@@ -6,40 +6,59 @@ var fs = require('fs')
 module.exports = BlobStore
 
 function BlobStore(storeRoot, dirDepth) {
-  if (!(this instanceof BlobStore)) { return new BlobStore(dir) }
+  if (!(this instanceof BlobStore)) { return new BlobStore(storeRoot, dirDepth) }
   this.storeRoot = storeRoot
-  this.dirDepth = depth
+  this.dirDepth = dirDepth
   this.currentDirPath = []
-  this.fsBlobStore = blobs(storePath)
+  this.fsBlobStore = blobs(storeRoot)
 }
 
-BlobStore.prototype.write((stream) => {
+BlobStore.prototype.write = (stream) => {
 
-})
+}
 
-BlogStore.prototype.read((blobPath) => {
+BlobStore.prototype.read = (blobPath) => {
 
-})
+}
 
-BlobStore.prototype.delete((blobPath) => {
+BlobStore.prototype.delete = (blobPath) => {
 
-})
+}
 
 BlobStore.prototype._getLatestDir = (parentPath) => {
   return new Promise((resolve, reject) => {
 
 
 
-    fs.readdir(parentPath, (err, files) => {
-      if (err) {
-        reject(err)
-      } else {
-        resolve(files)
-      }
+    function getSubDirs(dir, cb) {
+    fs.readdir(dir, function(err, files) {
+        var dirs = [],
+        filePath,
+        checkDirectory = function(err, stat) {
+            if(stat.isDirectory()) {
+                dirs.push(files[i]);
+            }
+            if(i + 1 === l) { // last record
+                cb(dirs);
+            }
+        };
+
+        for(var i=0, l=files.length; i<l; i++) {
+            if(files[i][0] !== '.') { // ignore hidden
+                filePath = dir+'/'+files[i];
+                fs.stat(filePath, checkDirectory);
+            }
+        }
+    });
+}
+
+
+
+  }).then((files) => {
+    console.dir(files);
+    files.map((file) => {
+      return fs.stat(file)
     })
-
-
-
   })
 }
 
