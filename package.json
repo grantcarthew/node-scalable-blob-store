@@ -1,0 +1,36 @@
+{
+  "name": "scalable-blob-store",
+  "version": "0.1.0",
+  "description": "A simple local filesystem blob store that is designed to prevent conflicts when used with a distributed or replicated filesystem.",
+  "homepage": "https://github.com/grantcarthew/scalable-blob-store#readme",
+  "author": "Grant Carthew <grant@carthew.net> (http://uglygizmo.blogspot.com.au/)",
+  "license": "MIT",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocka"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/grantcarthew/scalable-blob-store.git"
+  },
+  "bugs": {
+    "url": "https://github.com/grantcarthew/scalable-blob-store/issues"
+  },
+  "keywords": [
+    "node",
+    "scalable",
+    "file",
+    "storage",
+    "store",
+    "blob",
+    "uuid",
+    "guid"
+  ],
+  "devDependencies": {
+    "eslint": "^1.5.1"
+  },
+  "dependencies": {
+    "fs-blob-store": "^5.1.1",
+    "node-uuid": "^1.4.3"
+  }
+}
