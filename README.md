@@ -4,7 +4,7 @@ A simple local filesystem blob store that is designed to prevent conflicts when 
 
 ## Installation
 
-npm install scalable-blob-store --save
+`npm install scalable-blob-store --save`
 
 ## Usage
 
@@ -24,8 +24,8 @@ TODO: Write history
 
 ## Credits
 
-TODO: Write credits
+Thanks to [Mathias Buus](https://github.com/mafintosh) for his work on [fs-blob-store](https://github.com/mafintosh/fs-blob-store).
 
 ## License
 
-TODO: Write license
+MIT
