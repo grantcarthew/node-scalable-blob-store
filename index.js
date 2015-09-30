@@ -10,6 +10,7 @@ function BlobStore(storeRoot, dirDepth) {
   if (!(this instanceof BlobStore)) {
     return new BlobStore(storeRoot, dirDepth)
   }
+  console.log('[constructor]');
   this.storeRoot = storeRoot
   this.dirDepth = dirDepth
   this.currentDirPath = []
@@ -31,18 +32,16 @@ BlobStore.prototype.delete = (blobPath) => {
 BlobStore.prototype._buildChildPath = function(parentPath) {
   var workingDir = this.storeRoot
   var childPath = ''
-  for (var i of this.dirDepth) {
-    var dir = this._latestDir(workingDir)
-    if (!dir) {
-      childPath = '/' + uuid.v4()
-    } else {
-      childPath = '/' + dir
+  for (var i = 0; i < this.dirDepth; i--) {
+    function*() {
+      var partDir = yield this._nextChildPart(workingDir)
+      childPath += '/' + partDir
     }
   }
   return childPath
 }
 
-BlobStore.prototype._nextChildPath = function(parentPath) {
+BlobStore.prototype._nextChildPart = function(parentPath) {
   var self = this
   return self._latestDir(parentPath).then((dir) => {
     if (!dir) {
