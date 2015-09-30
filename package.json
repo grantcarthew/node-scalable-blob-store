@@ -30,6 +30,7 @@
     "eslint": "^1.5.1"
   },
   "dependencies": {
+    "bluebird": "^2.10.1",
     "fs-blob-store": "^5.1.1",
     "node-uuid": "^1.4.3"
   }
