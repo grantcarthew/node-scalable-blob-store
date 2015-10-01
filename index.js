@@ -15,6 +15,7 @@ function BlobStore(storeRoot, dirDepth) {
   this.dirDepth = dirDepth
   this.currentDirPath = []
   this.fsBlobStore = blobs(storeRoot)
+  // console.dir(this)
 }
 
 BlobStore.prototype.write = (stream) => {
@@ -30,44 +31,74 @@ BlobStore.prototype.delete = (blobPath) => {
 }
 
 BlobStore.prototype._buildChildPath = function(parentPath) {
-  var workingDir = this.storeRoot
-  var childPath = ''
-  for (var i = 0; i < this.dirDepth; i--) {
-    function*() {
-      var partDir = yield this._nextChildPart(workingDir)
-      childPath += '/' + partDir
-    }
-  }
-  return childPath
-}
-
-BlobStore.prototype._nextChildPart = function(parentPath) {
+  console.log('[_buildChildPath]');
   var self = this
-  return self._latestDir(parentPath).then((dir) => {
-    if (!dir) {
-      return '/' + uuid.v4()
-    } else {
-      return '/' + dir
+  var loopIndex = self.dirDepth
+  var childPath = '/'
+
+  return new Promise((resolve, reject) => {
+
+    function recurse(nextPath) {
+      console.log('[recurse]' + childPath);
+      console.log(nextPath);
+
+      self._latestDir(nextPath).then((dir) => {
+        console.log(dir);
+        if (dir) {
+          childPath = path.join(childPath, dir)
+        } else {
+          childPath = path.join(childPath, uuid.v4())
+        }
+
+        if (loopIndex === 1) {
+          resolve(childPath)
+        } else {
+          loopIndex--
+          console.log('[before recurse]');
+          console.log(loopIndex)
+          console.log(parentPath);
+          console.log(childPath);
+          var nextFullPath = path.join(parentPath, childPath)
+          recurse(nextFullPath)
+        }
+
+      }).catch((err) => {
+        console.log(err);
+        reject(err)
+      })
     }
+    recurse(parentPath)
+
+
+
+  }).then((result) => {
+    console.log('In return then with part following;');
+    console.log(result)
+    return result
+  }).catch((err) => {
+    console.error(err)
+    console.error(err.stack);
   })
-  // var get = async(function*() {
-  // var left = yield readJSON('left.json')
-  // var right = yield readJSON('right.json')
-  // return {left: left, right: right}
-  // })
+
+
+
+
+  return this._nextChildPart(parentPath, this.dirDepth)
+
 }
 
 BlobStore.prototype._dir = function(parentPath) {
+  console.log('[_dir]');
   return new Promise((resolve, reject) => {
     fs.readdir(parentPath, function(err, fsItems) {
       if (err) {
         if (err.code === 'ENOENT') {
-          return []
+          return resolve()
         } else {
           return reject(err)
         }
       }
-      resolve(fsItems)
+      return resolve(fsItems)
     })
   })
 }
@@ -98,14 +129,24 @@ BlobStore.prototype._fsItemInfo = function(parentPath, fsItems) {
 }
 
 BlobStore.prototype._latestDir = function(parentPath) {
+  console.log('[_latestDir]');
   var self = this
   return self._dir(parentPath).then((fsItems) => {
     return self._filterDirs(parentPath, fsItems)
   }).then((dirs) => {
+    if (!dirs || dirs.length === 0) {
+      return false
+    }
     dirs.sort((a, b) => {
       return b.stat.birthtime.getTime() - a.stat.birthtime.getTime()
     })
     return dirs[0].name
+  }).catch((err) => {
+    if (err.code === 'ENOENT') {
+      return false
+    } else {
+      return err
+    }
   })
 }
 
@@ -128,6 +169,10 @@ BlobStore.prototype._countFiles = function(parentPath) {
 }
 
 BlobStore.prototype._filterDirs = function(parentPath, fsItems) {
+  console.log('[_filterDirs]');
+  if (!fsItems || fsItems.length === 0) {
+    return []
+  }
   return this._fsItemInfo(parentPath, fsItems).then((fsItems) => {
     return fsItems.filter((item) => {
       return item.stat.isDirectory()
@@ -136,6 +181,9 @@ BlobStore.prototype._filterDirs = function(parentPath, fsItems) {
 }
 
 BlobStore.prototype._filterFiles = function(parentPath, fsItems) {
+  if (!fsItems || fsItems.length === 0) {
+    return []
+  }
   return this._fsItemInfo(parentPath, fsItems).then((fsItems) => {
     return fsItems.filter((item) => {
       return !item.stat.isDirectory()
