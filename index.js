@@ -1,6 +1,7 @@
 var uuid = require('node-uuid')
 var blobs = require('fs-blob-store')
 var Promise = require('bluebird')
+var mkdirp = require('mkdirp')
 var path = require('path')
 var fs = require('fs')
 
@@ -11,9 +12,10 @@ function BlobStore(storeRoot, dirDepth) {
     return new BlobStore(storeRoot, dirDepth)
   }
   console.log('[constructor]');
+  mkdirp.sync(storeRoot)
   this.storeRoot = storeRoot
   this.dirDepth = dirDepth
-  this.currentDirPath = []
+  this.currentChildPath = []
   this.fsBlobStore = blobs(storeRoot)
   // console.dir(this)
 }
