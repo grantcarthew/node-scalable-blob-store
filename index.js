@@ -1,22 +1,19 @@
 var uuid = require('node-uuid')
-var blobs = require('fs-blob-store')
+var fsBlobStoreFactory = require('fs-blob-store')
 var Promise = require('bluebird')
 var mkdirp = require('mkdirp')
 var path = require('path')
 var fs = require('fs')
 
-module.exports = BlobStore
+exports.create = BlobStore
 
-function BlobStore(storeRoot, dirDepth) {
+function BlobStore(opts) {
   if (!(this instanceof BlobStore)) {
-    return new BlobStore(storeRoot, dirDepth)
+    return new BlobStore(opts)
   }
-  console.log('[constructor]');
-  mkdirp.sync(storeRoot)
-  this.storeRoot = storeRoot
-  this.dirDepth = dirDepth
-  this.currentChildPath = []
-  this.fsBlobStore = blobs(storeRoot)
+  this._parseOpts(opts)
+  this.currentChildPath = ''
+  this.fsBlobStore = fsBlobStoreFactory(this.opts.blobStoreRoot)
   // console.dir(this)
 }
 
@@ -32,10 +29,24 @@ BlobStore.prototype.delete = (blobPath) => {
 
 }
 
+BlobStore.prototype._parseOpts = function(opts) {
+  if (!opts || !opts.blobStoreRoot) {
+    throw new Error('The blobStoreRoot directory must be set.')
+  }
+  mkdirp.sync(opts.blobStoreRoot)
+  if (!opts.dirDepth) { opts.dirDepth = 3 }
+  if (opts.dirDepth < 1 || opts.dirDepth > 10) {
+    throw new Error('The dirDepth option must be between 1 and 10.')
+  }
+  if (!opts.dirWidth) { opts.dirWidth = 1000 }
+
+  this.opts = opts
+}
+
 BlobStore.prototype._buildChildPath = function(parentPath) {
   console.log('[_buildChildPath]');
   var self = this
-  var loopIndex = self.dirDepth
+  var loopIndex = self.opts.dirDepth
   var childPath = '/'
 
   return new Promise((resolve, reject) => {
@@ -85,8 +96,44 @@ BlobStore.prototype._buildChildPath = function(parentPath) {
 
 
 
-  return this._nextChildPart(parentPath, this.dirDepth)
+  return this._nextChildPart(parentPath, this.opts.dirDepth)
 
+}
+
+BlobStore.prototype._latestDir = function(parentPath) {
+  console.log('[_latestDir]');
+  var self = this
+  return self._dir(parentPath).then((fsItems) => {
+    return self._filterDirs(parentPath, fsItems)
+  }).then((dirs) => {
+    if (!dirs || dirs.length === 0) {
+      return false
+    }
+    dirs.sort((a, b) => {
+      return b.stat.birthtime.getTime() - a.stat.birthtime.getTime()
+    })
+    return dirs[0].name
+  })
+}
+
+BlobStore.prototype._countDirs = function(parentPath) {
+  console.log('[_countDirs]');
+  var self = this
+  return self._dir(parentPath).then((fsItems) => {
+    return self._filterDirs(parentPath, fsItems)
+  }).then((dirs) => {
+    return dirs.length
+  })
+}
+
+BlobStore.prototype._countFiles = function(parentPath) {
+  console.log('[_countFiles]');
+  var self = this
+  return self._dir(parentPath).then((fsItems) => {
+    return self._filterFiles(parentPath, fsItems)
+  }).then((files) => {
+    return files.length
+  })
 }
 
 BlobStore.prototype._dir = function(parentPath) {
@@ -95,12 +142,32 @@ BlobStore.prototype._dir = function(parentPath) {
     fs.readdir(parentPath, function(err, fsItems) {
       if (err) {
         if (err.code === 'ENOENT') {
-          return resolve()
+          return resolve([])
         } else {
           return reject(err)
         }
       }
       return resolve(fsItems)
+    })
+  })
+}
+
+BlobStore.prototype._filterDirs = function(parentPath, fsItems) {
+  return this._filterFsItems(parentPath, fsItems, true)
+}
+
+BlobStore.prototype._filterFiles = function(parentPath, fsItems) {
+  return this._filterFsItems(parentPath, fsItems, false)
+}
+
+BlobStore.prototype._filterFsItems = function(parentPath, fsItems, onDirs) {
+  console.log('[_filterFsItems]');
+  if (!fsItems || fsItems.length === 0) {
+    return []
+  }
+  return this._fsItemInfo(parentPath, fsItems).then((fsItems) => {
+    return fsItems.filter((item) => {
+      return item.stat.isDirectory() === onDirs
     })
   })
 }
@@ -126,69 +193,6 @@ BlobStore.prototype._fsItemInfo = function(parentPath, fsItems) {
           resolve(stats)
         }
       })
-    })
-  })
-}
-
-BlobStore.prototype._latestDir = function(parentPath) {
-  console.log('[_latestDir]');
-  var self = this
-  return self._dir(parentPath).then((fsItems) => {
-    return self._filterDirs(parentPath, fsItems)
-  }).then((dirs) => {
-    if (!dirs || dirs.length === 0) {
-      return false
-    }
-    dirs.sort((a, b) => {
-      return b.stat.birthtime.getTime() - a.stat.birthtime.getTime()
-    })
-    return dirs[0].name
-  }).catch((err) => {
-    if (err.code === 'ENOENT') {
-      return false
-    } else {
-      return err
-    }
-  })
-}
-
-BlobStore.prototype._countDirs = function(parentPath) {
-  var self = this
-  return self._dir(parentPath).then((fsItems) => {
-    return self._filterDirs(parentPath, fsItems)
-  }).then((dirs) => {
-    return dirs.length
-  })
-}
-
-BlobStore.prototype._countFiles = function(parentPath) {
-  var self = this
-  return self._dir(parentPath).then((fsItems) => {
-    return self._filterDirs(parentPath, fsItems)
-  }).then((dirs) => {
-    return dirs.length
-  })
-}
-
-BlobStore.prototype._filterDirs = function(parentPath, fsItems) {
-  console.log('[_filterDirs]');
-  if (!fsItems || fsItems.length === 0) {
-    return []
-  }
-  return this._fsItemInfo(parentPath, fsItems).then((fsItems) => {
-    return fsItems.filter((item) => {
-      return item.stat.isDirectory()
-    })
-  })
-}
-
-BlobStore.prototype._filterFiles = function(parentPath, fsItems) {
-  if (!fsItems || fsItems.length === 0) {
-    return []
-  }
-  return this._fsItemInfo(parentPath, fsItems).then((fsItems) => {
-    return fsItems.filter((item) => {
-      return !item.stat.isDirectory()
     })
   })
 }
