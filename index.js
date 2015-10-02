@@ -1,6 +1,7 @@
 var uuid = require('node-uuid')
 var fsBlobStoreFactory = require('fs-blob-store')
 var Promise = require('bluebird')
+var validator = require('validator')
 var mkdirp = require('mkdirp')
 var path = require('path')
 var fs = require('fs')
@@ -57,7 +58,7 @@ BlobStore.prototype._buildChildPath = function(parentPath) {
 
       self._latestDir(nextPath).then((dir) => {
         console.log(dir);
-        if (dir) {
+        if (dir && validator.isUUID(dir, 4)) {
           childPath = path.join(childPath, dir)
         } else {
           childPath = path.join(childPath, uuid.v4())
