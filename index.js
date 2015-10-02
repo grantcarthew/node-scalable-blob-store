@@ -13,21 +13,9 @@ function BlobStore(opts) {
     return new BlobStore(opts)
   }
   this._parseOpts(opts)
-  this.currentChildPath = ''
+  this.currentBlobPath = ''
   this.fsBlobStore = fsBlobStoreFactory(this.opts.blobStoreRoot)
   // console.dir(this)
-}
-
-BlobStore.prototype.write = (stream) => {
-
-}
-
-BlobStore.prototype.read = (blobPath) => {
-
-}
-
-BlobStore.prototype.delete = (blobPath) => {
-
 }
 
 BlobStore.prototype._parseOpts = function(opts) {
@@ -42,6 +30,47 @@ BlobStore.prototype._parseOpts = function(opts) {
   if (!opts.dirWidth) { opts.dirWidth = 1000 }
 
   this.opts = opts
+}
+
+BlobStore.prototype.write = function(stream) {
+  var self = this
+  return this._countFiles(this.currentBlobPath).then((total) => {
+    if (total > self.opts.dirWidth) {
+      return self._buildBlobPath(self.opts.blobStoreRoot)
+    }
+  }).then(() => {
+    var fullPath = path.join(self.opts.blobStoreRoot,
+                             self.currentBlobPath,
+                             uuid.v4())
+    var writeStream = self.fsBlobStore.createWriteStream({
+      key: fullPath
+    })
+    return {
+      blobPath: self.currentBlobPath,
+      writeStream: writeStream
+    }
+  })
+}
+
+BlobStore.prototype.read = function(blobPath) {
+  var self = this
+  return new Promise((resolve, reject) => {
+    return self.fsBlobStore.createReadStream({
+      key: blobPath
+    })
+  })
+}
+
+BlobStore.prototype.delete = function(blobPath) {
+  return new Promise((resolve, reject) => {
+    fs.unlink(blobPath, (err) => {
+      if (err) {
+        reject(err)
+      } else {
+        resolve()
+      }
+    })
+  })
 }
 
 BlobStore.prototype._buildBlobPath = function(parentPath) {
@@ -70,7 +99,7 @@ BlobStore.prototype._buildBlobPath = function(parentPath) {
         return data
       }).then((data) => {
         if (loopIndex > 1 && !data.isNewDir) {
-          return self._coundDirs(data.dir).then((dirCount) => {
+          return self._countDirs(data.dir).then((dirCount) => {
             data.dirCount = dirCount
             return data
           })
@@ -94,7 +123,8 @@ BlobStore.prototype._buildBlobPath = function(parentPath) {
         blobPath = path.join(blobPath, data.dir)
 
         if (loopIndex === 1) {
-          resolve(blobPath)
+          self.currentBlobPath = blobPath
+          resolve(self.currentBlobPath)
         } else {
           loopIndex--
           var nextFullPath = path.join(parentPath, blobPath)
