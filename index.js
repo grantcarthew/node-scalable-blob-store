@@ -44,17 +44,16 @@ BlobStore.prototype._parseOpts = function(opts) {
   this.opts = opts
 }
 
-BlobStore.prototype._buildChildPath = function(parentPath) {
-  console.log('[_buildChildPath]');
+BlobStore.prototype._buildBlobPath = function(parentPath) {
+  console.log('[_buildBlobPath]');
   var self = this
   var loopIndex = self.opts.dirDepth
-  var childPath = '/'
+  var blobPath = '/'
 
   return new Promise((resolve, reject) => {
 
     function recurse(nextPath) {
-      console.log('[recurse]' + childPath);
-      console.log(nextPath);
+      console.log('[recurse] loopIndex: ' + loopIndex);
 
       self._latestDir(nextPath).then((dir) => {
         var data = {
@@ -75,16 +74,7 @@ BlobStore.prototype._buildChildPath = function(parentPath) {
             data.dirCount = dirCount
             return data
           })
-        }
-        return data
-      }).then((data) => {
-        if (data.dirCount > self.opts.dirWidth) {
-          data.dir = uuid.v4()
-          data.dirCount = 0
-        }
-        return data
-      }).then((data) => {
-        if (loopIndex === 1 && !data.isNewDir) {
+        } else {
           return self._countFiles(data.dir).then((fileCount) => {
             data.fileCount = fileCount
             return data
@@ -92,43 +82,32 @@ BlobStore.prototype._buildChildPath = function(parentPath) {
         }
         return data
       }).then((data) => {
-        if (data.fileCount > self.dirWidth) {
+        if (!data.isNewDir &&
+            data.dirCount > self.opts.dirWidth ||
+            data.fileCount > self.opts.dirWidth) {
           data.dir = uuid.v4()
+          data.dirCount = 0
+          data.fileCount = 0
         }
         return data
       }).then((data) => {
-        childPath = path.join(childPath, data.dir)
+        blobPath = path.join(blobPath, data.dir)
 
         if (loopIndex === 1) {
-          resolve(childPath)
+          resolve(blobPath)
         } else {
           loopIndex--
-          var nextFullPath = path.join(parentPath, childPath)
+          var nextFullPath = path.join(parentPath, blobPath)
           recurse(nextFullPath)
         }
       }).catch((err) => {
-        console.log(err);
         reject(err)
       })
     }
+
+    // Initiate Recursion
     recurse(parentPath)
-
-
-
-  }).then((result) => {
-    console.log('In return then with part following;');
-    console.log(result)
-    return result
-  }).catch((err) => {
-    console.error(err)
-    console.error(err.stack);
   })
-
-
-
-
-  return this._nextChildPart(parentPath, this.opts.dirDepth)
-
 }
 
 BlobStore.prototype._latestDir = function(parentPath) {
