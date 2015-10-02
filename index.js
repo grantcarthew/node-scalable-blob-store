@@ -15,7 +15,11 @@ function BlobStore(opts) {
   this._parseOpts(opts)
   this.currentBlobPath = ''
   this.fsBlobStore = fsBlobStoreFactory(this.opts.blobStoreRoot)
-  // console.dir(this)
+  this._buildBlobPath().then(() => {
+    console.log('Blob Store Initialized');
+    console.log('Current Blob Path: ' + this.currentBlobPath);
+  })
+
 }
 
 BlobStore.prototype._parseOpts = function(opts) {
@@ -32,18 +36,21 @@ BlobStore.prototype._parseOpts = function(opts) {
   this.opts = opts
 }
 
-BlobStore.prototype.write = function(stream) {
+BlobStore.prototype.write = function() {
+  console.log('[write]');
   var self = this
-  return this._countFiles(this.currentBlobPath).then((total) => {
+  console.dir(this.currentBlobPath);
+  var fullPath = path.join(self.opts.blobStoreRoot,
+                           self.currentBlobPath)
+
+  return this._countFiles(fullPath).then((total) => {
     if (total > self.opts.dirWidth) {
       return self._buildBlobPath(self.opts.blobStoreRoot)
     }
   }).then(() => {
-    var fullPath = path.join(self.opts.blobStoreRoot,
-                             self.currentBlobPath,
-                             uuid.v4())
+    var filePath = path.join(fullPath, uuid.v4())
     var writeStream = self.fsBlobStore.createWriteStream({
-      key: fullPath
+      key: filePath
     })
     return {
       blobPath: self.currentBlobPath,
@@ -73,7 +80,7 @@ BlobStore.prototype.delete = function(blobPath) {
   })
 }
 
-BlobStore.prototype._buildBlobPath = function(parentPath) {
+BlobStore.prototype._buildBlobPath = function() {
   console.log('[_buildBlobPath]');
   var self = this
   var loopIndex = self.opts.dirDepth
@@ -127,7 +134,7 @@ BlobStore.prototype._buildBlobPath = function(parentPath) {
           resolve(self.currentBlobPath)
         } else {
           loopIndex--
-          var nextFullPath = path.join(parentPath, blobPath)
+          var nextFullPath = path.join(self.opts.blobStoreRoot, blobPath)
           recurse(nextFullPath)
         }
       }).catch((err) => {
@@ -136,7 +143,7 @@ BlobStore.prototype._buildBlobPath = function(parentPath) {
     }
 
     // Initiate Recursion
-    recurse(parentPath)
+    recurse(self.opts.blobStoreRoot)
   })
 }
 

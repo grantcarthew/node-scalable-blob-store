@@ -27,6 +27,7 @@
     "guid"
   ],
   "devDependencies": {
+    "crispy-stream": "^0.1.2",
     "eslint": "^1.5.1"
   },
   "dependencies": {
