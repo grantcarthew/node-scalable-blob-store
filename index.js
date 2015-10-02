@@ -57,25 +57,55 @@ BlobStore.prototype._buildChildPath = function(parentPath) {
       console.log(nextPath);
 
       self._latestDir(nextPath).then((dir) => {
-        console.log(dir);
-        if (dir && validator.isUUID(dir, 4)) {
-          childPath = path.join(childPath, dir)
-        } else {
-          childPath = path.join(childPath, uuid.v4())
+        var data = {
+          isNewDir: false,
+          dirCount: 0,
+          fileCount: 0
         }
+        if (dir && validator.isUUID(dir, 4)) {
+          data.dir = dir
+        } else {
+          data.dir = uuid.v4()
+          data.isNewDir = true
+        }
+        return data
+      }).then((data) => {
+        if (loopIndex > 1 && !data.isNewDir) {
+          return self._coundDirs(data.dir).then((dirCount) => {
+            data.dirCount = dirCount
+            return data
+          })
+        }
+        return data
+      }).then((data) => {
+        if (data.dirCount > self.opts.dirWidth) {
+          data.dir = uuid.v4()
+          data.dirCount = 0
+        }
+        return data
+      }).then((data) => {
+        if (loopIndex === 1 && !data.isNewDir) {
+          return self._countFiles(data.dir).then((fileCount) => {
+            data.fileCount = fileCount
+            return data
+          })
+        }
+        return data
+      }).then((data) => {
+        if (data.fileCount > self.dirWidth) {
+          data.dir = uuid.v4()
+        }
+        return data
+      }).then((data) => {
+        childPath = path.join(childPath, data.dir)
 
         if (loopIndex === 1) {
           resolve(childPath)
         } else {
           loopIndex--
-          console.log('[before recurse]');
-          console.log(loopIndex)
-          console.log(parentPath);
-          console.log(childPath);
           var nextFullPath = path.join(parentPath, childPath)
           recurse(nextFullPath)
         }
-
       }).catch((err) => {
         console.log(err);
         reject(err)
