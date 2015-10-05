@@ -45,7 +45,7 @@ BlobStore.prototype.write = function() {
     return this._countFiles(fullPath)
   }).then((total) => {
     if (total > this.opts.dirWidth) {
-      return this._buildBlobPath(this.opts.blobStoreRoot)
+      return this._buildBlobPath()
     }
   }).then(() => {
     var filePath = path.join(this.currentBlobPath, uuid.v4())
@@ -106,12 +106,14 @@ BlobStore.prototype._buildBlobPath = function() {
         return data
       }).then((data) => {
         if (loopIndex > 1 && !data.isNewDir) {
-          return self._countDirs(data.dir).then((dirCount) => {
+          var coundDirsPath = path.join(nextPath, data.dir)
+          return self._countDirs(coundDirsPath).then((dirCount) => {
             data.dirCount = dirCount
             return data
           })
         } else {
-          return self._countFiles(data.dir).then((fileCount) => {
+          var countFilesPath = path.join(nextPath, data.dir)
+          return self._countFiles(countFilesPath).then((fileCount) => {
             data.fileCount = fileCount
             return data
           })
@@ -122,6 +124,7 @@ BlobStore.prototype._buildBlobPath = function() {
             data.dirCount > self.opts.dirWidth ||
             data.fileCount > self.opts.dirWidth) {
           data.dir = uuid.v4()
+          data.isNewDir = true
           data.dirCount = 0
           data.fileCount = 0
         }

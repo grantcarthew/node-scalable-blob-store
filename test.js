@@ -15,14 +15,10 @@ var sbs = require('./index').create(opts)
 //   console.log(result);
 // })
 
-console.log('=======');
-console.dir(sbs.write)
-console.log('=======');
 var input = 'pipe this';
 var pipable = crispyStream.createReadStream(input);
 
-console.log('=======');
-for (var i = 0; i < 2500; i++) {
+for (var i = 0; i < 10; i++) {
   console.log(i);
   sbs.write().then((ws) => {
     pipable.pipe(ws.writeStream);
