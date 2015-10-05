@@ -13,13 +13,8 @@ function BlobStore(opts) {
     return new BlobStore(opts)
   }
   this._parseOpts(opts)
-  this.currentBlobPath = ''
+  this.currentBlobPath = false
   this.fsBlobStore = fsBlobStoreFactory(this.opts.blobStoreRoot)
-  this._buildBlobPath().then(() => {
-    console.log('Blob Store Initialized');
-    console.log('Current Blob Path: ' + this.currentBlobPath);
-  })
-
 }
 
 BlobStore.prototype._parseOpts = function(opts) {
@@ -38,22 +33,27 @@ BlobStore.prototype._parseOpts = function(opts) {
 
 BlobStore.prototype.write = function() {
   console.log('[write]');
-  var self = this
-  console.dir(this.currentBlobPath);
-  var fullPath = path.join(self.opts.blobStoreRoot,
-                           self.currentBlobPath)
-
-  return this._countFiles(fullPath).then((total) => {
-    if (total > self.opts.dirWidth) {
-      return self._buildBlobPath(self.opts.blobStoreRoot)
+  var fullPath = ''
+  return Promise.resolve(this.currentBlobPath).bind(this).then((blobPath) => {
+    if (!blobPath) {
+      return this._buildBlobPath()
+    }
+    return
+  }).then(() => {
+    fullPath = path.join(this.opts.blobStoreRoot,
+                         this.currentBlobPath)
+    return this._countFiles(fullPath)
+  }).then((total) => {
+    if (total > this.opts.dirWidth) {
+      return this._buildBlobPath(this.opts.blobStoreRoot)
     }
   }).then(() => {
-    var filePath = path.join(fullPath, uuid.v4())
-    var writeStream = self.fsBlobStore.createWriteStream({
+    var filePath = path.join(this.currentBlobPath, uuid.v4())
+    var writeStream = this.fsBlobStore.createWriteStream({
       key: filePath
     })
     return {
-      blobPath: self.currentBlobPath,
+      blobPath: this.currentBlobPath,
       writeStream: writeStream
     }
   })
