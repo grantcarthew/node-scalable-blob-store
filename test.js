@@ -17,13 +17,13 @@ var sbs = require('./index').create(opts)
 
 
 function tester() {
-  var i = 10
-  var input = 'pipe this';
-  var pipable = crispyStream.createReadStream(input);
+  var i = 50
+  var input = 'The Quick Brown Fox Jumped Over The Lazy Dog';
   function recurse() {
     if (i < 1) { return }
-    sbs.write().then((ws) => {
-      pipable.pipe(ws.writeStream);
+    var readStream = crispyStream.createReadStream(input);
+    sbs.write(readStream).then((blobPath) => {
+      console.log(blobPath);
       i--
       recurse()
     })
