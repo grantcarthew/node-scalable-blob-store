@@ -31,9 +31,10 @@ BlobStore.prototype._parseOpts = function(opts) {
   this.opts = opts
 }
 
-BlobStore.prototype.write = function() {
+BlobStore.prototype.write = function(readStream) {
   console.log('[write]');
   var fullPath = ''
+
   return Promise.resolve(this.currentBlobPath).bind(this).then((blobPath) => {
     if (!blobPath) {
       return this._buildBlobPath()
@@ -48,14 +49,18 @@ BlobStore.prototype.write = function() {
       return this._buildBlobPath()
     }
   }).then(() => {
-    var filePath = path.join(this.currentBlobPath, uuid.v4())
-    var writeStream = this.fsBlobStore.createWriteStream({
-      key: filePath
-    })
-    return {
-      blobPath: this.currentBlobPath,
-      writeStream: writeStream
-    }
+    return new Promise((resolve, reject) => {
+      var filePath = path.join(this.currentBlobPath, uuid.v4())
+      var writeStream = this.fsBlobStore.createWriteStream({
+        key: filePath
+      })
+      writeStream.on('finish', resolve)
+      writeStream.on('error', reject)
+      return {
+        filePath: filePath,
+        writeStream: writeStream
+      }
+    }).bind(this)
   })
 }
 

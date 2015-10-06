@@ -15,12 +15,20 @@ var sbs = require('./index').create(opts)
 //   console.log(result);
 // })
 
-var input = 'pipe this';
-var pipable = crispyStream.createReadStream(input);
 
-for (var i = 0; i < 10; i++) {
-  console.log(i);
-  sbs.write().then((ws) => {
-    pipable.pipe(ws.writeStream);
-  })
+function tester() {
+  var i = 10
+  var input = 'pipe this';
+  var pipable = crispyStream.createReadStream(input);
+  function recurse() {
+    if (i < 1) { return }
+    sbs.write().then((ws) => {
+      pipable.pipe(ws.writeStream);
+      i--
+      recurse()
+    })
+  }
+  recurse()
 }
+console.log('[Calling Tester]');
+tester()
