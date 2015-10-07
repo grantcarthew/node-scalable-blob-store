@@ -79,7 +79,7 @@ BlobStore.prototype.read = function(blobPath) {
   }).bind(this)
 }
 
-BlobStore.prototype.delete = function(blobPath) {
+BlobStore.prototype.remove = function(blobPath) {
   return new Promise((resolve, reject) => {
     this.fsBlobStore.remove({
         key: blobPath
