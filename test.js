@@ -8,6 +8,7 @@ var repeat = 400
 var sbs = require('./index').create(opts)
 
 sbs._trimedLinearBlobKey().then((result) => {
+  console.log('=============result=============');
   console.log(result);
 })
 return
