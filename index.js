@@ -270,7 +270,7 @@ BlobStore.prototype._latestDir = function(parentDir) {
   var self = this
 
   return this._dir(parentDir).then((fsItems) => {
-    return self._filterDirs(parentDir, fsItems)
+    return self._filterUuidDirs(parentDir, fsItems)
   }).then((dirs) => {
     if (!dirs || dirs.length === 0) {
       return false
@@ -289,7 +289,7 @@ BlobStore.prototype._countDirs = function(parentDir) {
 
   return this._dir(parentDir).then((fsItems) => {
     console.log('fsItems from dir: ' + fsItems);
-    return self._filterDirs(parentDir, fsItems)
+    return self._filterUuidDirs(parentDir, fsItems)
   }).then((dirs) => {
     return dirs.length
   })
@@ -300,7 +300,7 @@ BlobStore.prototype._countFiles = function(parentDir) {
   var self = this
 
   return this._dir(parentDir).then((fsItems) => {
-    return self._filterFiles(parentDir, fsItems)
+    return self._filterUuidFiles(parentDir, fsItems)
   }).then((files) => {
     return files.length
   })
@@ -322,16 +322,16 @@ BlobStore.prototype._dir = function(parentDir) {
   })
 }
 
-BlobStore.prototype._filterDirs = function(parentDir, fsItems) {
-  return this._filterFsItems(parentDir, fsItems, true)
+BlobStore.prototype._filterUuidDirs = function(parentDir, fsItems) {
+  return this._filterFsUuidItems(parentDir, fsItems, true)
 }
 
-BlobStore.prototype._filterFiles = function(parentDir, fsItems) {
-  return this._filterFsItems(parentDir, fsItems, false)
+BlobStore.prototype._filterUuidFiles = function(parentDir, fsItems) {
+  return this._filterFsUuidItems(parentDir, fsItems, false)
 }
 
-BlobStore.prototype._filterFsItems = function(parentDir, fsItems, onDirs) {
-  // console.log('[_filterFsItems]');
+BlobStore.prototype._filterFsUuidItems = function(parentDir, fsItems, onDirs) {
+  // console.log('[_filterFsUuidItems]');
   if (!fsItems || fsItems.length === 0) {
     return []
   }
