@@ -40,6 +40,7 @@ BlobStore.prototype.write = function(readStream) {
 
   return Promise.resolve(this.currentBlobDir).bind(this).then((blobDir) => {
     if (!blobDir) {
+      console.log('[========Building New========]');
       return this._buildBlobDir()
     }
     return
@@ -99,46 +100,62 @@ BlobStore.prototype._buildBlobDir = function() {
 
   return new Promise((resolve, reject) => {
     function recurse(nextPath) {
+      console.log('=================== Recurse Start ' + loopIndex + ' nextPath ====================');
+      console.log(nextPath);
+      console.log('==================== currentBlobDir ======================');
+      console.log(this.currentBlobDir);
       this._latestDir(nextPath).then((dir) => {
-        var data = {
+        var state = {
           isNewDir: false,
           dirCount: 0,
           fileCount: 0
         }
-        if (dir && validator.isUUID(dir, 4)) {
-          data.dir = dir
+        if (dir) {
+          console.log('================ Latest Is Valid =====================');
+          console.log(dir);
+
+          state.dir = dir
         } else {
-          data.dir = uuid.v4()
-          data.isNewDir = true
+          state.dir = uuid.v4()
+          state.isNewDir = true
+          console.log('@@@@@@@@@@@@@@@@@@@@@@@@@@@@ Latest Not Valid New Dir @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@');
+          console.log(state.dir);
         }
-        return data
-      }).then((data) => {
-        if (loopIndex > 1 && !data.isNewDir) {
-          var coundDirsPath = path.join(nextPath, data.dir)
-          return this._countDirs(coundDirsPath).then((dirCount) => {
-            data.dirCount = dirCount
-            return data
+        return state
+      }).then((state) => {
+        if (loopIndex > 1 && !state.isNewDir) {
+          var countDirsPath = path.join(nextPath, state.dir)
+          return this._countDirs(countDirsPath).then((dirCount) => {
+            state.dirCount = dirCount
+            return state
           })
         } else {
-          var countFilesPath = path.join(nextPath, data.dir)
+          var countFilesPath = path.join(nextPath, state.dir)
           return this._countFiles(countFilesPath).then((fileCount) => {
-            data.fileCount = fileCount
-            return data
+            state.fileCount = fileCount
+            return state
           })
         }
-        return data
-      }).then((data) => {
-        if (!data.isNewDir &&
-            data.dirCount >= this.dirWidth ||
-            data.fileCount >= this.dirWidth) {
-          data.dir = uuid.v4()
-          data.isNewDir = true
-          data.dirCount = 0
-          data.fileCount = 0
+        return state
+      }).then((state) => {
+
+        console.log('===================== State with Dir and File Count =========================');
+        console.log(state);
+
+        if (!state.isNewDir &&
+            state.dirCount >= this.dirWidth ||
+            state.fileCount >= this.dirWidth) {
+          console.log('################### Dir or File > Width ##########################');
+          state.dir = uuid.v4()
+          state.isNewDir = true
+          state.dirCount = 0
+          state.fileCount = 0
+          console.log('===================== New Dir =========================');
+          console.log(state.dir);
         }
-        return data
-      }).then((data) => {
-        blobDir = path.join(blobDir, data.dir)
+        return state
+      }).then((state) => {
+        blobDir = path.join(blobDir, state.dir)
 
         if (loopIndex === 1) {
           this.currentBlobDir = blobDir
@@ -146,6 +163,74 @@ BlobStore.prototype._buildBlobDir = function() {
         } else {
           loopIndex--
           var nextFullPath = path.join(this.blobStoreRoot, blobDir)
+          recurse.call(this, nextFullPath)
+        }
+      }).catch((err) => {
+        reject(err)
+      })
+    }
+
+    // Initiate Recursion
+    recurse.call(this, this.blobStoreRoot)
+  }).bind(this)
+}
+
+BlobStore.prototype._trimedLinearBlobKey = function() {
+  return this._latestLinearBlobKey().bind(this).then((linearBlobKey) => {
+    var fullBlobDir = path.join(this.blobStoreRoot, linearBlobKey)
+    return this._countFiles(fullBlobDir).then((fileCount) => {
+      if (fileCount >= this.dirWidth) {
+        return path.dirname(linearBlobKey)
+      }
+      return linearBlobKey
+    })
+  }).then((linearBlobKey) => {
+    var keyLength = linearBlobKey.split('/').length - 1
+    var blobKey = ''
+    console.log(keyLength);
+    if (keyLength === this.dirDepth) {
+      return linearBlobKey
+    }
+
+    return new Promise((resolve, reject) => {
+      function trimKey(nextKey) {
+        this._countDirs(nextKey).then((dirCount) => {
+          if (dirCount >= this.dirWidth) {
+            blobKey = path.dirname(nextKey)
+            trimKey.call(this, blobKey)
+          }
+          resolve(nextKey)
+        }).bind(this)
+      }
+
+      // Initiate Recursion
+      trimKey.call(this, linearBlobKey)
+    }).bind(this)
+
+    return linearBlobKey
+  })
+}
+
+BlobStore.prototype._latestLinearBlobKey = function() {
+  var loopIndex = this.dirDepth
+  var blobKey = '/'
+
+  return new Promise((resolve, reject) => {
+    function recurse(nextKey) {
+      this._latestDir(nextKey).then((dir) => {
+        if (!dir) {
+          return uuid.v4()
+        }
+        return dir
+      }).then((dir) => {
+        blobKey = path.join(blobKey, dir)
+
+        if (loopIndex === 1) {
+          this.currentBlobDir = blobKey
+          resolve(this.currentBlobDir)
+        } else {
+          loopIndex--
+          var nextFullPath = path.join(this.blobStoreRoot, blobKey)
           recurse.call(this, nextFullPath)
         }
       }).catch((err) => {
@@ -222,7 +307,8 @@ BlobStore.prototype._filterFsItems = function(parentDir, fsItems, onDirs) {
   }
   return this._fsItemInfo(parentDir, fsItems).then((fsItems) => {
     return fsItems.filter((item) => {
-      return item.stat.isDirectory() === onDirs
+      return item.stat.isDirectory() === onDirs &&
+             validator.isUUID(item.name, 4)
     })
   })
 }

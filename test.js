@@ -4,12 +4,13 @@ var opts = {
   dirDepth: 10,
   dirWidth: 3
 }
+var repeat = 400
 var sbs = require('./index').create(opts)
 
-// sbs._latestDir('/home/grant/app-contacts').then((result) => {
-//   console.log(result);
-// })
-
+sbs._trimedLinearBlobKey().then((result) => {
+  console.log(result);
+})
+return
 
 // sbs._buildChildPath('/home/grant/app-contacts').then((result) => {
 //   console.log(result);
@@ -27,8 +28,8 @@ function streamToString(stream) {
 }
 
 
-function tester() {
-  var i = 5000
+function tester(repeat) {
+  var i = repeat
   var input = 'The quick brown fox jumped over the lazy dog';
   function recurse() {
     if (i < 1) { return }
@@ -43,7 +44,9 @@ function tester() {
     }).then((rs) => {
       return streamToString(rs)
     }).then((data) => {
-      console.log(data + ' ' + i);
+      // console.log(data + ' ' + i);
+      console.log('[Before Delay] index: ' + i);
+    }).delay(1000).then(() => {
       i--
       recurse()
       return
@@ -56,4 +59,4 @@ function tester() {
   recurse()
 }
 console.log('[Calling Tester]');
-tester()
+tester(repeat)
