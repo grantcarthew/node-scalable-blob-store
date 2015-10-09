@@ -4,14 +4,14 @@ var opts = {
   dirDepth: 10,
   dirWidth: 3
 }
-var repeat = 400
+var repeat = 2000
 var sbs = require('./index').create(opts)
 
-sbs._trimedLinearBlobKey().then((result) => {
-  console.log('=============result=============');
-  console.log(result);
-})
-return
+// sbs._linearBlobKey().then((result) => {
+//   console.log('=============result=============');
+//   console.log(result);
+// })
+// return
 
 // sbs._buildChildPath('/home/grant/app-contacts').then((result) => {
 //   console.log(result);
@@ -47,7 +47,7 @@ function tester(repeat) {
     }).then((data) => {
       // console.log(data + ' ' + i);
       console.log('[Before Delay] index: ' + i);
-    }).delay(1000).then(() => {
+    }).then(() => {
       i--
       recurse()
       return
