@@ -1,7 +1,7 @@
 var crispyStream = require('crispy-stream');
 var opts = {
   blobStoreRoot: '/home/grant/blobs',
-  dirDepth: 10,
+  dirDepth: 3,
   dirWidth: 3
 }
 var repeat = 2000
@@ -46,7 +46,7 @@ function tester(repeat) {
       return streamToString(rs)
     }).then((data) => {
       // console.log(data + ' ' + i);
-      console.log('[Before Delay] index: ' + i);
+      //console.log('[Before Delay] index: ' + i);
     }).then(() => {
       i--
       recurse()

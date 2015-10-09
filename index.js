@@ -35,19 +35,16 @@ BlobStore.prototype._parseOpts = function(opts) {
 }
 
 BlobStore.prototype.write = function(readStream) {
-  // console.log('[write]');
   var self = this
-  var fullPath = ''
-
   return Promise.resolve(this.currentBlobKey).then((blobKey) => {
     if (!blobKey) {
-      return self._linearBlobKey()
+      return self._buildBlobKey()
     }
     return blobKey
   }).then((blobKey) => {
     return self._countFiles(blobKey).then((total) => {
       if (total >= self.dirWidth) {
-        return self._linearBlobKey()
+        return self._buildBlobKey()
       }
       return blobKey
     })
@@ -95,8 +92,7 @@ BlobStore.prototype.remove = function(blobPath) {
   })
 }
 
-BlobStore.prototype._linearBlobKey = function() {
-  // console.log('[_linearBlobKey]');
+BlobStore.prototype._buildBlobKey = function() {
   var self = this
   return this._latestLinearBlobKey().then((linearBlobKey) => {
     return self._countFiles(linearBlobKey).then((fileCount) => {
@@ -105,22 +101,21 @@ BlobStore.prototype._linearBlobKey = function() {
       }
       return linearBlobKey
     })
-  }).then((linearBlobKey) => {
-    var keyLength = linearBlobKey.split('/').length - 1
-    var blobKey = ''
+  }).then((newBlobKey) => {
+    var keyLength = newBlobKey.split('/').length - 1
     if (keyLength === self.dirDepth) {
-      return linearBlobKey
+      return newBlobKey
     }
 
     return new Promise((resolve, reject) => {
 
-      function trimKey(nextKey) {
+      function trimBlobKey(nextKey) {
         self._countDirs(nextKey).then((dirCount) => {
           if (dirCount < self.dirWidth || nextKey.length === 1) {
             resolve(nextKey)
           } else {
             nextKey = path.dirname(nextKey)
-            trimKey(nextKey)
+            trimBlobKey(nextKey)
           }
         }).catch((err) => {
           reject(err)
@@ -128,17 +123,17 @@ BlobStore.prototype._linearBlobKey = function() {
       }
 
       // Initiate Recursion
-      trimKey(linearBlobKey)
+      trimBlobKey(newBlobKey)
     })
-  }).then((linearBlobKey) => {
-    var keyLength = linearBlobKey.split('/').length - 1
+  }).then((newBlobKey) => {
+    var keyLength = newBlobKey.split('/').length - 1
     if (keyLength === self.dirDepth) {
-      return linearBlobKey
+      return newBlobKey
     }
     for (var i = self.dirDepth - keyLength; i > 0; i--) {
-      linearBlobKey = linearBlobKey + '/' + uuid.v4()
+      newBlobKey = newBlobKey + '/' + uuid.v4()
     }
-    return linearBlobKey
+    return newBlobKey
   })
 }
 
@@ -148,6 +143,7 @@ BlobStore.prototype._latestLinearBlobKey = function() {
   var blobKey = '/'
 
   return new Promise((resolve, reject) => {
+
     function buildKey(nextKey) {
       self._latestDir(nextKey).then((dir) => {
         if (!dir) {
@@ -158,6 +154,7 @@ BlobStore.prototype._latestLinearBlobKey = function() {
         blobKey = path.join(blobKey, dir)
 
         if (loopIndex === 1) {
+          mkdirp(path.join(self.blobStoreRoot, blobKey))
           resolve(blobKey)
         } else {
           loopIndex--
@@ -174,9 +171,7 @@ BlobStore.prototype._latestLinearBlobKey = function() {
 }
 
 BlobStore.prototype._latestDir = function(parentKey) {
-  // console.log('[_latestDir]');
   var self = this
-
   return this._dir(parentKey).then((fsItems) => {
     return self._filterUuidDirs(parentKey, fsItems)
   }).then((dirs) => {
@@ -191,9 +186,7 @@ BlobStore.prototype._latestDir = function(parentKey) {
 }
 
 BlobStore.prototype._countDirs = function(parentKey) {
-  // console.log('[_countDirs]');
   var self = this
-
   return this._dir(parentKey).then((fsItems) => {
     return self._filterUuidDirs(parentKey, fsItems)
   }).then((dirs) => {
@@ -202,9 +195,7 @@ BlobStore.prototype._countDirs = function(parentKey) {
 }
 
 BlobStore.prototype._countFiles = function(parentKey) {
-  // console.log('[_countFiles]');
   var self = this
-
   return this._dir(parentKey).then((fsItems) => {
     return self._filterUuidFiles(parentKey, fsItems)
   }).then((files) => {
@@ -213,7 +204,6 @@ BlobStore.prototype._countFiles = function(parentKey) {
 }
 
 BlobStore.prototype._dir = function(parentKey) {
-  // console.log('[_dir]');
   var fullParentPath = path.join(this.blobStoreRoot, parentKey)
   return new Promise((resolve, reject) => {
     fs.readdir(fullParentPath, function(err, fsItems) {
@@ -238,7 +228,6 @@ BlobStore.prototype._filterUuidFiles = function(parentKey, fsItems) {
 }
 
 BlobStore.prototype._filterFsUuidItems = function(parentKey, fsItems, onDirs) {
-  // console.log('[_filterFsUuidItems]');
   if (!fsItems || fsItems.length === 0) {
     return []
   }
