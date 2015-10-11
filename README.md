@@ -2,17 +2,19 @@
 
 `scalable-blob-store` is a simple local file system blob store that is designed to prevent conflicts when used with a distributed or replicated file system.
 
-After researching file upload storage for a web application I was working on I discovered the most common solution used by web developers is to create an account with a cloud service provider and just stash all their users files there.
+After researching user file storage, or blob storage, for a web application I was working on I discovered the most common solution used by web developers is to create an account with a cloud service provider. After creating an account with such providers as [Amazon S3](https://aws.amazon.com/s3/), [Google Cloud Storage](https://cloud.google.com/storage/), or [Azure Storage](https://azure.microsoft.com/en-us/services/storage/), they just stash all their users files there.
 
 I researched the price of cloud storage and decided I wanted a free local version that would scale if needed.
 
-I looked at a number of existing solutions such as [filestorage](https://github.com/petersirka/node-filestorage) but was unhappy with the scalability of these solutions. Most are only designed for a single server and would cause write conflicts if a distributed file system or cluster file system like [GlusterFS](http://www.gluster.org/) was used as the storage backend.
+I looked at a number of existing solutions such as [filestorage](https://github.com/petersirka/node-filestorage) but was unhappy with the scalability of these solutions. Most are only designed for a single server and would cause write conflicts if a distributed file system or cluster file system like [GlusterFS](http://www.gluster.org/) was used as the backend file system.
+
+On a long car trip I was thinkging about a solution for my blob storage and came up with `scalable-blob-store`.
 
 ## How does it work?
 
-`scalable-blob-store` does not manage the files on the disk or storage system using a database or index files. Instead, the file system itself is used to find the current storage path and maintain a reasonable number of files in its directories. It is up to you to maintain metadata about the stored files in your own database.
+`scalable-blob-store` does not use index files or other databases to manage the files on the disk or storage system. Instead, the file system itself is used to find the current storage path and maintain a reasonable number of files in its directories. It is up to you to maintain metadata about the stored files in your own database.
 
-The reason `scalable-blob-store` is scalable is due to the naming of the directories and files. Every directory and file saved to disk is named by a generated [v4 UUID](https://github.com/broofa/node-uuid). If a replicated or cluster file system is in use the only conflict that can occur is when one server is reading a file while another is removing the same file.
+The reason `scalable-blob-store` is scalable is due to the naming of the directories and files. Every directory and file saved to disk is named by a [generated](https://github.com/broofa/node-uuid) [v4 UUID](https://en.wikipedia.org/wiki/Universally_unique_identifier). If a replicated or cluster file system is in use the only conflict that can occur is when one server is reading a file while another is removing the same file. `scalable-blob-store` does not try to manage this conflict however it will raise the exception.
 
 Here is an example of the directory structure created by `scalable-blob-store`:
 ```
@@ -39,6 +41,8 @@ $ npm install scalable-blob-store --save (not published yet!!!)
 
 Everything in `scalable-blob-store` is asynchronous and is based on Promises using the [Bluebird](https://github.com/petkaantonov/bluebird) library. There are no callbacks in the API.
 
+### Here is a basic usage example:
+
 ```js
 var sbsFactory = require('scalable-blob-store')
 
@@ -53,12 +57,25 @@ var blobStore = sbsFactory.create(options)
 var fs = require('fs')
 var readStream = fs.createReadStream('/path/to/input')
 
+// Writing Exapmle
 blobStore.write(readStream).then((blobPath) => {
   console.log(blobPath)
   // Console logs the blobPath like this. Only two UUIDs shown for brevity.
   // The root is not included. Store in your database.
   // /e6b7815a-c818-465d-8511-5a53c8276b86/aea4be6a-9e7f-4511-b394-049e68f59b02
 }).catch((err) => {
+  console.error(err)
+})
+
+// Reading Example
+blobStore.read('/uuid/path/from/your/database').then((readStream) => {
+  // Pipe the file to the console.
+  readStream.pipe(process.stdout)
+})
+
+// Delete Example
+blobStore.remove('/uuid/path/from/your/database').then((err) => {
+  // Do something with the error.
   console.error(err)
 })
 
