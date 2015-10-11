@@ -41,7 +41,7 @@ $ npm install scalable-blob-store --save (not published yet!!!)
 
 Everything in `scalable-blob-store` is asynchronous and is based on Promises using the [Bluebird](https://github.com/petkaantonov/bluebird) library. There are no callbacks in the API.
 
-### Here is a basic usage example:
+### Basic usage example:
 
 ```js
 var sbsFactory = require('scalable-blob-store')
@@ -71,6 +71,13 @@ blobStore.write(readStream).then((blobPath) => {
 blobStore.read('/uuid/path/from/your/database').then((readStream) => {
   // Pipe the file to the console.
   readStream.pipe(process.stdout)
+})
+
+// File Metadata Example
+blobStore.stat('/uuid/path/from/your/database').then((stat) => {
+  // Returns a unix stat object
+  // https://nodejs.org/api/fs.html#fs_class_fs_stats
+  console.dir(stat)
 })
 
 // Delete Example
