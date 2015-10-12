@@ -5,8 +5,8 @@
 - [Quick Start](#Quick-Start)
 - [Rationale](#Rationale)
 - [Function](#Function)
-- [Requirements](#Requirements)
-- [Installation](#Installation)
+- [Requirements](#requirements)
+- [Installation]()
 - [API](#API)
     - [create](#create)
     - [write](#write)
@@ -37,7 +37,7 @@ var options = {
 var blobStore = sbsFactory.create(options)
 
 var fs = require('fs')
-var readStream = fs.createReadStream('/path/to/input')
+var readStream = fs.createReadStream('/path/to/file')
 
 // Writing Exapmle
 blobStore.write(readStream).then((blobPath) => {
@@ -143,6 +143,50 @@ var blobStore = sbsFactory.create(options)
 ```
 
 ### `write(object)`
+Returns: `string` containing the path to the file within the blob store root.
+
+`object` can be a node read stream, buffer, or string. Buffer objects get converted to strings using `utf8` format, then converted to read streams. String objects get converted to read streams.
+
+Example with a `stream` object:
+```js
+var fs = require('fs')
+var readStream = fs.createReadStream('/path/to/file')
+
+blobStore.write(readStream).then((blobPath) => {
+  console.log(blobPath)
+  // Console output below. Store this in your database.
+  // /e6b7815a-c818-465d-8511-5a53c8276b86/aea4be6a-9e7f-4511-b394-049e68f59b02
+}).catch((err) => {
+  console.error(err)
+})
+```
+
+Example with a `string` object:
+```js
+var text = 'Text to place into a blob file'
+blobStore.write(text).then((blobPath) => {
+  console.log(blobPath)
+  // Console output below. Store this in your database.
+  // /e6b7815a-c818-465d-8511-5a53c8276b86/aea4be6a-9e7f-4511-b394-049e68f59b02
+}).catch((err) => {
+  console.error(err)
+})
+```
+
+Example with a `buffer` object:
+```js
+var text = 'Example text for the buffer'
+var dataBuffer = new Buffer(text)
+blobStore.write(dataBuffer).then((blobPath) => {
+  console.log(blobPath)
+  // Console output below. Store this in your database.
+  // /e6b7815a-c818-465d-8511-5a53c8276b86/aea4be6a-9e7f-4511-b394-049e68f59b02
+}).catch((err) => {
+  console.error(err)
+})
+```
+
+
 
 
 ## Contributing

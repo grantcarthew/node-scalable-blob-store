@@ -3,6 +3,7 @@ var fsBlobStoreFactory = require('fs-blob-store')
 var Promise = require('bluebird')
 var validator = require('validator')
 var mkdirp = require('mkdirp')
+var stream = require('stream')
 var path = require('path')
 var fs = require('fs')
 
@@ -41,6 +42,24 @@ BlobStore.prototype._parseOpts = function(opts) {
 
 BlobStore.prototype.write = function(readStream) {
   var self = this
+
+  if (typeof (readStream) === 'undefined') {
+    var customError = new Error('Buffer is undefined.');
+    return Promise.reject(customError);
+  }
+
+  if (typeof (readStream) === 'buffer') {
+    readStream = readStream.toString('utf8')
+  }
+
+  if (typeof (readStream) === 'string') {
+    var blobString = readStream
+    readStream = new stream.Readable()
+    readStream._read = function noop() {}
+    readStream.push(blobString)
+    readStream.push(null)
+  }
+
   return Promise.resolve(this.currentBlobKey).then((blobKey) => {
     if (!blobKey) {
       return self._buildBlobKey()
