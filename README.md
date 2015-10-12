@@ -78,7 +78,7 @@ I looked at a number of existing solutions such as [filestorage](https://github.
 
 On a long car trip I was thinkging about a solution for my blob storage and came up with `scalable-blob-store`.
 
-## Function
+# Function
 `scalable-blob-store` does not use index files or other databases to manage the files on the disk or storage system. Instead, the file system itself is used to find the current storage path and maintain a reasonable number of files in its directories. Each time you write a new blob, the current save directory files are counted to ensure it remains under the configured value. Because of this there is a performance hit when saving blobs so do not use `scalable-blob-store` if write performance is a must in your app.
 
 Because there are no indexes used to manage the files in the root path, it is up to you to maintain metadata about the stored files in your own database.
@@ -99,21 +99,21 @@ Other points of interest:
 - Once the number of directories in any directory reaches the `dirWidth` value, the next parent directory is created.
 - If the number of directories in the highest directory, being the blob store root, has reached the `dirWidth` value, the `dirWidth` value is ignored.
 
-## Requirements
+# Requirements
 - Node.js v4.1.2 or greater.
   Mainly due to the ES6 (ES2015) syntax used. There is no reason a transpiled version would not work against an earlier version of node.
 
 
-## Installation
+# Installation
 
 ```sh
 $ npm install scalable-blob-store --save (not published yet!!!)
 ```
 
-## API
+# API
 
 ### `create(opts)`
-__Returns__: New `BlobStore` object
+__Returns__: A new `BlobStore` object to be used as a factory.
 The `create(opts)` function can be called multiple times to create more than one blob store.
 
 Options are past to the constructor function as a `string` or `JSON object`. Only use a `string` if you are happy with the defaults below.
@@ -253,7 +253,7 @@ blobStore.stat(blobPath).then((stat) => {
 })
 ```
 
-## Contributing
+# Contributing
 
 1. Fork it!
 2. Create your feature branch: `git checkout -b my-new-feature`
@@ -261,14 +261,14 @@ blobStore.stat(blobPath).then((stat) => {
 4. Push to the branch: `git push origin my-new-feature`
 5. Submit a pull request :D
 
-## History
+# History
 
 - v0.1.0: Initial release.
 
-## Credits
+# Credits
 
 Thanks to [Mathias Buus](https://github.com/mafintosh) for his work on [fs-blob-store](https://github.com/mafintosh/fs-blob-store).
 
-## License
+# License
 
 MIT
