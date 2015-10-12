@@ -2,14 +2,14 @@
 `scalable-blob-store` is a simple local file system blob store that is designed to prevent conflicts when used with a distributed or replicated file system.
 
 # Topics
-- [Quick Start](#quick-Start)
+- [Quick Start](#quick-start)
 - [Rationale](#rationale)
 - [Function](#function)
 - [Requirements](#requirements)
 - [Installation](#installation)
 - [API](#api)
-    - [create](#create)
-    - [write](#write)
+    - [create](#create(opts))
+    - [write](#write(object))
     - [read](#read)
     - [remove](#remove)
     - [stat](#stat)
@@ -53,6 +53,8 @@ blobStore.write(readStream).then((blobPath) => {
 blobStore.read('/uuid/path/from/your/database').then((readStream) => {
   // Pipe the file to the console.
   readStream.pipe(process.stdout)
+}).catch((err) => {
+  console.error(err)
 })
 
 // File Metadata Example
@@ -60,14 +62,16 @@ blobStore.stat('/uuid/path/from/your/database').then((stat) => {
   // Returns a unix stat object
   // https://nodejs.org/api/fs.html#fs_class_fs_stats
   console.dir(stat)
-})
-
-// Delete Example
-blobStore.remove('/uuid/path/from/your/database').then((err) => {
-  // Do something with the error.
+}).catch((err) => {
   console.error(err)
 })
 
+// Delete Example
+blobStore.remove(blobPath).then(() => {
+  console.log('Blob removed successfully.')
+}).catch((err) => {
+  console.error(err)
+})
 ```
 
 # Rationale
@@ -113,7 +117,7 @@ $ npm install scalable-blob-store --save (not published yet!!!)
 
 ## API
 
-### `create(opts)`
+### Create `create(opts)`
 Return Value: new `BlobStore` object
 The `create(opts)` function can be called multiple times to create more than one blob store.
 
@@ -142,7 +146,7 @@ var options = {
 var blobStore = sbsFactory.create(options)
 ```
 
-### `write(object)`
+### Write `write(object)`
 Returns: `string` containing the path to the file within the blob store root.
 
 `object` can be a node read stream, buffer, or string. Buffer objects get converted to strings using `utf8` format, then converted to read streams. String objects get converted to read streams.
@@ -186,8 +190,68 @@ blobStore.write(dataBuffer).then((blobPath) => {
 })
 ```
 
+### Read `read(string)`
+Returns: `readStream`
 
+Example:
+```js
+// Only two UUIDs shown for brevity
+var blobPath = '/e6b7815a-c818-465d-8511-5a53c8276b86/aea4be6a-9e7f-4511-b394-049e68f59b02'
 
+blobStore.read(blobPath).then((readStream) => {
+  // Blob contents is piped to the console.
+  readStream.pipe(process.stdout)
+}).catch((err) => {
+  console.error(err)
+})
+```
+
+### Remove `remove(string)`
+Returns: `undefined` if nothing went wrong or `error`
+
+Example:
+```js
+// Only two UUIDs shown for brevity
+var blobPath = '/e6b7815a-c818-465d-8511-5a53c8276b86/aea4be6a-9e7f-4511-b394-049e68f59b02'
+
+blobStore.remove(blobPath).then(() => {
+  console.log('Blob removed successfully.')
+}).catch((err) => {
+  console.error(err)
+})
+```
+
+### Stat `stat(string)`
+Returns: `JSON Object`
+Rather than parse the file system [`stat` object](https://nodejs.org/api/fs.html#fs_class_fs_stats), `scalable-blob-store` returns the raw `stat` object.
+Stat class details from [Wikipedia](https://en.wikipedia.org/wiki/Stat_(system_call))
+
+Example:
+```js
+// Only two UUIDs shown for brevity
+var blobPath = '/e6b7815a-c818-465d-8511-5a53c8276b86/aea4be6a-9e7f-4511-b394-049e68f59b02'
+
+blobStore.stat(blobPath).then((stat) => {
+  console.dir(stat)
+  // Console output will be similar to the following.
+  // { dev: 2050,
+  //   mode: 33188,
+  //   nlink: 1,
+  //   uid: 1000,
+  //   gid: 1000,
+  //   rdev: 0,
+  //   blksize: 4096,
+  //   ino: 6707277,
+  //   size: 44,
+  //   blocks: 8,
+  //   atime: Mon Oct 12 2015 08:51:29 GMT+1000 (AEST),
+  //   mtime: Mon Oct 12 2015 08:51:29 GMT+1000 (AEST),
+  //   ctime: Mon Oct 12 2015 08:51:29 GMT+1000 (AEST),
+  //   birthtime: Mon Oct 12 2015 08:51:29 GMT+1000 (AEST) }
+}).catch((err) => {
+  console.error(err)
+})
+```
 
 ## Contributing
 
@@ -199,7 +263,7 @@ blobStore.write(dataBuffer).then((blobPath) => {
 
 ## History
 
-TODO: Write history
+- v0.1.0: Initial release.
 
 ## Credits
 
