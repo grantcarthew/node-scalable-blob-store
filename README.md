@@ -8,11 +8,6 @@
 - [Requirements](#requirements)
 - [Installation](#installation)
 - [API](#api)
-    - [create](#create(opts))
-    - [write](#write(object))
-    - [read](#read)
-    - [remove](#remove)
-    - [stat](#stat)
 - [Contributing](#contributing)
 - [History](#history)
 - [Credits](#credits)
@@ -60,7 +55,7 @@ blobStore.read('/uuid/path/from/your/database').then((readStream) => {
 // File Metadata Example
 blobStore.stat('/uuid/path/from/your/database').then((stat) => {
   // Returns a unix stat object
-  // https://nodejs.org/api/fs.html#fs_class_fs_stats
+  // https://en.wikipedia.org/wiki/Stat_(system_call)
   console.dir(stat)
 }).catch((err) => {
   console.error(err)
@@ -102,7 +97,7 @@ Other points of interest:
 - Files are only stored at the bottom of the directory tree.
 - Once the number of files in a directory reaches the `dirWidth` value, the next directory is created.
 - Once the number of directories in any directory reaches the `dirWidth` value, the next parent directory is created.
-- If the number of directories in the highest directory, being the blob store root, has reached the `dirWidth` vaule, the `dirWidth` value is ignored.
+- If the number of directories in the highest directory, being the blob store root, has reached the `dirWidth` value, the `dirWidth` value is ignored.
 
 ## Requirements
 - Node.js v4.1.2 or greater.
@@ -117,8 +112,8 @@ $ npm install scalable-blob-store --save (not published yet!!!)
 
 ## API
 
-### Create `create(opts)`
-Return Value: new `BlobStore` object
+### `create(opts)`
+__Returns__: New `BlobStore` object
 The `create(opts)` function can be called multiple times to create more than one blob store.
 
 Options are past to the constructor function as a `string` or `JSON object`. Only use a `string` if you are happy with the defaults below.
@@ -128,6 +123,11 @@ Key | Description | Defaults
 `blobStoreRoot` | Root directory to store blobs | Required option no defaults
 `dirDepth` | How deep you want the directries under the root | 3
 `dirWidth` | The maximum number of files or directories in a directory | 1000
+
+Start by creating the `scalable-blob-store` factory object:
+```js
+var sbsFactory = require('scalable-blob-store')
+```
 
 String Multiple Store Example:
 ```js
@@ -146,8 +146,8 @@ var options = {
 var blobStore = sbsFactory.create(options)
 ```
 
-### Write `write(object)`
-Returns: `string` containing the path to the file within the blob store root.
+### `write(object)`
+__Returns__: `string` containing the path to the file within the blob store root.
 
 `object` can be a node read stream, buffer, or string. Buffer objects get converted to strings using `utf8` format, then converted to read streams. String objects get converted to read streams.
 
@@ -190,8 +190,8 @@ blobStore.write(dataBuffer).then((blobPath) => {
 })
 ```
 
-### Read `read(string)`
-Returns: `readStream`
+### `read(string)`
+__Returns__: `readStream`
 
 Example:
 ```js
@@ -206,8 +206,8 @@ blobStore.read(blobPath).then((readStream) => {
 })
 ```
 
-### Remove `remove(string)`
-Returns: `undefined` if nothing went wrong or `error`
+### `remove(string)`
+__Returns__: `undefined` if nothing went wrong or `error`
 
 Example:
 ```js
@@ -221,10 +221,10 @@ blobStore.remove(blobPath).then(() => {
 })
 ```
 
-### Stat `stat(string)`
-Returns: `JSON Object`
+### `stat(string)`
+__Returns__: `JSON Object`
 Rather than parse the file system [`stat` object](https://nodejs.org/api/fs.html#fs_class_fs_stats), `scalable-blob-store` returns the raw `stat` object.
-Stat class details from [Wikipedia](https://en.wikipedia.org/wiki/Stat_(system_call))
+More stat class details can be found on [Wikipedia](https://en.wikipedia.org/wiki/Stat_(system_call))
 
 Example:
 ```js
