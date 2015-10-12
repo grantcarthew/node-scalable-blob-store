@@ -23,12 +23,12 @@ function BlobStore(opts) {
 }
 
 BlobStore.prototype._parseOpts = function(opts) {
-  if (!opts || !opts.blobStoreRoot) {
-    throw new Error('The blobStoreRoot directory must be set.')
+  if (typeof opts === 'string') {
+    opts = { blobStoreRoot: opts }
   }
 
-  if (typeof opts === 'string') {
-    opts = { blobStoreRoot: opts}
+  if (!opts || !opts.blobStoreRoot) {
+    throw new Error('The blobStoreRoot directory must be set.')
   }
 
   mkdirp.sync(opts.blobStoreRoot)
@@ -48,7 +48,7 @@ BlobStore.prototype.write = function(readStream) {
     return Promise.reject(customError);
   }
 
-  if (typeof (readStream) === 'buffer') {
+  if (readStream instanceof Buffer) {
     readStream = readStream.toString('utf8')
   }
 
