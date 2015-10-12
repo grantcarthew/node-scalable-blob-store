@@ -93,8 +93,15 @@ BlobStore.prototype.remove = function(blobPath) {
 }
 
 BlobStore.prototype.stat = function(blobPath) {
-  var fullPath = path.join(this.blobStoreRoot, blobPath)
-  return this._fsStat(fullPath)
+  var fullBlobPath = path.join(this.blobStoreRoot, blobPath)
+  return new Promise((resolve, reject) => {
+    fs.stat(fullBlobPath, (err, stat) => {
+      if (err) {
+        return reject(err)
+      }
+      resolve(stat)
+    })
+  })
 }
 
 BlobStore.prototype._buildBlobKey = function() {
@@ -266,18 +273,6 @@ BlobStore.prototype._fsItemInfo = function(parentKey, fsItems) {
           resolve(stats)
         }
       })
-    })
-  })
-}
-
-BlobStore.prototype._fsStat = function(fullFilePath) {
-  return new Promise((resolve, reject) => {
-    fs.stat(fullPath, (err, stat) => {
-      if (err) {
-          return reject(err)
-        }
-      }
-      resolve(stat)
     })
   })
 }

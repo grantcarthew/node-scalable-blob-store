@@ -4,8 +4,17 @@ var opts = {
   dirDepth: 3,
   dirWidth: 3
 }
-var repeat = 2000
+var repeat = 500
 var sbs = require('./index').create(opts)
+
+var blobItem = '/04df9f3b-87e0-4636-ac85-1bbbb4dd95d6/7f66e07c-b59d-4ef6-8eb9-1eb5b41fc14a/1f2ab679-aeec-4c54-a00b-04c0a31510b1/2296b3a9-26c0-400d-8684-70c91a0ddf31'
+var fullBlobPath
+sbs.stat(blobItem).then((stat) => {
+  console.dir(stat);
+}).catch((err) => {
+  console.error(err)
+})
+return
 
 // sbs._linearBlobKey().then((result) => {
 //   console.log('=============result=============');
