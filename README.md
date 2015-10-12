@@ -2,21 +2,21 @@
 `scalable-blob-store` is a simple local file system blob store that is designed to prevent conflicts when used with a distributed or replicated file system.
 
 # Topics
-- [Quick Start](#Quick-Start)
-- [Rationale](#Rationale)
-- [Function](#Function)
+- [Quick Start](#quick-Start)
+- [Rationale](#rationale)
+- [Function](#function)
 - [Requirements](#requirements)
-- [Installation]()
-- [API](#API)
+- [Installation](#installation)
+- [API](#api)
     - [create](#create)
     - [write](#write)
     - [read](#read)
     - [remove](#remove)
     - [stat](#stat)
-- [Contributing](#Contributing)
-- [History](#History)
-- [Credits](#Credits)
-- [License](#License)
+- [Contributing](#contributing)
+- [History](#history)
+- [Credits](#credits)
+- [License](#license)
 
 # Quick Start
 
