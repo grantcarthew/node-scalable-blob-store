@@ -26,6 +26,9 @@
     "uuid",
     "guid"
   ],
+  "engines": {
+    "node": ">=4.1.2"
+  },
   "devDependencies": {
     "crispy-stream": "^0.1.2",
     "eslint": "^1.6.0"

@@ -25,6 +25,11 @@ BlobStore.prototype._parseOpts = function(opts) {
   if (!opts || !opts.blobStoreRoot) {
     throw new Error('The blobStoreRoot directory must be set.')
   }
+
+  if (typeof opts === 'string') {
+    opts = { blobStoreRoot: opts}
+  }
+
   mkdirp.sync(opts.blobStoreRoot)
   if (!opts.dirDepth) { opts.dirDepth = 3 }
   if (opts.dirDepth < 1 || opts.dirDepth > 10) {
