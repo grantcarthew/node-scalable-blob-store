@@ -18,7 +18,7 @@ function BlobStore(opts) {
   this.dirDepth = parsedOpts.dirDepth
   this.dirWidth = parsedOpts.dirWidth
 
-  this.currentBlobKey = false
+  this.currentBlobPath = false
   this.fsBlobStore = fsBlobStoreFactory(this.blobStoreRoot)
 }
 
@@ -60,22 +60,22 @@ BlobStore.prototype.write = function(readStream) {
     readStream.push(null)
   }
 
-  return Promise.resolve(this.currentBlobKey).then((blobKey) => {
-    if (!blobKey) {
-      return self._buildBlobKey()
+  return Promise.resolve(this.currentBlobPath).then((blobPath) => {
+    if (!blobPath) {
+      return self._buildblobPath()
     }
-    return blobKey
-  }).then((blobKey) => {
-    return self._countFiles(blobKey).then((total) => {
+    return blobPath
+  }).then((blobPath) => {
+    return self._countFiles(blobPath).then((total) => {
       if (total >= self.dirWidth) {
-        return self._buildBlobKey()
+        return self._buildblobPath()
       }
-      return blobKey
+      return blobPath
     })
-  }).then((blobKey) => {
-    self.currentBlobKey = blobKey
+  }).then((blobPath) => {
+    self.currentBlobPath = blobPath
     return new Promise((resolve, reject) => {
-      var filePath = path.join(blobKey, uuid.v4())
+      var filePath = path.join(blobPath, uuid.v4())
       var writeStream = self.fsBlobStore.createWriteStream({
         key: filePath
       })
@@ -128,30 +128,30 @@ BlobStore.prototype.stat = function(blobPath) {
   })
 }
 
-BlobStore.prototype._buildBlobKey = function() {
+BlobStore.prototype._buildblobPath = function() {
   var self = this
-  return this._latestLinearBlobKey().then((linearBlobKey) => {
-    return self._countFiles(linearBlobKey).then((fileCount) => {
+  return this._latestLinearblobPath().then((linearblobPath) => {
+    return self._countFiles(linearblobPath).then((fileCount) => {
       if (fileCount >= self.dirWidth) {
-        return path.dirname(linearBlobKey)
+        return path.dirname(linearblobPath)
       }
-      return linearBlobKey
+      return linearblobPath
     })
-  }).then((newBlobKey) => {
-    var keyLength = newBlobKey.split('/').length - 1
-    if (keyLength === self.dirDepth) {
-      return newBlobKey
+  }).then((newblobPath) => {
+    var blobPathUuidCount = newblobPath.split('/').length - 1
+    if (blobPathUuidCount === self.dirDepth) {
+      return newblobPath
     }
 
     return new Promise((resolve, reject) => {
 
-      function trimBlobKey(nextKey) {
-        self._countDirs(nextKey).then((dirCount) => {
-          if (dirCount < self.dirWidth || nextKey.length === 1) {
-            resolve(nextKey)
+      function trimblobPath(nextPath) {
+        self._countDirs(nextPath).then((dirCount) => {
+          if (dirCount < self.dirWidth || nextPath.length === 1) {
+            resolve(nextPath)
           } else {
-            nextKey = path.dirname(nextKey)
-            trimBlobKey(nextKey)
+            nextPath = path.dirname(nextPath)
+            trimblobPath(nextPath)
           }
         }).catch((err) => {
           reject(err)
@@ -159,42 +159,42 @@ BlobStore.prototype._buildBlobKey = function() {
       }
 
       // Initiate Recursion
-      trimBlobKey(newBlobKey)
+      trimblobPath(newblobPath)
     })
-  }).then((newBlobKey) => {
-    var keyLength = newBlobKey.split('/').length - 1
-    if (keyLength === self.dirDepth) {
-      return newBlobKey
+  }).then((newblobPath) => {
+    var blobPathUuidCount = newblobPath.split('/').length - 1
+    if (blobPathUuidCount === self.dirDepth) {
+      return newblobPath
     }
-    for (var i = self.dirDepth - keyLength; i > 0; i--) {
-      newBlobKey = newBlobKey + '/' + uuid.v4()
+    for (var i = self.dirDepth - blobPathUuidCount; i > 0; i--) {
+      newblobPath = newblobPath + '/' + uuid.v4()
     }
-    return newBlobKey
+    return newblobPath
   })
 }
 
-BlobStore.prototype._latestLinearBlobKey = function() {
+BlobStore.prototype._latestLinearblobPath = function() {
   var self = this
   var loopIndex = this.dirDepth
-  var blobKey = '/'
+  var blobPath = '/'
 
   return new Promise((resolve, reject) => {
 
-    function buildKey(nextKey) {
-      self._latestDir(nextKey).then((dir) => {
+    function buildPath(nextPath) {
+      self._latestDir(nextPath).then((dir) => {
         if (!dir) {
           return uuid.v4()
         }
         return dir
       }).then((dir) => {
-        blobKey = path.join(blobKey, dir)
+        blobPath = path.join(blobPath, dir)
 
         if (loopIndex === 1) {
-          mkdirp(path.join(self.blobStoreRoot, blobKey))
-          resolve(blobKey)
+          mkdirp(path.join(self.blobStoreRoot, blobPath))
+          resolve(blobPath)
         } else {
           loopIndex--
-          buildKey(blobKey)
+          buildPath(blobPath)
         }
       }).catch((err) => {
         reject(err)
@@ -202,14 +202,14 @@ BlobStore.prototype._latestLinearBlobKey = function() {
     }
 
     // Initiate Recursion
-    buildKey(blobKey)
+    buildPath(blobPath)
   })
 }
 
-BlobStore.prototype._latestDir = function(parentKey) {
+BlobStore.prototype._latestDir = function(parentPath) {
   var self = this
-  return this._dir(parentKey).then((fsItems) => {
-    return self._filterUuidDirs(parentKey, fsItems)
+  return this._dir(parentPath).then((fsItems) => {
+    return self._filterUuidDirs(parentPath, fsItems)
   }).then((dirs) => {
     if (!dirs || dirs.length === 0) {
       return false
@@ -221,26 +221,26 @@ BlobStore.prototype._latestDir = function(parentKey) {
   })
 }
 
-BlobStore.prototype._countDirs = function(parentKey) {
+BlobStore.prototype._countDirs = function(parentPath) {
   var self = this
-  return this._dir(parentKey).then((fsItems) => {
-    return self._filterUuidDirs(parentKey, fsItems)
+  return this._dir(parentPath).then((fsItems) => {
+    return self._filterUuidDirs(parentPath, fsItems)
   }).then((dirs) => {
     return dirs.length
   })
 }
 
-BlobStore.prototype._countFiles = function(parentKey) {
+BlobStore.prototype._countFiles = function(parentPath) {
   var self = this
-  return this._dir(parentKey).then((fsItems) => {
-    return self._filterUuidFiles(parentKey, fsItems)
+  return this._dir(parentPath).then((fsItems) => {
+    return self._filterUuidFiles(parentPath, fsItems)
   }).then((files) => {
     return files.length
   })
 }
 
-BlobStore.prototype._dir = function(parentKey) {
-  var fullParentPath = path.join(this.blobStoreRoot, parentKey)
+BlobStore.prototype._dir = function(parentPath) {
+  var fullParentPath = path.join(this.blobStoreRoot, parentPath)
   return new Promise((resolve, reject) => {
     fs.readdir(fullParentPath, function(err, fsItems) {
       if (err) {
@@ -255,19 +255,19 @@ BlobStore.prototype._dir = function(parentKey) {
   })
 }
 
-BlobStore.prototype._filterUuidDirs = function(parentKey, fsItems) {
-  return this._filterFsUuidItems(parentKey, fsItems, true)
+BlobStore.prototype._filterUuidDirs = function(parentPath, fsItems) {
+  return this._filterFsUuidItems(parentPath, fsItems, true)
 }
 
-BlobStore.prototype._filterUuidFiles = function(parentKey, fsItems) {
-  return this._filterFsUuidItems(parentKey, fsItems, false)
+BlobStore.prototype._filterUuidFiles = function(parentPath, fsItems) {
+  return this._filterFsUuidItems(parentPath, fsItems, false)
 }
 
-BlobStore.prototype._filterFsUuidItems = function(parentKey, fsItems, onDirs) {
+BlobStore.prototype._filterFsUuidItems = function(parentPath, fsItems, onDirs) {
   if (!fsItems || fsItems.length === 0) {
     return []
   }
-  return this._fsItemInfo(parentKey, fsItems).then((fsItems) => {
+  return this._fsItemInfo(parentPath, fsItems).then((fsItems) => {
     return fsItems.filter((item) => {
       return item.stat.isDirectory() === onDirs &&
              validator.isUUID(item.name, 4)
@@ -275,10 +275,10 @@ BlobStore.prototype._filterFsUuidItems = function(parentKey, fsItems, onDirs) {
   })
 }
 
-BlobStore.prototype._fsItemInfo = function(parentKey, fsItems) {
+BlobStore.prototype._fsItemInfo = function(parentPath, fsItems) {
   return new Promise((resolve, reject) => {
     var stats = []
-    var fullParentPath = path.join(this.blobStoreRoot, parentKey)
+    var fullParentPath = path.join(this.blobStoreRoot, parentPath)
     fsItems.forEach((item, index) => {
       fullPath = path.join(fullParentPath, item)
       fs.stat(fullPath, (err, stat) => {

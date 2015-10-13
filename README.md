@@ -5,6 +5,7 @@
 - [Quick Start](#quick-start)
 - [Rationale](#rationale)
 - [Function](#function)
+- [Performance](#performance)
 - [Requirements](#requirements)
 - [Installation](#installation)
 - [API](#api)
@@ -37,8 +38,8 @@ var readStream = fs.createReadStream('/path/to/file')
 // Writing Exapmle
 blobStore.write(readStream).then((blobPath) => {
   console.log(blobPath)
-  // Console logs the blobPath like this. Only two UUIDs shown for brevity.
-  // The root is not included. Store in your database.
+  // Logs the blobPath. The store root is not included.
+  // Store in your database. Only two UUIDs shown for brevity.
   // /e6b7815a-c818-465d-8511-5a53c8276b86/aea4be6a-9e7f-4511-b394-049e68f59b02
 }).catch((err) => {
   console.error(err)
@@ -76,14 +77,14 @@ I researched the price of cloud storage and decided I wanted a free local versio
 
 I looked at a number of existing solutions such as [filestorage](https://github.com/petersirka/node-filestorage) but was unhappy with the scalability of these solutions. Most are only designed for a single server and would cause write conflicts if a distributed file system or cluster file system like [GlusterFS](http://www.gluster.org/) was used as the backend file system.
 
-On a long car trip I was thinkging about a solution for my blob storage and came up with `scalable-blob-store`.
+On a long car trip I was thinking about a solution for my blob storage and came up with `scalable-blob-store`.
 
 # Function
-`scalable-blob-store` does not use index files or other databases to manage the files on the disk or storage system. Instead, the file system itself is used to find the current storage path and maintain a reasonable number of files in its directories. Each time you write a new blob, the current save directory files are counted to ensure it remains under the configured value. Because of this there is a performance hit when saving blobs so do not use `scalable-blob-store` if write performance is a must in your app.
+`scalable-blob-store` does not use index files or other databases to manage the files on the disk or storage system. Instead, the file system itself is used to find the current storage path and maintain a reasonable number of files in its directories. Each time you write a new blob, the current save directory files are counted to ensure it remains under the configured value. Because of this there is a performance hit when saving blobs. Check the [Performance](#performance) topic below for some detail.
 
-Because there are no indexes used to manage the files in the root path, it is up to you to maintain metadata about the stored files in your own database.
+Because there are no databases used to manage the files in the root path, it is up to you to maintain the returned `blobStore` path and metadata about the stored files in your own database.
 
-The reason `scalable-blob-store` is scalable is due to the naming of the directories and files. Every directory and file saved to disk is named by a [generated](https://github.com/broofa/node-uuid) [v4 UUID](https://en.wikipedia.org/wiki/Universally_unique_identifier). If a replicated or cluster file system is in use the only conflict that can occur is when one server is reading a file while another is removing the same file. `scalable-blob-store` does not try to manage this conflict; however it will raise the exception.
+The reason `scalable-blob-store` is scalable is due to the naming of the directories and files. Every directory and file saved to disk is named by a [generated](https://github.com/broofa/node-uuid) [v4 UUID](https://en.wikipedia.org/wiki/Universally_unique_identifier). If a replicated or cluster file system is in use the only conflict that can occur is when one server is reading a file while another is removing the same file. `scalable-blob-store` does not try to manage this conflict, however it will raise the exception.
 
 Here is an example of the directory structure created by `scalable-blob-store`:
 ```
@@ -99,6 +100,22 @@ Other points of interest:
 - Once the number of directories in any directory reaches the `dirWidth` value, the next parent directory is created.
 - If the number of directories in the highest directory, being the blob store root, has reached the `dirWidth` value, the `dirWidth` value is ignored.
 
+# Performance
+This is a unscientific measurement, however just to get some idea of the write performance I ran a test with the following configuration:
+- Virtual Machine running on an SSD disk
+- File Content: "The quick brown fox jumped over the lazy dog"
+- dirDepth: 3
+- dirWidth: 1000
+- Repeat: 10,000
+
+With this configuration the following performance was observed:
+- Total Time: 118610 milliseconds (119 seconds)
+- Total Size: 9.76 GB
+
+Not surprisingly, this configuration created one top tier directory, one second tier directory, and ten third tier directories.
+
+Read performance will be close to disk speed.
+
 # Requirements
 - Node.js v4.1.2 or greater.
   Mainly due to the ES6 (ES2015) syntax used. There is no reason a transpiled version would not work against an earlier version of node.
@@ -107,14 +124,14 @@ Other points of interest:
 # Installation
 
 ```sh
-$ npm install scalable-blob-store --save (not published yet!!!)
+$ npm install scalable-blob-store --save
 ```
 
 # API
 
-### `create(opts)`
+### `create(options)`
 __Returns__: A new `BlobStore` object to be used as a factory.
-The `create(opts)` function can be called multiple times to create more than one blob store.
+The `create(options)` function can be called multiple times to create more than one blob store.
 
 Options are past to the constructor function as a `string` or `JSON object`. Only use a `string` if you are happy with the defaults below.
 
@@ -147,9 +164,9 @@ var blobStore = sbsFactory.create(options)
 ```
 
 ### `write(object)`
-__Returns__: `string` containing the path to the file within the blob store root.
+__Returns__: `string` containing the child path to the file within the blob store root. This `string` needs to be saved to your database for future access.
 
-`object` can be a node read stream, buffer, or string. Buffer objects get converted to strings using `utf8` format, then converted to read streams. String objects get converted to read streams.
+`object` can be a node [`stream.Readable`](https://nodejs.org/api/stream.html#stream_class_stream_readable), [`Buffer`](https://nodejs.org/api/buffer.html#buffer_buffer), or `string`. `Buffer` objects get converted to `strings` using utf-8 format, then converted to `stream.Readable`. String objects get converted to `stream.Readable`.
 
 Example with a `stream` object:
 ```js
@@ -191,7 +208,7 @@ blobStore.write(dataBuffer).then((blobPath) => {
 ```
 
 ### `read(string)`
-__Returns__: `readStream`
+__Returns__: [`stream.Readable`](https://nodejs.org/api/stream.html#stream_class_stream_readable)
 
 Example:
 ```js
@@ -223,7 +240,8 @@ blobStore.remove(blobPath).then(() => {
 
 ### `stat(string)`
 __Returns__: `JSON Object`
-Rather than parse the file system [`stat` object](https://nodejs.org/api/fs.html#fs_class_fs_stats), `scalable-blob-store` returns the raw `stat` object.
+
+Rather than parse the file system [`stat`](https://nodejs.org/api/fs.html#fs_class_fs_stats) object, `scalable-blob-store` returns the raw `stat` object.
 More stat class details can be found on [Wikipedia](https://en.wikipedia.org/wiki/Stat_(system_call))
 
 Example:
