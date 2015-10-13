@@ -2,8 +2,8 @@
   "name": "scalable-blob-store",
   "version": "0.1.0",
   "description": "A simple local filesystem blob store that is designed to prevent conflicts when used with a distributed or replicated filesystem.",
-  "homepage": "https://github.com/grantcarthew/scalable-blob-store#readme",
-  "author": "Grant Carthew <grant@carthew.net> (http://uglygizmo.blogspot.com.au/)",
+  "homepage": "https://github.com/grantcarthew/node-scalable-blob-store",
+  "author": "Grant Carthew <npm@carthew.net> (http://uglygizmo.blogspot.com.au/)",
   "license": "MIT",
   "main": "index.js",
   "scripts": {
@@ -11,10 +11,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/grantcarthew/scalable-blob-store.git"
+    "url": "git://github.com/grantcarthew/node-scalable-blob-store.git"
   },
   "bugs": {
-    "url": "https://github.com/grantcarthew/scalable-blob-store/issues"
+    "url": "https://github.com/grantcarthew/node-scalable-blob-store/issues"
   },
   "keywords": [
     "node",
