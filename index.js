@@ -40,10 +40,6 @@ BlobStore.prototype._parseOpts = function(opts) {
   return opts
 }
 
-BlobStore.prototype.fullFilePath = function(blobPath) {
-  return path.join(this.blobStoreRoot, blobPath)
-}
-
 BlobStore.prototype.write = function(readStream) {
   var self = this
 

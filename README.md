@@ -128,6 +128,7 @@ $ npm install scalable-blob-store --save
 ```
 
 # API
+All `API` calls are asynchronous returning Promises resolving to the values below.
 
 ### `create(options)`
 __Returns__: A new `BlobStore` object to be used as a factory.
@@ -282,6 +283,7 @@ blobStore.stat(blobPath).then((stat) => {
 # History
 
 - v0.1.0: Initial release.
+- v0.1.1: Added `fullFilePath` function.
 
 # Credits
 
