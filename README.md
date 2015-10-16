@@ -283,7 +283,8 @@ blobStore.stat(blobPath).then((stat) => {
 # History
 
 - v0.1.0: Initial release.
-- v0.1.1: Added `fullFilePath` function.
+- v0.2.0: Added file path function.
+- v0.3.0: Removed file path function with a plan to add image support.
 
 # Credits
 
