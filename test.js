@@ -2,9 +2,9 @@ var crispyStream = require('crispy-stream');
 var opts = {
   blobStoreRoot: '/home/grant/blobs',
   dirDepth: 3,
-  dirWidth: 3
+  dirWidth: 1000
 }
-var repeat = 1000
+var repeat = 10000
 var sbs = require('./index').create(opts)
 
 function streamToString(stream) {
@@ -33,11 +33,19 @@ function writer(repeat) {
     var readStream = crispyStream.createReadStream(input);
     var currentBlobPath = ''
 
-    sbs.write(readStream).then((blobPath) => {
-      currentBlobPath = blobPath
-      return blobPath
+    sbs.createWriteStream().then((result) => {
+      currentBlobPath = result.blobPath
+      return result
+    }).then((result) => {
+      return new Promise((resolve, reject) => {
+        result.writeStream.on('finish', () => {
+          resolve(result.blobPath)
+        })
+        result.writeStream.on('error', reject)
+        readStream.pipe(result.writeStream)
+      })
     }).then((blobPath) => {
-      return sbs.read(blobPath)
+      return sbs.createReadStream(blobPath)
     }).then((rs) => {
       return streamToString(rs)
     }).then((data) => {

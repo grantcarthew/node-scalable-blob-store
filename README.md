@@ -1,6 +1,12 @@
 # Introduction
 `scalable-blob-store` is a simple local file system blob store that is designed to prevent conflicts when used with a distributed or replicated file system.
 
+__WARNING: API change from v0.3 to v0.4!__
+I have changed `read` and `write` to `createReadStream` and `createWriteStream`.
+This change moves some of the complexity to the consuming code but makes `scalable-blob-store` more of a lower level module.
+Now that you have access to the stream you can read and manipulate the stream on writing.
+Creating blobs using `string` and `Buffer` objects has also been removed.
+
 # Topics
 - [Quick Start](#quick-start)
 - [Rationale](#rationale)
@@ -36,17 +42,33 @@ var fs = require('fs')
 var readStream = fs.createReadStream('/path/to/file')
 
 // Writing Exapmle
-blobStore.write(readStream).then((blobPath) => {
+blobStore.createWriteStream().then((result) => {
+  console.dir(result)
+  // Logs the result object which contains the blobPath and writeStream.
+  // Use the writeStream to save your blob.
+  // Store the blobPath in your database.
+  //
+  // result object will be similar to this:
+  // {
+  //   blobPath: "/e6b7815a-c818-465d-8511-5a53c8276b86/aea4be6a-9e7f-4511-b394-049e68f59b02",
+  //   writeStream: object
+  // }
+  return new Promise((resolve, reject) => {
+    result.writeStream.on('finish', () => {
+        resolve(result.blobPath)
+    })
+    result.writeStream.on('error', reject)
+    readStream.pipe(result.writeStream)
+  })
+}).then((blobPath) => {
   console.log(blobPath)
-  // Logs the blobPath. The store root is not included.
-  // Store in your database. Only two UUIDs shown for brevity.
-  // /e6b7815a-c818-465d-8511-5a53c8276b86/aea4be6a-9e7f-4511-b394-049e68f59b02
+  // Logs the blobPath. Save this in your database.
 }).catch((err) => {
   console.error(err)
 })
 
 // Reading Example
-blobStore.read('/uuid/path/from/your/database').then((readStream) => {
+blobStore.createReadStream('/uuid/path/from/your/database').then((readStream) => {
   // Pipe the file to the console.
   readStream.pipe(process.stdout)
 }).catch((err) => {
@@ -62,8 +84,16 @@ blobStore.stat('/uuid/path/from/your/database').then((stat) => {
   console.error(err)
 })
 
+// File Exists Example
+blobStore.exists('/uuid/path/from/your/database').then((result) => {
+  console.log(result)
+  // Logs 'true' or 'false'
+}).catch((err) => {
+  console.error(err)
+})
+
 // Delete Example
-blobStore.remove(blobPath).then(() => {
+blobStore.remove('/uuid/path/from/your/database').then(() => {
   console.log('Blob removed successfully.')
 }).catch((err) => {
   console.error(err)
@@ -128,7 +158,7 @@ $ npm install scalable-blob-store --save
 ```
 
 # API
-All `API` calls are asynchronous returning Promises resolving to the values below.
+All `API` calls apart from `create(options)` are asynchronous returning Promises resolving to the values below.
 
 ### `create(options)`
 __Returns__: A new `BlobStore` object to be used as a factory.
@@ -164,51 +194,50 @@ var options = {
 var blobStore = sbsFactory.create(options)
 ```
 
-### `write(object)`
-__Returns__: `string` containing the child path to the file within the blob store root. This `string` needs to be saved to your database for future access.
+### `createWriteStream()`
+__Returns__: `JSON Object` containing the child path to the file within the blob store root and a writable file stream.
 
-`object` can be a node [`stream.Readable`](https://nodejs.org/api/stream.html#stream_class_stream_readable), [`Buffer`](https://nodejs.org/api/buffer.html#buffer_buffer), or `string`. `Buffer` objects get converted to `strings` using utf-8 format, then converted to `stream.Readable`. String objects get converted to `stream.Readable`.
+Returned Object:
+```js
+{
+  blobPath: "/e6b7815a-c818-465d-8511-5a53c8276b86/aea4be6a-9e7f-4511-b394-049e68f59b02",
+  writeStream: stream.Writable
+}
+```
 
-Example with a `stream` object:
+Use the `writeStream` to save your blob or file.
+The `blobPath` needs to be saved to your database for future access.
+
+Example:
 ```js
 var fs = require('fs')
 var readStream = fs.createReadStream('/path/to/file')
 
-blobStore.write(readStream).then((blobPath) => {
+blobStore.createWriteStream().then((result) => {
+  console.dir(result)
+  // result object will be similar to this:
+  // {
+  //   blobPath: "/e6b7815a-c818-465d-8511-5a53c8276b86/aea4be6a-9e7f-4511-b394-049e68f59b02",
+  //   writeStream: object
+  // }
+  // Using a Promise to encapsulate the write asynchronous events.
+  return new Promise((resolve, reject) => {
+    result.writeStream.on('finish', () => {
+        resolve(result.blobPath)
+    })
+    result.writeStream.on('error', reject)
+    readStream.pipe(result.writeStream)
+  })
+}).then((blobPath) => {
   console.log(blobPath)
-  // Console output below. Store this in your database.
-  // /e6b7815a-c818-465d-8511-5a53c8276b86/aea4be6a-9e7f-4511-b394-049e68f59b02
+  // Logs the blobPath. Save this in your database.
 }).catch((err) => {
   console.error(err)
 })
 ```
 
-Example with a `string` object:
-```js
-var text = 'Text to place into a blob file'
-blobStore.write(text).then((blobPath) => {
-  console.log(blobPath)
-  // Console output below. Store this in your database.
-  // /e6b7815a-c818-465d-8511-5a53c8276b86/aea4be6a-9e7f-4511-b394-049e68f59b02
-}).catch((err) => {
-  console.error(err)
-})
-```
 
-Example with a `buffer` object:
-```js
-var text = 'Example text for the buffer'
-var dataBuffer = new Buffer(text)
-blobStore.write(dataBuffer).then((blobPath) => {
-  console.log(blobPath)
-  // Console output below. Store this in your database.
-  // /e6b7815a-c818-465d-8511-5a53c8276b86/aea4be6a-9e7f-4511-b394-049e68f59b02
-}).catch((err) => {
-  console.error(err)
-})
-```
-
-### `read(string)`
+### `createReadStream(string)`
 __Returns__: [`stream.Readable`](https://nodejs.org/api/stream.html#stream_class_stream_readable)
 
 Example:
@@ -216,7 +245,7 @@ Example:
 // Only two UUIDs shown for brevity
 var blobPath = '/e6b7815a-c818-465d-8511-5a53c8276b86/aea4be6a-9e7f-4511-b394-049e68f59b02'
 
-blobStore.read(blobPath).then((readStream) => {
+blobStore.createReadStream(blobPath).then((readStream) => {
   // Blob contents is piped to the console.
   readStream.pipe(process.stdout)
 }).catch((err) => {
@@ -239,10 +268,28 @@ blobStore.remove(blobPath).then(() => {
 })
 ```
 
+### `exists(string)`
+__Returns__: `boolean`
+
+`true` if the file exists, otherwise `false`.
+
+Example:
+```js
+// Only two UUIDs shown for brevity
+var blobPath = '/e6b7815a-c818-465d-8511-5a53c8276b86/aea4be6a-9e7f-4511-b394-049e68f59b02'
+
+blobStore.exists(blobPath).then((result) => {
+  console.log(result)
+  // Logs 'true' or 'false'.
+}).catch((err) => {
+  console.error(err)
+})
+```
+
 ### `stat(string)`
 __Returns__: `JSON Object`
 
-Rather than parse the file system [`stat`](https://nodejs.org/api/fs.html#fs_class_fs_stats) object, `scalable-blob-store` returns the raw `stat` object.
+Rather than parse the file system [`stats`](https://nodejs.org/api/fs.html#fs_class_fs_stats) object, `scalable-blob-store` returns the raw `stats` object.
 More stat class details can be found on [Wikipedia](https://en.wikipedia.org/wiki/Stat_(system_call))
 
 Example:
@@ -282,9 +329,11 @@ blobStore.stat(blobPath).then((stat) => {
 
 # History
 
-- v0.1.0: Initial release.
+- v0.4.0: Changed read and write to createReadStream and createWriteStream.
+- v0.3.1: Fix write stream event order.
+- v0.3.0: Removed file path function, change of plans.
 - v0.2.0: Added file path function.
-- v0.3.0: Removed file path function with a plan to add image support.
+- v0.1.0: Initial release.
 
 # Credits
 

@@ -40,25 +40,8 @@ BlobStore.prototype._parseOpts = function(opts) {
   return opts
 }
 
-BlobStore.prototype.write = function(readStream) {
+BlobStore.prototype.createWriteStream = function() {
   var self = this
-
-  if (typeof (readStream) === 'undefined') {
-    var customError = new Error('Buffer is undefined.');
-    return Promise.reject(customError);
-  }
-
-  if (readStream instanceof Buffer) {
-    readStream = readStream.toString('utf8')
-  }
-
-  if (typeof (readStream) === 'string') {
-    var blobString = readStream
-    readStream = new stream.Readable()
-    readStream._read = function noop() {}
-    readStream.push(blobString)
-    readStream.push(null)
-  }
 
   return Promise.resolve(this.currentBlobPath).then((blobPath) => {
     if (!blobPath) {
@@ -79,16 +62,16 @@ BlobStore.prototype.write = function(readStream) {
       var writeStream = self.fsBlobStore.createWriteStream({
         key: filePath
       })
-      readStream.pipe(writeStream)
-      writeStream.on('finish', () => {
-        resolve(filePath)
-      })
-      writeStream.on('error', reject)
+      var result = {
+        blobPath: filePath,
+        writeStream: writeStream
+      }
+      resolve(result)
     })
   })
 }
 
-BlobStore.prototype.read = function(blobPath) {
+BlobStore.prototype.createReadStream = function(blobPath) {
   var self = this
   return new Promise((resolve, reject) => {
     try {
@@ -99,6 +82,20 @@ BlobStore.prototype.read = function(blobPath) {
     } catch (err) {
       reject(err)
     }
+  })
+}
+
+BlobStore.prototype.exists = function(blobPath) {
+  var self = This
+  return new Promise((resolve, reject) => {
+    self.fsBlobStore.exists({
+      key: blobPath
+    }, (err) => {
+      if (err) {
+        reject(err)
+      }
+      resolve(true)
+    })
   })
 }
 
