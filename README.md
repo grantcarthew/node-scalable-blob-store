@@ -101,7 +101,7 @@ Other points of interest:
 - If the number of directories in the highest directory, being the blob store root, has reached the `dirWidth` value, the `dirWidth` value is ignored.
 
 # Performance
-This is a unscientific measurement, however just to get some idea of the write performance I ran a test with the following configuration:
+This is an unscientific measurement, however just to get some idea of the write performance I ran a test with the following configuration:
 - Virtual Machine running on an SSD disk
 - File Content: "The quick brown fox jumped over the lazy dog"
 - dirDepth: 3

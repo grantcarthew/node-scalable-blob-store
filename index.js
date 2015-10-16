@@ -40,6 +40,10 @@ BlobStore.prototype._parseOpts = function(opts) {
   return opts
 }
 
+BlobStore.prototype.fullFilePath = function(blobPath) {
+  return path.join(this.blobStoreRoot, blobPath)
+}
+
 BlobStore.prototype.write = function(readStream) {
   var self = this
 
@@ -62,13 +66,13 @@ BlobStore.prototype.write = function(readStream) {
 
   return Promise.resolve(this.currentBlobPath).then((blobPath) => {
     if (!blobPath) {
-      return self._buildblobPath()
+      return self._buildBlobPath()
     }
     return blobPath
   }).then((blobPath) => {
     return self._countFiles(blobPath).then((total) => {
       if (total >= self.dirWidth) {
-        return self._buildblobPath()
+        return self._buildBlobPath()
       }
       return blobPath
     })
@@ -128,30 +132,30 @@ BlobStore.prototype.stat = function(blobPath) {
   })
 }
 
-BlobStore.prototype._buildblobPath = function() {
+BlobStore.prototype._buildBlobPath = function() {
   var self = this
-  return this._latestLinearblobPath().then((linearblobPath) => {
-    return self._countFiles(linearblobPath).then((fileCount) => {
+  return this._latestlinearBlobPath().then((linearBlobPath) => {
+    return self._countFiles(linearBlobPath).then((fileCount) => {
       if (fileCount >= self.dirWidth) {
-        return path.dirname(linearblobPath)
+        return path.dirname(linearBlobPath)
       }
-      return linearblobPath
+      return linearBlobPath
     })
-  }).then((newblobPath) => {
-    var blobPathUuidCount = newblobPath.split('/').length - 1
+  }).then((newBlobPath) => {
+    var blobPathUuidCount = newBlobPath.split('/').length - 1
     if (blobPathUuidCount === self.dirDepth) {
-      return newblobPath
+      return newBlobPath
     }
 
     return new Promise((resolve, reject) => {
 
-      function trimblobPath(nextPath) {
+      function trimBlobPath(nextPath) {
         self._countDirs(nextPath).then((dirCount) => {
           if (dirCount < self.dirWidth || nextPath.length === 1) {
             resolve(nextPath)
           } else {
             nextPath = path.dirname(nextPath)
-            trimblobPath(nextPath)
+            trimBlobPath(nextPath)
           }
         }).catch((err) => {
           reject(err)
@@ -159,21 +163,21 @@ BlobStore.prototype._buildblobPath = function() {
       }
 
       // Initiate Recursion
-      trimblobPath(newblobPath)
+      trimBlobPath(newBlobPath)
     })
-  }).then((newblobPath) => {
-    var blobPathUuidCount = newblobPath.split('/').length - 1
+  }).then((newBlobPath) => {
+    var blobPathUuidCount = newBlobPath.split('/').length - 1
     if (blobPathUuidCount === self.dirDepth) {
-      return newblobPath
+      return newBlobPath
     }
     for (var i = self.dirDepth - blobPathUuidCount; i > 0; i--) {
-      newblobPath = newblobPath + '/' + uuid.v4()
+      newBlobPath = newBlobPath + '/' + uuid.v4()
     }
-    return newblobPath
+    return newBlobPath
   })
 }
 
-BlobStore.prototype._latestLinearblobPath = function() {
+BlobStore.prototype._latestlinearBlobPath = function() {
   var self = this
   var loopIndex = this.dirDepth
   var blobPath = '/'
