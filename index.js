@@ -86,7 +86,7 @@ BlobStore.prototype.createReadStream = function(blobPath) {
 }
 
 BlobStore.prototype.exists = function(blobPath) {
-  var self = This
+  var self = this
   return new Promise((resolve, reject) => {
     self.fsBlobStore.exists({
       key: blobPath

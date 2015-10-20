@@ -2,6 +2,7 @@
 `scalable-blob-store` is a simple local file system blob store that is designed to prevent conflicts when used with a distributed or replicated file system.
 
 __WARNING: API change from v0.3 to v0.4!__
+
 I have changed `read` and `write` to `createReadStream` and `createWriteStream`.
 This change moves some of the complexity to the consuming code but makes `scalable-blob-store` more of a lower level module.
 Now that you have access to the stream you can read and manipulate the stream on writing.
@@ -15,6 +16,12 @@ Creating blobs using `string` and `Buffer` objects has also been removed.
 - [Requirements](#requirements)
 - [Installation](#installation)
 - [API](#api)
+    - [create](#create)
+    - [createWriteStream](#createWriteStream)
+    - [createReadStream](#createReadStream)
+    - [remove](#remove)
+    - [stat](#stat)
+    - [exists](#exists)
 - [Contributing](#contributing)
 - [History](#history)
 - [Credits](#credits)
@@ -50,8 +57,8 @@ blobStore.createWriteStream().then((result) => {
   //
   // result object will be similar to this:
   // {
-  //   blobPath: "/e6b7815a-c818-465d-8511-5a53c8276b86/aea4be6a-9e7f-4511-b394-049e68f59b02",
-  //   writeStream: object
+  //   blobPath: "/e6b7815a-c818-465d-8511-5a53c8276b86/aea4be6a-9e7f-4511-b394-049e68f59b02/fea722d1-001a-4765-8408-eb8e0fe7dbc6/183a6b7b-2fd6-4f80-8c6a-2647beb7bb19",
+  //   writeStream: [object Object]
   // }
   return new Promise((resolve, reject) => {
     result.writeStream.on('finish', () => {
@@ -64,6 +71,7 @@ blobStore.createWriteStream().then((result) => {
   console.log(blobPath)
   // Logs the blobPath. Save this in your database.
 }).catch((err) => {
+  // Consider removing the empty blob from the file system. Code no included.
   console.error(err)
 })
 
@@ -75,11 +83,18 @@ blobStore.createReadStream('/uuid/path/from/your/database').then((readStream) =>
   console.error(err)
 })
 
+// Delete Example
+blobStore.remove('/uuid/path/from/your/database').then(() => {
+  console.log('Blob removed successfully.')
+}).catch((err) => {
+  console.error(err)
+})
+
 // File Metadata Example
-blobStore.stat('/uuid/path/from/your/database').then((stat) => {
-  // Returns a unix stat object
+blobStore.stat('/uuid/path/from/your/database').then((stats) => {
+  // Returns a unix stats object
   // https://en.wikipedia.org/wiki/Stat_(system_call)
-  console.dir(stat)
+  console.dir(stats)
 }).catch((err) => {
   console.error(err)
 })
@@ -88,13 +103,6 @@ blobStore.stat('/uuid/path/from/your/database').then((stat) => {
 blobStore.exists('/uuid/path/from/your/database').then((result) => {
   console.log(result)
   // Logs 'true' or 'false'
-}).catch((err) => {
-  console.error(err)
-})
-
-// Delete Example
-blobStore.remove('/uuid/path/from/your/database').then(() => {
-  console.log('Blob removed successfully.')
 }).catch((err) => {
   console.error(err)
 })
@@ -160,6 +168,7 @@ $ npm install scalable-blob-store --save
 # API
 All `API` calls apart from `create(options)` are asynchronous returning Promises resolving to the values below.
 
+<a name="create" />
 ### `create(options)`
 __Returns__: A new `BlobStore` object to be used as a factory.
 The `create(options)` function can be called multiple times to create more than one blob store.
@@ -177,13 +186,13 @@ Start by creating the `scalable-blob-store` factory object:
 var sbsFactory = require('scalable-blob-store')
 ```
 
-String Multiple Store Example:
+Creating multiple blob stores using strings:
 ```js
 var userFileStore = sbsFacorty.create('/appstore/userfiles')
 var pdfDocumentStore = sbsFactory.create('/appstore/documents')
 ```
 
-Object Example:
+Creating a blob store using a `JSON Object`:
 ```js
 var options = {
   blobStoreRoot: '/app/blobs',
@@ -194,13 +203,14 @@ var options = {
 var blobStore = sbsFactory.create(options)
 ```
 
+<a name="createWriteStream" />
 ### `createWriteStream()`
 __Returns__: `JSON Object` containing the child path to the file within the blob store root and a writable file stream.
 
 Returned Object:
 ```js
 {
-  blobPath: "/e6b7815a-c818-465d-8511-5a53c8276b86/aea4be6a-9e7f-4511-b394-049e68f59b02",
+  blobPath: "/e6b7815a-c818-465d-8511-5a53c8276b86/aea4be6a-9e7f-4511-b394-049e68f59b02/fea722d1-001a-4765-8408-eb8e0fe7dbc6/183a6b7b-2fd6-4f80-8c6a-2647beb7bb19",
   writeStream: stream.Writable
 }
 ```
@@ -217,8 +227,8 @@ blobStore.createWriteStream().then((result) => {
   console.dir(result)
   // result object will be similar to this:
   // {
-  //   blobPath: "/e6b7815a-c818-465d-8511-5a53c8276b86/aea4be6a-9e7f-4511-b394-049e68f59b02",
-  //   writeStream: object
+  //   blobPath: "/e6b7815a-c818-465d-8511-5a53c8276b86/aea4be6a-9e7f-4511-b394-049e68f59b02/fea722d1-001a-4765-8408-eb8e0fe7dbc6/183a6b7b-2fd6-4f80-8c6a-2647beb7bb19",
+  //   writeStream: [object Object]
   // }
   // Using a Promise to encapsulate the write asynchronous events.
   return new Promise((resolve, reject) => {
@@ -236,14 +246,14 @@ blobStore.createWriteStream().then((result) => {
 })
 ```
 
-
+<a name="createReadStream" />
 ### `createReadStream(string)`
 __Returns__: [`stream.Readable`](https://nodejs.org/api/stream.html#stream_class_stream_readable)
 
 Example:
 ```js
-// Only two UUIDs shown for brevity
-var blobPath = '/e6b7815a-c818-465d-8511-5a53c8276b86/aea4be6a-9e7f-4511-b394-049e68f59b02'
+// Get the blobPath value from your database.
+var blobPath = '/e6b7815a-c818-465d-8511-5a53c8276b86/aea4be6a-9e7f-4511-b394-049e68f59b02/fea722d1-001a-4765-8408-eb8e0fe7dbc6/183a6b7b-2fd6-4f80-8c6a-2647beb7bb19'
 
 blobStore.createReadStream(blobPath).then((readStream) => {
   // Blob contents is piped to the console.
@@ -253,13 +263,14 @@ blobStore.createReadStream(blobPath).then((readStream) => {
 })
 ```
 
+<a name="remove" />
 ### `remove(string)`
 __Returns__: `undefined` if nothing went wrong or `error`
 
 Example:
 ```js
-// Only two UUIDs shown for brevity
-var blobPath = '/e6b7815a-c818-465d-8511-5a53c8276b86/aea4be6a-9e7f-4511-b394-049e68f59b02'
+// Get the blobPath value from your database.
+var blobPath = '/e6b7815a-c818-465d-8511-5a53c8276b86/aea4be6a-9e7f-4511-b394-049e68f59b02/fea722d1-001a-4765-8408-eb8e0fe7dbc6/183a6b7b-2fd6-4f80-8c6a-2647beb7bb19'
 
 blobStore.remove(blobPath).then(() => {
   console.log('Blob removed successfully.')
@@ -268,24 +279,7 @@ blobStore.remove(blobPath).then(() => {
 })
 ```
 
-### `exists(string)`
-__Returns__: `boolean`
-
-`true` if the file exists, otherwise `false`.
-
-Example:
-```js
-// Only two UUIDs shown for brevity
-var blobPath = '/e6b7815a-c818-465d-8511-5a53c8276b86/aea4be6a-9e7f-4511-b394-049e68f59b02'
-
-blobStore.exists(blobPath).then((result) => {
-  console.log(result)
-  // Logs 'true' or 'false'.
-}).catch((err) => {
-  console.error(err)
-})
-```
-
+<a name="stat" />
 ### `stat(string)`
 __Returns__: `JSON Object`
 
@@ -294,11 +288,11 @@ More stat class details can be found on [Wikipedia](https://en.wikipedia.org/wik
 
 Example:
 ```js
-// Only two UUIDs shown for brevity
-var blobPath = '/e6b7815a-c818-465d-8511-5a53c8276b86/aea4be6a-9e7f-4511-b394-049e68f59b02'
+// Get the blobPath value from your database.
+var blobPath = '/e6b7815a-c818-465d-8511-5a53c8276b86/aea4be6a-9e7f-4511-b394-049e68f59b02/fea722d1-001a-4765-8408-eb8e0fe7dbc6/183a6b7b-2fd6-4f80-8c6a-2647beb7bb19'
 
-blobStore.stat(blobPath).then((stat) => {
-  console.dir(stat)
+blobStore.stat(blobPath).then((stats) => {
+  console.dir(stats)
   // Console output will be similar to the following.
   // { dev: 2050,
   //   mode: 33188,
@@ -319,6 +313,25 @@ blobStore.stat(blobPath).then((stat) => {
 })
 ```
 
+<a name="exists" />
+### `exists(string)`
+__Returns__: `boolean`
+
+`true` if the file exists, otherwise `false`.
+
+Example:
+```js
+// Get the blobPath value from your database.
+var blobPath = '/e6b7815a-c818-465d-8511-5a53c8276b86/aea4be6a-9e7f-4511-b394-049e68f59b02/fea722d1-001a-4765-8408-eb8e0fe7dbc6/183a6b7b-2fd6-4f80-8c6a-2647beb7bb19'
+
+blobStore.exists(blobPath).then((result) => {
+  console.log(result)
+  // Logs 'true' or 'false'.
+}).catch((err) => {
+  console.error(err)
+})
+```
+
 # Contributing
 
 1. Fork it!
@@ -329,6 +342,7 @@ blobStore.stat(blobPath).then((stat) => {
 
 # History
 
+- v0.4.1: Fix reference error.
 - v0.4.0: Changed read and write to createReadStream and createWriteStream.
 - v0.3.1: Fix write stream event order.
 - v0.3.0: Removed file path function, change of plans.
