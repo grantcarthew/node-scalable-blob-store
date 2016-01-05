@@ -32,6 +32,10 @@
     -   [stat](#stat)
     -   [exists](#exists)
 
+-   [Known Issues](#known-issues)
+
+-   [Future Plans](#future-plans)
+
 -   [Contributing](#contributing)
 
 -   [History](#history)
@@ -382,6 +386,20 @@ blobStore.exists(blobPath).then((result) => {
 })
 ```
 
+## Known Issues
+
+There is an issue in `scalable-blob-store` that I have no work around for as of yet. If there are a large number of blobs added and then removed from the store, you may have directories with small numbers of files in them, or empty. These directories will never be removed and will not be populated.
+
+Possible solutions for this would be a maintenance task to remove empty directories and migrate low numbered directories into other directories. This is not something that `scalable-blob-store` can do and the developer needs to know about this.
+
+A better solution that could be managed inside `scalable-blob-store` would be a background task that would reset the created date on low or empty directories to make them the next directory to receive new blobs. I don't know if resetting the created date is possible.
+
+For my use case, removal of large numbers of files is unlikely to occur, so my motivation to build a solution for this issue is quite low.
+
+## Future Plans
+
+I recently learned about [cuid][cuid-url] and like the idea of shorter directory and file names. I am considering either giving the user an option of switching from UUID to CUID, or changing to CUID and removing UUID support. I haven't decided yet. I have bumped the version number to v1 so any breaking changes will be applied to v2 of `scalable-blob-store`.
+
 ## Contributing
 
 1.  Fork it!
@@ -392,6 +410,7 @@ blobStore.exists(blobPath).then((result) => {
 
 ## History
 
+-   v1.0.0: Minor delint and README updates. Bump to v1.0 for future changes.
 -   v0.4.1: Fix reference error.
 -   v0.4.0: Changed read and write to createReadStream and createWriteStream.
 -   v0.3.1: Fix write stream event order.
@@ -406,6 +425,7 @@ Thanks to [Mathias Buus][mathiasbuus-url] for his work on [fs-blob-store][fsblob
 ## License
 
 MIT
+
 [bluebird-url]: https://github.com/petkaantonov/bluebird
 [amazones3-url]: https://aws.amazon.com/s3/
 [googlecloud-url]: https://cloud.google.com/storage/
@@ -417,6 +437,7 @@ MIT
 [nodefs-url]: https://nodejs.org/api/fs.html#fs_class_fs_stats
 [wikistat-url]: https://en.wikipedia.org/wiki/Stat_(system_call)
 [mathiasbuus-url]: https://github.com/mafintosh
+[cuid-url]: https://github.com/ericelliott/cuid
 [fsblobstore-url]: https://github.com/mafintosh/fs-blob-store
 [bithound-overall-image]: https://www.bithound.io/github/grantcarthew/node-scalable-blob-store/badges/score.svg
 [bithound-overall-url]: https://www.bithound.io/github/grantcarthew/node-scalable-blob-store
