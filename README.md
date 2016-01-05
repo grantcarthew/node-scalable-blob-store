@@ -2,10 +2,12 @@
 
 `scalable-blob-store` is a simple local file system blob store that is designed to prevent conflicts when used with a distributed or replicated file system.
 
-  [![bitHound Overall Score][bithound-overall-image]][bithound-overall-url]
-  [![bitHound Dependencies][bithound-dep-image]][bithound-dep-url]
-  [![bitHound Code][bithound-code-image]][bithound-code-url]
-  [![npm version][versionbadge-npm-image]][versionbadge-npm-url]
+[![bitHound Overall Score][bithound-overall-image]][bithound-overall-url]
+[![bitHound Dependencies][bithound-dep-image]][bithound-dep-url]
+[![bitHound Code][bithound-code-image]][bithound-code-url]
+[![npm version][versionbadge-npm-image]][versionbadge-npm-url]
+
+[![NPM][nodei-npm-image]][nodei-npm-url]
 
 ## Topics
 
@@ -40,7 +42,7 @@
 
 ## Quick Start
 
-Everything in `scalable-blob-store` is asynchronous and is based on Promises using the [Bluebird](https://github.com/petkaantonov/bluebird) library. There are no callbacks in the API. I did this for two reasons; I like Promises, and to support the future ES2016 async / await features.
+Everything in `scalable-blob-store` is asynchronous and is based on Promises using the [Bluebird][bluebird-url] library. There are no callbacks in the API. I did this for two reasons; I like Promises, and to support the future ES2016 async / await features.
 
 Basic usage example:
 
@@ -121,11 +123,11 @@ blobStore.exists('/uuid/path/from/your/database').then((result) => {
 
 ## Rationale
 
-After researching user file storage, or blob storage, for a web application I was working on I discovered the most common solution used by web developers is to create an account with a cloud service provider. After creating an account with such providers as [Amazon S3](https://aws.amazon.com/s3/), [Google Cloud Storage](https://cloud.google.com/storage/), or [Azure Storage](https://azure.microsoft.com/en-us/services/storage/), they just stash all their users files there.
+After researching user file storage, or blob storage, for a web application I was working on I discovered the most common solution used by web developers is to create an account with a cloud service provider. After creating an account with such providers as [Amazon S3][amazones3-url], [Google Cloud Storage][googlecloud-url], or [Azure Storage][azurestorage-url], they just stash all their users files there.
 
 I researched the price of cloud storage and decided I wanted a free local version that would scale if needed.
 
-I looked at a number of existing solutions such as [filestorage](https://github.com/petersirka/node-filestorage) but was unhappy with the scalability of these solutions. Most are only designed for a single server and would cause write conflicts if a distributed file system or cluster file system like [GlusterFS](http://www.gluster.org/) was used as the backend file system.
+I looked at a number of existing solutions such as [filestorage][filestorage-url] but was unhappy with the scalability of these solutions. Most are only designed for a single server and would cause write conflicts if a distributed file system or cluster file system like [GlusterFS][glusterfs-url] was used as the backend file system.
 
 On a long car trip I was thinking about a solution for my blob storage and came up with `scalable-blob-store`.
 
@@ -135,11 +137,11 @@ On a long car trip I was thinking about a solution for my blob storage and came 
 
 Because there are no databases used to manage the files in the root path, it is up to you to maintain the returned `blobStore` path and metadata about the stored files in your own database.
 
-The reason `scalable-blob-store` is scalable is due to the naming of the directories and files. Every directory and file saved to disk is named by a [generated](https://github.com/broofa/node-uuid) [v4 UUID](https://en.wikipedia.org/wiki/Universally_unique_identifier). If a replicated or cluster file system is in use the only conflict that can occur is when one server is reading a file while another is removing the same file. `scalable-blob-store` does not try to manage this conflict, however it will raise the exception.
+The reason `scalable-blob-store` is scalable is due to the naming of the directories and files. Every directory and file saved to disk is named by a [generated][nodeuuid-url] [v4 UUID][wikiuuid-url]. If a replicated or cluster file system is in use the only conflict that can occur is when one server is reading a file while another is removing the same file. `scalable-blob-store` does not try to manage this conflict, however it will raise the exception.
 
 Here is an example of the directory structure created by `scalable-blob-store`:
 
-```js
+```sh
 \blobs\846a291f-9864-40bb-aefe-f29bdc73a761 // ← Directory    File ↓   
 \blobs\846a291f-9864-40bb-aefe-f29bdc73a761\..\8b86b6fe-6166-424c-aed9-8faf1e62689e
 ```
@@ -327,8 +329,8 @@ blobStore.remove(blobPath).then(() => {
 
 __Returns__: `JSON Object`
 
-Rather than parse the file system [`stats`](https://nodejs.org/api/fs.html#fs_class_fs_stats) object, `scalable-blob-store` returns the raw `stats` object.
-More stat class details can be found on [Wikipedia](https://en.wikipedia.org/wiki/Stat_(system_call))
+Rather than parse the file system [`stats`][nodefs-url] object, `scalable-blob-store` returns the raw `stats` object.
+More stat class details can be found on [Wikipedia][wikistat-url]
 
 Example:
 
@@ -399,12 +401,23 @@ blobStore.exists(blobPath).then((result) => {
 
 ## Credits
 
-Thanks to [Mathias Buus](https://github.com/mafintosh) for his work on [fs-blob-store](https://github.com/mafintosh/fs-blob-store).
+Thanks to [Mathias Buus][mathiasbuus-url] for his work on [fs-blob-store][fsblobstore-url].
 
 ## License
 
 MIT
-
+[bluebird-url]: https://github.com/petkaantonov/bluebird
+[amazones3-url]: https://aws.amazon.com/s3/
+[googlecloud-url]: https://cloud.google.com/storage/
+[azurestorage-url]: https://azure.microsoft.com/en-us/services/storage/
+[filestorage-url]: https://github.com/petersirka/node-filestorage
+[glusterfs-url]: http://www.gluster.org/
+[nodeuuid-url]: https://github.com/broofa/node-uuid
+[wikiuuid-url]: https://en.wikipedia.org/wiki/Universally_unique_identifier
+[nodefs-url]: https://nodejs.org/api/fs.html#fs_class_fs_stats
+[wikistat-url]: https://en.wikipedia.org/wiki/Stat_(system_call)
+[mathiasbuus-url]: https://github.com/mafintosh
+[fsblobstore-url]: https://github.com/mafintosh/fs-blob-store
 [bithound-overall-image]: https://www.bithound.io/github/grantcarthew/node-scalable-blob-store/badges/score.svg
 [bithound-overall-url]: https://www.bithound.io/github/grantcarthew/node-scalable-blob-store
 [bithound-dep-image]: https://www.bithound.io/github/grantcarthew/node-scalable-blob-store/badges/dependencies.svg
@@ -413,3 +426,5 @@ MIT
 [bithound-code-url]: https://www.bithound.io/github/grantcarthew/node-scalable-blob-store
 [versionbadge-npm-image]: https://badge.fury.io/js/scalable-blob-store.svg
 [versionbadge-npm-url]: https://badge.fury.io/js/scalable-blob-store
+[nodei-npm-image]: https://nodei.co/npm/scalable-blob-store.png?downloads=true&downloadRank=true&stars=true
+[nodei-npm-url]: https://nodei.co/npm/scalable-blob-store/
