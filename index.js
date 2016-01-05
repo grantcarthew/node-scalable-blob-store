@@ -243,9 +243,8 @@ BlobStore.prototype._dir = function(parentPath) {
       if (err) {
         if (err.code === 'ENOENT') {
           return resolve([])
-        } else {
-          return reject(err)
         }
+        return reject(err)
       }
       return resolve(fsItems)
     })
@@ -282,9 +281,8 @@ BlobStore.prototype._fsItemInfo = function(parentPath, fsItems) {
         if (err) {
           if (err.code === 'ENOENT') {
             return
-          } else {
-            return reject(err)
           }
+          return reject(err)
         }
         stats.push({
           name: item,
