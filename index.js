@@ -3,13 +3,12 @@ var fsBlobStoreFactory = require('fs-blob-store')
 var Promise = require('bluebird')
 var validator = require('validator')
 var mkdirp = require('mkdirp')
-var stream = require('stream')
 var path = require('path')
 var fs = require('fs')
 
 exports.create = BlobStore
 
-function BlobStore(opts) {
+function BlobStore (opts) {
   if (!(this instanceof BlobStore)) {
     return new BlobStore(opts)
   }
@@ -22,7 +21,7 @@ function BlobStore(opts) {
   this.fsBlobStore = fsBlobStoreFactory(this.blobStoreRoot)
 }
 
-BlobStore.prototype._parseOpts = function(opts) {
+BlobStore.prototype._parseOpts = function (opts) {
   if (typeof opts === 'string') {
     opts = { blobStoreRoot: opts }
   }
@@ -40,7 +39,7 @@ BlobStore.prototype._parseOpts = function(opts) {
   return opts
 }
 
-BlobStore.prototype.createWriteStream = function() {
+BlobStore.prototype.createWriteStream = function () {
   var self = this
 
   return Promise.resolve(this.currentBlobPath).then((blobPath) => {
@@ -71,7 +70,7 @@ BlobStore.prototype.createWriteStream = function() {
   })
 }
 
-BlobStore.prototype.createReadStream = function(blobPath) {
+BlobStore.prototype.createReadStream = function (blobPath) {
   var self = this
   return new Promise((resolve, reject) => {
     try {
@@ -85,7 +84,7 @@ BlobStore.prototype.createReadStream = function(blobPath) {
   })
 }
 
-BlobStore.prototype.exists = function(blobPath) {
+BlobStore.prototype.exists = function (blobPath) {
   var self = this
   return new Promise((resolve, reject) => {
     self.fsBlobStore.exists({
@@ -99,7 +98,7 @@ BlobStore.prototype.exists = function(blobPath) {
   })
 }
 
-BlobStore.prototype.remove = function(blobPath) {
+BlobStore.prototype.remove = function (blobPath) {
   var self = this
   return new Promise((resolve, reject) => {
     self.fsBlobStore.remove({
@@ -113,7 +112,7 @@ BlobStore.prototype.remove = function(blobPath) {
   })
 }
 
-BlobStore.prototype.stat = function(blobPath) {
+BlobStore.prototype.stat = function (blobPath) {
   var fullBlobPath = path.join(this.blobStoreRoot, blobPath)
   return new Promise((resolve, reject) => {
     fs.stat(fullBlobPath, (err, stat) => {
@@ -125,7 +124,7 @@ BlobStore.prototype.stat = function(blobPath) {
   })
 }
 
-BlobStore.prototype._buildBlobPath = function() {
+BlobStore.prototype._buildBlobPath = function () {
   var self = this
   return this._latestlinearBlobPath().then((linearBlobPath) => {
     return self._countFiles(linearBlobPath).then((fileCount) => {
@@ -141,8 +140,7 @@ BlobStore.prototype._buildBlobPath = function() {
     }
 
     return new Promise((resolve, reject) => {
-
-      function trimBlobPath(nextPath) {
+      function trimBlobPath (nextPath) {
         self._countDirs(nextPath).then((dirCount) => {
           if (dirCount < self.dirWidth || nextPath.length === 1) {
             resolve(nextPath)
@@ -170,14 +168,13 @@ BlobStore.prototype._buildBlobPath = function() {
   })
 }
 
-BlobStore.prototype._latestlinearBlobPath = function() {
+BlobStore.prototype._latestlinearBlobPath = function () {
   var self = this
   var loopIndex = this.dirDepth
   var blobPath = '/'
 
   return new Promise((resolve, reject) => {
-
-    function buildPath(nextPath) {
+    function buildPath (nextPath) {
       self._latestDir(nextPath).then((dir) => {
         if (!dir) {
           return uuid.v4()
@@ -203,7 +200,7 @@ BlobStore.prototype._latestlinearBlobPath = function() {
   })
 }
 
-BlobStore.prototype._latestDir = function(parentPath) {
+BlobStore.prototype._latestDir = function (parentPath) {
   var self = this
   return this._dir(parentPath).then((fsItems) => {
     return self._filterUuidDirs(parentPath, fsItems)
@@ -218,7 +215,7 @@ BlobStore.prototype._latestDir = function(parentPath) {
   })
 }
 
-BlobStore.prototype._countDirs = function(parentPath) {
+BlobStore.prototype._countDirs = function (parentPath) {
   var self = this
   return this._dir(parentPath).then((fsItems) => {
     return self._filterUuidDirs(parentPath, fsItems)
@@ -227,7 +224,7 @@ BlobStore.prototype._countDirs = function(parentPath) {
   })
 }
 
-BlobStore.prototype._countFiles = function(parentPath) {
+BlobStore.prototype._countFiles = function (parentPath) {
   var self = this
   return this._dir(parentPath).then((fsItems) => {
     return self._filterUuidFiles(parentPath, fsItems)
@@ -236,10 +233,10 @@ BlobStore.prototype._countFiles = function(parentPath) {
   })
 }
 
-BlobStore.prototype._dir = function(parentPath) {
+BlobStore.prototype._dir = function (parentPath) {
   var fullParentPath = path.join(this.blobStoreRoot, parentPath)
   return new Promise((resolve, reject) => {
-    fs.readdir(fullParentPath, function(err, fsItems) {
+    fs.readdir(fullParentPath, function (err, fsItems) {
       if (err) {
         if (err.code === 'ENOENT') {
           return resolve([])
@@ -251,15 +248,16 @@ BlobStore.prototype._dir = function(parentPath) {
   })
 }
 
-BlobStore.prototype._filterUuidDirs = function(parentPath, fsItems) {
+BlobStore.prototype._filterUuidDirs = function (parentPath, fsItems) {
   return this._filterFsUuidItems(parentPath, fsItems, true)
 }
 
-BlobStore.prototype._filterUuidFiles = function(parentPath, fsItems) {
+BlobStore.prototype._filterUuidFiles = function (parentPath, fsItems) {
   return this._filterFsUuidItems(parentPath, fsItems, false)
 }
 
-BlobStore.prototype._filterFsUuidItems = function(parentPath, fsItems, onDirs) {
+BlobStore.prototype._filterFsUuidItems = function (parentPath, fsItems,
+  onDirs) {
   if (!fsItems || fsItems.length === 0) {
     return []
   }
@@ -271,12 +269,12 @@ BlobStore.prototype._filterFsUuidItems = function(parentPath, fsItems, onDirs) {
   })
 }
 
-BlobStore.prototype._fsItemInfo = function(parentPath, fsItems) {
+BlobStore.prototype._fsItemInfo = function (parentPath, fsItems) {
   return new Promise((resolve, reject) => {
     var stats = []
     var fullParentPath = path.join(this.blobStoreRoot, parentPath)
     fsItems.forEach((item, index) => {
-      fullPath = path.join(fullParentPath, item)
+      var fullPath = path.join(fullParentPath, item)
       fs.stat(fullPath, (err, stat) => {
         if (err) {
           if (err.code === 'ENOENT') {

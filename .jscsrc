@@ -1,8 +1,0 @@
-{
-    "preset": "node-style-guide",
-    "esnext": true,
-    "requireTrailingComma": false,
-    "requireCapitalizedComments": false,
-    "requireCapitalizedConstructors": false,
-    "validateLineBreaks": "CRLF"
-}
