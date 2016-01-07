@@ -3,9 +3,9 @@ var crispyStream = require('crispy-stream')
 var opts = {
   blobStoreRoot: os.tmpdir() + '/blobs',
   dirDepth: 3,
-  dirWidth: 100
+  dirWidth: 10
 }
-var repeat = 10000
+var repeat = 1000
 var sbs = require('./index').create(opts)
 
 function streamToString (stream) {
