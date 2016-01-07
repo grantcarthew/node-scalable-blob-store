@@ -412,6 +412,7 @@ __Update:__ After reading [this discussion][cuid-discuss-url] I have decided to 
 
 ## History
 
+-   v1.0.1: Last release of v1. Work on v2.0.0 to support cuid.
 -   v1.0.0: Minor delint and README updates. Bump to v1.0 for future changes.
 -   v0.4.1: Fix reference error.
 -   v0.4.0: Changed read and write to createReadStream and createWriteStream.
