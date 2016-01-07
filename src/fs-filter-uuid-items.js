@@ -1,4 +1,4 @@
-var validator = require('validator')
+var idValidator = require('./id-validator')
 var fsItemInfo = require('./fs-item-info')
 
 module.exports = function (blobStoreRoot, parentPath, fsItems, onDirs) {
@@ -8,7 +8,7 @@ module.exports = function (blobStoreRoot, parentPath, fsItems, onDirs) {
   return fsItemInfo(blobStoreRoot, parentPath, fsItems).then((fsItems) => {
     return fsItems.filter((item) => {
       return item.stat.isDirectory() === onDirs &&
-             validator.isUUID(item.name, 4)
+             idValidator.isUuidV4(item.name, 4)
     })
   })
 }

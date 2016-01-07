@@ -3,14 +3,13 @@ var path = require('path')
 var mkdirp = require('mkdirp')
 var uuid = require('node-uuid')
 var fsBlobStoreFactory = require('fs-blob-store')
-var validator = require('validator')
+var idValidator = require('./id-validator')
 var Promise = require('bluebird')
 
 // Internal Modules
 var options = require('./options')
 var fsItemCount = require('./fs-item-count')
 var blobPathBuild = require('./blob-path-build')
-
 
 exports.create = BlobStore
 
