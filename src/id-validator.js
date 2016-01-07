@@ -4,6 +4,6 @@ exports.isUuidV4 = function (uuid) {
 }
 
 exports.isCuid = function (cuid) {
-  cuidRegEx = /^c/
+  cuidRegEx = /^c[^\s-]{8,}$/
   return cuidRegEx.test(cuid)
 }

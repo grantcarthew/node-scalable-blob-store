@@ -400,6 +400,8 @@ For my use case, removal of large numbers of files is unlikely to occur, so my m
 
 I recently learned about [cuid][cuid-url] and like the idea of shorter directory and file names. I am considering either giving the user an option of switching from UUID to CUID, or changing to CUID and removing UUID support. I haven't decided yet. I have bumped the version number to v1 so any breaking changes will be applied to v2 of `scalable-blob-store`.
 
+__Update:__ After reading [this discussion][cuid-discuss-url] I have decided to add `cuid` support in v2.0.0. It will be a required option with no default in the create function. Something like `'idType: cuid or uuid'`.
+
 ## Contributing
 
 1.  Fork it!
@@ -449,3 +451,4 @@ MIT
 [versionbadge-npm-url]: https://badge.fury.io/js/scalable-blob-store
 [nodei-npm-image]: https://nodei.co/npm/scalable-blob-store.png?downloads=true&downloadRank=true&stars=true
 [nodei-npm-url]: https://nodei.co/npm/scalable-blob-store/
+[cuid-discuss-url]: https://github.com/ericelliott/cuid/issues/22
