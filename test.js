@@ -4,7 +4,7 @@ var opts = {
   blobStoreRoot: os.tmpdir() + '/blobs',
   idType: 'cuid',
   dirDepth: 3,
-  dirWidth: 10
+  dirWidth: 100
 }
 var repeat = 1000
 var sbs = require('./index').create(opts)

@@ -10,6 +10,12 @@
 
 [![NPM][nodei-npm-image]][nodei-npm-url]
 
+## Breaking Changes
+
+Version 2 of `scalable-blob-store` has introduced a new directory and file naming options based on [cuid][cuid-url]. There is now a required option to specify the type of id system to use. Using a `string` as options is no longer supported. Apart from that, the API has not changed.
+
+To migrate to v2 simply add the `idType: 'uuid'` to the options past into the create method. Alternatively switch to `cuid` with the option `idType: 'cuid'`.
+
 ## Topics
 
 -   [Quick Start](#quick-start)
@@ -35,8 +41,6 @@
 
 -   [Known Issues](#known-issues)
 
--   [Future Plans](#future-plans)
-
 -   [Contributing](#contributing)
 
 -   [History](#history)
@@ -56,6 +60,7 @@ var sbsFactory = require('scalable-blob-store')
 
 var options = {
   blobStoreRoot: '/your/local/root/path',
+  idType: 'cuid',
   dirDepth: 4,
   dirWidth: 1000
 }
@@ -75,7 +80,7 @@ blobStore.createWriteStream().then((result) => {
   //
   // result object will be similar to this:
   // {
-  //   blobPath: "/e6b7815a-c818-465d-8511-5a53c8276b86/aea4be6a-9e7f-4511-b394-049e68f59b02/fea722d1-001a-4765-8408-eb8e0fe7dbc6/183a6b7b-2fd6-4f80-8c6a-2647beb7bb19",
+  //   blobPath: "/cij50xids00ulzph3n49znlex/cij50xidu00upzph327c9zwwh/cij50xidx00utzph3ikjxzkt7/cij50xidq00ujzph3o3nsthq7",
   //   writeStream: [object Object]
   // }
   return new Promise((resolve, reject) => {
@@ -94,7 +99,7 @@ blobStore.createWriteStream().then((result) => {
 })
 
 // Reading Example
-blobStore.createReadStream('/uuid/path/from/your/database').then((readStream) => {
+blobStore.createReadStream('/id/path/from/your/database').then((readStream) => {
   // Pipe the file to the console.
   readStream.pipe(process.stdout)
 }).catch((err) => {
@@ -102,14 +107,14 @@ blobStore.createReadStream('/uuid/path/from/your/database').then((readStream) =>
 })
 
 // Delete Example
-blobStore.remove('/uuid/path/from/your/database').then(() => {
+blobStore.remove('/id/path/from/your/database').then(() => {
   console.log('Blob removed successfully.')
 }).catch((err) => {
   console.error(err)
 })
 
 // File Metadata Example
-blobStore.stat('/uuid/path/from/your/database').then((stats) => {
+blobStore.stat('/id/path/from/your/database').then((stats) => {
   // Returns a unix stats object
   // https://en.wikipedia.org/wiki/Stat_(system_call)
   console.dir(stats)
@@ -118,7 +123,7 @@ blobStore.stat('/uuid/path/from/your/database').then((stats) => {
 })
 
 // File Exists Example
-blobStore.exists('/uuid/path/from/your/database').then((result) => {
+blobStore.exists('/id/path/from/your/database').then((result) => {
   console.log(result)
   // Logs 'true' or 'false'
 }).catch((err) => {
@@ -142,20 +147,30 @@ On a long car trip I was thinking about a solution for my blob storage and came 
 
 Because there are no databases used to manage the files in the root path, it is up to you to maintain the returned `blobStore` path and metadata about the stored files in your own database.
 
-The reason `scalable-blob-store` is scalable is due to the naming of the directories and files. Every directory and file saved to disk is named by a [generated][nodeuuid-url] [v4 UUID][wikiuuid-url]. If a replicated or cluster file system is in use the only conflict that can occur is when one server is reading a file while another is removing the same file. `scalable-blob-store` does not try to manage this conflict, however it will raise the exception.
+The reason `scalable-blob-store` is scalable is due to the naming of the directories and files. Every directory and file saved to disk is named by a generated id based on either [CUID][cuid-url] or [v4 UUID][nodeuuid-url]. (here is a [discussion about CUIDs and UUIDs][cuid-discuss-url]). If a replicated or cluster file system is in use the only conflict that can occur is when one server is reading a file while another is removing the same file. `scalable-blob-store` does not try to manage this conflict, however it will raise the exception.
 
-Here is an example of the directory structure created by `scalable-blob-store`:
+Below are examples of the directory structure created by `scalable-blob-store`.
+
+Example with CUIDs:
+
+```sh
+\blobs\cij50xia200pzzph3we9r62bi // ← Directory    File ↓   
+\blobs\cij50xia300q1zph3m4df4ypz\..\cij50xiae00qgzph3i0ms0l2w
+```
+
+Example with UUIDs:
 
 ```sh
 \blobs\846a291f-9864-40bb-aefe-f29bdc73a761 // ← Directory    File ↓   
 \blobs\846a291f-9864-40bb-aefe-f29bdc73a761\..\8b86b6fe-6166-424c-aed9-8faf1e62689e
 ```
 
-`scalable-blob-store` supports configuration options to give you control over the depth of the directory structure and the width of the directories. The default options give 3 directories deep containing 1000 items giving a total storage of 1 billion files within the directory structure.
+`scalable-blob-store` supports configuration options to give you control over the type of ids used, depth of the directory structure, and the width of the directories. The default options give 3 directories deep containing 1000 items giving a total storage of 1 billion files within the directory structure.
 
 Other points of interest:
 
 -   Files are only stored at the bottom of the directory tree.
+-   The directory use to write files is determined by the latest creation time.
 -   Once the number of files in a directory reaches the `dirWidth` value, the next directory is created.
 -   Once the number of directories in any directory reaches the `dirWidth` value, the next parent directory is created.
 -   If the number of directories in the highest directory, being the blob store root, has reached the `dirWidth` value, the `dirWidth` value is ignored.
@@ -177,7 +192,8 @@ With this configuration the following performance was observed:
 -   Files Created: 10,000
 -   Total File Size: 40MB
 -   Total Size on Disk: 9.76GB (ext4 file system)
--   Total Time: 148273 milliseconds (148 seconds)
+-   Total Time CUID: 115123 milliseconds (115 seconds)
+-   Total Time UUID: 115743 milliseconds (116 seconds)
 
 Not surprisingly, this configuration created one top tier directory, one second tier directory, and ten third tier directories.
 
@@ -206,14 +222,15 @@ All `API` calls apart from `create(options)` are asynchronous returning Promises
 
 ### `create(options)`
 
-__Returns__: A new `BlobStore` object to be used as a factory.
+__Returns__: A new `BlobStore` object to be to store data.
 The `create(options)` function can be called multiple times to create more than one blob store.
 
-Options are past to the constructor function as a `string` or `JSON object`. Only use a `string` if you are happy with the defaults below.
+Options are past to the constructor function as a `JSON object`.
 
 |Key            |Description                                              |Defaults                   |
 |---------------|---------------------------------------------------------|---------------------------|
-|`blobStoreRoot`|Root directory to store blobs                            |Required option no defaults|
+|`blobStoreRoot`|Root directory to store blobs                            |Required                   |
+|`idType`       |Either 'cuid' or 'uuid' as directory and file names      |Required                   |
 |`dirDepth`     |How deep you want the directories under the root         |3                          |
 |`dirWidth`     |The maximum number of files or directories in a directory|1000                       |
 
@@ -223,23 +240,38 @@ Start by creating the `scalable-blob-store` factory object:
 var sbsFactory = require('scalable-blob-store')
 ```
 
-Creating multiple blob stores using strings:
-
-```js
-var userFileStore = sbsFacorty.create('/appstore/userfiles')
-var pdfDocumentStore = sbsFactory.create('/appstore/documents')
-```
-
 Creating a blob store using a `JSON Object`:
 
 ```js
 var options = {
   blobStoreRoot: '/app/blobs',
+  idType: 'cuid',
   dirDepth: 4,
   dirWidth: 2000
 }
 
 var blobStore = sbsFactory.create(options)
+```
+
+Creating multiple blob stores:
+
+```js
+var userOptions = {
+  blobStoreRoot: '/app/blobs/user',
+  idType: 'cuid',
+  dirDepth: 4,
+  dirWidth: 2000
+}
+
+var pdfOptions = {
+  blobStoreRoot: '/app/blobs/pdf',
+  idType: 'uuid',
+  dirDepth: 2,
+  dirWidth: 300
+}
+
+var userFileStore = sbsFacorty.create(userOptions)
+var pdfDocumentStore = sbsFactory.create(pdfOptions)
 ```
 
 <a name="createWriteStream" />
@@ -248,7 +280,16 @@ var blobStore = sbsFactory.create(options)
 
 __Returns__: `JSON Object` containing the child path to the file within the blob store root and a writable file stream.
 
-Returned Object:
+Returned Object using CUID as the idType:
+
+```js
+{
+  blobPath: "/cij50xi3y00iyzph3qs7oatcy/cij50xi3z00izzph3yo053mzs/cij50xi4000j0zph3mshil7p5/cij50xi4100j1zph3loy3hp6h",
+  writeStream: stream.Writable
+}
+```
+
+Returned Object using UUID as the idType:
 
 ```js
 {
@@ -270,7 +311,7 @@ blobStore.createWriteStream().then((result) => {
   console.dir(result)
   // result object will be similar to this:
   // {
-  //   blobPath: "/e6b7815a-c818-465d-8511-5a53c8276b86/aea4be6a-9e7f-4511-b394-049e68f59b02/fea722d1-001a-4765-8408-eb8e0fe7dbc6/183a6b7b-2fd6-4f80-8c6a-2647beb7bb19",
+  //   blobPath: "/cij50xi3y00iyzph3qs7oatcy/cij50xi3z00izzph3yo053mzs/cij50xi4000j0zph3mshil7p5/cij50xi4100j1zph3loy3hp6h",
   //   writeStream: [object Object]
   // }
   // Using a Promise to encapsulate the write asynchronous events.
@@ -293,13 +334,13 @@ blobStore.createWriteStream().then((result) => {
 
 ### `createReadStream(string)`
 
-__Returns__: [`stream.Readable`](https://nodejs.org/api/stream.html#stream_class_stream_readable)
+__Returns__: [`stream.Readable`][readstream-url]
 
 Example:
 
 ```js
 // Get the blobPath value from your database.
-var blobPath = '/e6b7815a-c818-465d-8511-5a53c8276b86/aea4be6a-9e7f-4511-b394-049e68f59b02/fea722d1-001a-4765-8408-eb8e0fe7dbc6/183a6b7b-2fd6-4f80-8c6a-2647beb7bb19'
+var blobPath = '/cij50xi3y00iyzph3qs7oatcy/cij50xi3z00izzph3yo053mzs/cij50xi4000j0zph3mshil7p5/cij50xi4100j1zph3loy3hp6h'
 
 blobStore.createReadStream(blobPath).then((readStream) => {
   // Blob contents is piped to the console.
@@ -319,7 +360,7 @@ Example:
 
 ```js
 // Get the blobPath value from your database.
-var blobPath = '/e6b7815a-c818-465d-8511-5a53c8276b86/aea4be6a-9e7f-4511-b394-049e68f59b02/fea722d1-001a-4765-8408-eb8e0fe7dbc6/183a6b7b-2fd6-4f80-8c6a-2647beb7bb19'
+var blobPath = '/cij50xi3y00iyzph3qs7oatcy/cij50xi3z00izzph3yo053mzs/cij50xi4000j0zph3mshil7p5/cij50xi4100j1zph3loy3hp6h'
 
 blobStore.remove(blobPath).then(() => {
   console.log('Blob removed successfully.')
@@ -341,7 +382,7 @@ Example:
 
 ```js
 // Get the blobPath value from your database.
-var blobPath = '/e6b7815a-c818-465d-8511-5a53c8276b86/aea4be6a-9e7f-4511-b394-049e68f59b02/fea722d1-001a-4765-8408-eb8e0fe7dbc6/183a6b7b-2fd6-4f80-8c6a-2647beb7bb19'
+var blobPath = '/cij50xi3y00iyzph3qs7oatcy/cij50xi3z00izzph3yo053mzs/cij50xi4000j0zph3mshil7p5/cij50xi4100j1zph3loy3hp6h'
 
 blobStore.stat(blobPath).then((stats) => {
   console.dir(stats)
@@ -377,7 +418,7 @@ Example:
 
 ```js
 // Get the blobPath value from your database.
-var blobPath = '/e6b7815a-c818-465d-8511-5a53c8276b86/aea4be6a-9e7f-4511-b394-049e68f59b02/fea722d1-001a-4765-8408-eb8e0fe7dbc6/183a6b7b-2fd6-4f80-8c6a-2647beb7bb19'
+var blobPath = '/cij50xi3y00iyzph3qs7oatcy/cij50xi3z00izzph3yo053mzs/cij50xi4000j0zph3mshil7p5/cij50xi4100j1zph3loy3hp6h'
 
 blobStore.exists(blobPath).then((result) => {
   console.log(result)
@@ -397,12 +438,6 @@ A better solution that could be managed inside `scalable-blob-store` would be a 
 
 For my use case, removal of large numbers of files is unlikely to occur, so my motivation to build a solution for this issue is quite low.
 
-## Future Plans
-
-I recently learned about [cuid][cuid-url] and like the idea of shorter directory and file names. I am considering either giving the user an option of switching from UUID to CUID, or changing to CUID and removing UUID support. I haven't decided yet. I have bumped the version number to v1 so any breaking changes will be applied to v2 of `scalable-blob-store`.
-
-__Update:__ After reading [this discussion][cuid-discuss-url] I have decided to add `cuid` support in v2.0.0. It will be a required option with no default in the create function. Something like `'idType: cuid or uuid'`.
-
 ## Contributing
 
 1.  Fork it!
@@ -413,6 +448,7 @@ __Update:__ After reading [this discussion][cuid-discuss-url] I have decided to 
 
 ## History
 
+-   v2.0.0: Added support for [CUID][cuid-url] or [UUID][nodeuuid-url] directory and file names.
 -   v1.0.1: Last release of v1. Work on v2.0.0 to support cuid.
 -   v1.0.0: Minor delint and README updates. Bump to v1.0 for future changes.
 -   v0.4.1: Fix reference error.
@@ -440,6 +476,7 @@ MIT
 [wikiuuid-url]: https://en.wikipedia.org/wiki/Universally_unique_identifier
 [nodefs-url]: https://nodejs.org/api/fs.html#fs_class_fs_stats
 [wikistat-url]: https://en.wikipedia.org/wiki/Stat_(system_call)
+[readstream-url]: https://nodejs.org/api/stream.html#stream_class_stream_readable
 [mathiasbuus-url]: https://github.com/mafintosh
 [cuid-url]: https://github.com/ericelliott/cuid
 [fsblobstore-url]: https://github.com/mafintosh/fs-blob-store
