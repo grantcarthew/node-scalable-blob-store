@@ -1,4 +1,3 @@
-var idValidator = require('./id-validator')
 var fsItemInfo = require('./fs-item-info')
 
 module.exports = function (opts, parentPath, fsItems, onDirs) {
@@ -8,7 +7,7 @@ module.exports = function (opts, parentPath, fsItems, onDirs) {
   return fsItemInfo(opts, parentPath, fsItems).then((fsItems) => {
     return fsItems.filter((item) => {
       return item.stat.isDirectory() === onDirs &&
-             idValidator(opts.idType, item.name)
+             opts.validateId(item.name)
     })
   })
 }

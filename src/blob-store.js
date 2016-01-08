@@ -18,6 +18,8 @@ function BlobStore (opts) {
     return new BlobStore(opts)
   }
   this.opts = options(opts)
+  this.opts.newId = idGenerator(this.opts.idType)
+  this.opts.validateId = idValidator(this.opts.idType)
   this.currentBlobPath = false
   this.fsBlobStore = fsBlobStoreFactory(this.opts.blobStoreRoot)
 }
@@ -40,7 +42,7 @@ BlobStore.prototype.createWriteStream = function () {
   }).then((blobPath) => {
     self.currentBlobPath = blobPath
     return new Promise((resolve, reject) => {
-      var filePath = path.join(blobPath, idGenerator(self.opts.idType))
+      var filePath = path.join(blobPath, self.opts.newId())
       var writeStream = self.fsBlobStore.createWriteStream({
         key: filePath
       })

@@ -40,7 +40,7 @@ module.exports = function (opts) {
       return newBlobPath
     }
     for (var i = opts.dirDepth - blobPathIdCount; i > 0; i--) {
-      newBlobPath = path.join(newBlobPath, idGenerator(opts.idType))
+      newBlobPath = path.join(newBlobPath, opts.newId())
     }
     return newBlobPath
   })

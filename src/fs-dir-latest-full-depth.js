@@ -1,6 +1,5 @@
 var path = require('path')
 var mkdirp = require('mkdirp')
-var idGenerator = require('./id-generator')
 var fsDirLatest = require('./fs-dir-latest')
 
 module.exports = function (opts) {
@@ -11,7 +10,7 @@ module.exports = function (opts) {
     function buildPath (nextPath) {
       fsDirLatest(opts, nextPath).then((dir) => {
         if (!dir) {
-          return idGenerator(opts.idType)
+          return opts.newId()
         }
         return dir
       }).then((dir) => {
