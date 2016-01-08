@@ -12,9 +12,9 @@
 
 ## Breaking Changes
 
-Version 2 of `scalable-blob-store` has introduced a new directory and file naming options based on [cuid][cuid-url]. There is now a required option to specify the type of id system to use. Using a `string` as options is no longer supported. Apart from that, the API has not changed.
+Version 2 of `scalable-blob-store` has introduced a new directory and file naming option based on [cuid][cuid-url]. There is now a required option to specify the type of id system to use being either CUID or UUID. Also, using a `string` for the options in the create method is no longer supported. Apart from that, the API has not changed.
 
-To migrate to v2 simply add the `idType: 'uuid'` to the options past into the create method. Alternatively switch to `cuid` with the option `idType: 'cuid'`.
+To migrate to v2 simply add the `idType: 'uuid'` to the options passed into the create method. Alternatively switch to `cuid` with the option `idType: 'cuid'`.
 
 ## Topics
 
@@ -151,14 +151,14 @@ The reason `scalable-blob-store` is scalable is due to the naming of the directo
 
 Below are examples of the directory structure created by `scalable-blob-store`.
 
-Example with CUIDs:
+Example with CUID directory and file names:
 
 ```sh
 \blobs\cij50xia200pzzph3we9r62bi // ← Directory    File ↓   
 \blobs\cij50xia300q1zph3m4df4ypz\..\cij50xiae00qgzph3i0ms0l2w
 ```
 
-Example with UUIDs:
+Example with UUID directory and file names:
 
 ```sh
 \blobs\846a291f-9864-40bb-aefe-f29bdc73a761 // ← Directory    File ↓   
@@ -225,7 +225,7 @@ All `API` calls apart from `create(options)` are asynchronous returning Promises
 __Returns__: A new `BlobStore` object to be to store data.
 The `create(options)` function can be called multiple times to create more than one blob store.
 
-Options are past to the constructor function as a `JSON object`.
+Options are passed to the constructor function as a `JSON object`.
 
 |Key            |Description                                              |Defaults                   |
 |---------------|---------------------------------------------------------|---------------------------|
@@ -240,7 +240,7 @@ Start by creating the `scalable-blob-store` factory object:
 var sbsFactory = require('scalable-blob-store')
 ```
 
-Creating a blob store using a `JSON Object`:
+Create a blob store using a `JSON Object`:
 
 ```js
 var options = {

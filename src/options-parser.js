@@ -13,7 +13,8 @@ module.exports = function (opts) {
     throw new Error('The idType option must be set.')
   }
 
-  if (opts.idType !== 'uuid' && opts.idType !== 'cuid') {
+  if (opts.idType.toUpperCase() !== 'uuid'.toUpperCase() &&
+      opts.idType.toUpperCase() !== 'cuid'.toUpperCase()) {
     throw new Error('The idType option is invalid.')
   }
 
