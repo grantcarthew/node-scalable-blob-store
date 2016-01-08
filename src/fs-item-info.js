@@ -1,10 +1,10 @@
 const fs = require('fs')
 const path = require('path')
 
-module.exports = function (state, parentPath, fsItems) {
+module.exports = function (blobStoreRoot, parentPath, fsItems) {
   return new Promise((resolve, reject) => {
     var stats = []
-    var fullParentPath = path.join(state.blobStoreRoot, parentPath)
+    var fullParentPath = path.join(blobStoreRoot, parentPath)
     fsItems.forEach((item, index) => {
       var fullPath = path.join(fullParentPath, item)
       fs.stat(fullPath, (err, stat) => {

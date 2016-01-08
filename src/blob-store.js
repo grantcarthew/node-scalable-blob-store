@@ -7,7 +7,7 @@ const idValidator = require('./id-validator')
 const Promise = require('bluebird')
 
 // Internal Modules
-const options = require('./options')
+const optionsParser = require('./options-parser')
 const fsItemCount = require('./fs-item-count')
 const blobPathBuild = require('./blob-path-build')
 
@@ -17,7 +17,7 @@ function BlobStore (opts) {
   if (!(this instanceof BlobStore)) {
     return new BlobStore(opts)
   }
-  this.state = options(opts)
+  this.state = optionsParser(opts)
   this.state.newId = idGenerator(this.state.idType)
   this.state.validateId = idValidator(this.state.idType)
   this.currentBlobPath = false
