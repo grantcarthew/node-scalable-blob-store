@@ -1,26 +1,26 @@
 var path = require('path')
-var uuid = require('node-uuid')
+var idGenerator = require('./id-generator')
 var fsItemCount = require('./fs-item-count')
 var fsDirLatestFullDepth = require('./fs-dir-latest-full-depth')
 
-module.exports = function (blobStoreRoot, dirDepth, dirWidth) {
-  return fsDirLatestFullDepth(blobStoreRoot, dirDepth).then((linearBlobPath) => {
-    return fsItemCount(blobStoreRoot, linearBlobPath, false).then((fileCount) => {
-      if (fileCount >= dirWidth) {
+module.exports = function (opts) {
+  return fsDirLatestFullDepth(opts).then((linearBlobPath) => {
+    return fsItemCount(opts, linearBlobPath, false).then((fileCount) => {
+      if (fileCount >= opts.dirWidth) {
         return path.dirname(linearBlobPath)
       }
       return linearBlobPath
     })
   }).then((newBlobPath) => {
-    var blobPathUuidCount = newBlobPath.split('/').length - 1
-    if (blobPathUuidCount === dirDepth) {
+    var blobPathIdCount = newBlobPath.split('/').length - 1
+    if (blobPathIdCount === opts.dirDepth) {
       return newBlobPath
     }
 
     return new Promise((resolve, reject) => {
       function trimBlobPath (nextPath) {
-        fsItemCount(blobStoreRoot, nextPath, true).then((dirCount) => {
-          if (dirCount < dirWidth || nextPath.length === 1) {
+        fsItemCount(opts, nextPath, true).then((dirCount) => {
+          if (dirCount < opts.dirWidth || nextPath.length === 1) {
             resolve(nextPath)
           } else {
             nextPath = path.dirname(nextPath)
@@ -35,12 +35,12 @@ module.exports = function (blobStoreRoot, dirDepth, dirWidth) {
       trimBlobPath(newBlobPath)
     })
   }).then((newBlobPath) => {
-    var blobPathUuidCount = newBlobPath.split('/').length - 1
-    if (blobPathUuidCount === dirDepth) {
+    var blobPathIdCount = newBlobPath.split('/').length - 1
+    if (blobPathIdCount === opts.dirDepth) {
       return newBlobPath
     }
-    for (var i = dirDepth - blobPathUuidCount; i > 0; i--) {
-      newBlobPath = newBlobPath + '/' + uuid.v4()
+    for (var i = opts.dirDepth - blobPathIdCount; i > 0; i--) {
+      newBlobPath = path.join(newBlobPath, idGenerator(opts.idType))
     }
     return newBlobPath
   })

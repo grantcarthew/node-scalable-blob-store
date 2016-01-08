@@ -2,6 +2,7 @@ var os = require('os')
 var crispyStream = require('crispy-stream')
 var opts = {
   blobStoreRoot: os.tmpdir() + '/blobs',
+  idType: 'uuid',
   dirDepth: 3,
   dirWidth: 10
 }
@@ -25,8 +26,11 @@ function writer (repeat) {
   console.time('Duration')
   var i = repeat
   var input = 'The quick brown fox jumped over the lazy dog'
+  var readTotal = 0
+
   function recurse () {
     if (i < 1) {
+      console.log('Read Total: ', readTotal)
       console.timeEnd('Duration')
       console.log('Test complete.')
       return
@@ -46,11 +50,13 @@ function writer (repeat) {
     }).then((rs) => {
       return streamToString(rs)
     }).then((data) => {
+      readTotal += data.length
       i--
       recurse()
       return
     }).catch((err) => {
       console.error(err)
+      console.error(err.stack)
     })
   }
   recurse()

@@ -1,8 +1,8 @@
 var fs = require('fs')
 var path = require('path')
 var mkdirp = require('mkdirp')
-var uuid = require('node-uuid')
 var fsBlobStoreFactory = require('fs-blob-store')
+const idGenerator = require('./id-generator')
 var idValidator = require('./id-validator')
 var Promise = require('bluebird')
 
@@ -17,13 +17,9 @@ function BlobStore (opts) {
   if (!(this instanceof BlobStore)) {
     return new BlobStore(opts)
   }
-  var parsedOpts = options(opts)
-  this.blobStoreRoot = parsedOpts.blobStoreRoot
-  this.dirDepth = parsedOpts.dirDepth
-  this.dirWidth = parsedOpts.dirWidth
-
+  this.opts = options(opts)
   this.currentBlobPath = false
-  this.fsBlobStore = fsBlobStoreFactory(this.blobStoreRoot)
+  this.fsBlobStore = fsBlobStoreFactory(this.opts.blobStoreRoot)
 }
 
 BlobStore.prototype.createWriteStream = function () {
@@ -31,20 +27,20 @@ BlobStore.prototype.createWriteStream = function () {
 
   return Promise.resolve(this.currentBlobPath).then((blobPath) => {
     if (!blobPath) {
-      return blobPathBuild(self.blobStoreRoot, self.dirDepth, self.dirWidth)
+      return blobPathBuild(self.opts)
     }
     return blobPath
   }).then((blobPath) => {
-    return fsItemCount(self.blobStoreRoot, blobPath, false).then((total) => {
-      if (total >= self.dirWidth) {
-        return blobPathBuild(self.blobStoreRoot, self.dirDepth, self.dirWidth)
+    return fsItemCount(self.opts, blobPath, false).then((total) => {
+      if (total >= self.opts.dirWidth) {
+        return blobPathBuild(self.opts)
       }
       return blobPath
     })
   }).then((blobPath) => {
     self.currentBlobPath = blobPath
     return new Promise((resolve, reject) => {
-      var filePath = path.join(blobPath, uuid.v4())
+      var filePath = path.join(blobPath, idGenerator(self.opts.idType))
       var writeStream = self.fsBlobStore.createWriteStream({
         key: filePath
       })
@@ -100,7 +96,7 @@ BlobStore.prototype.remove = function (blobPath) {
 }
 
 BlobStore.prototype.stat = function (blobPath) {
-  var fullBlobPath = path.join(this.blobStoreRoot, blobPath)
+  var fullBlobPath = path.join(this.opts.blobStoreRoot, blobPath)
   return new Promise((resolve, reject) => {
     fs.stat(fullBlobPath, (err, stat) => {
       if (err) {

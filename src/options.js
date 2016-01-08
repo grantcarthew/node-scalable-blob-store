@@ -1,12 +1,20 @@
 var mkdirp = require('mkdirp')
 
 module.exports = function (opts) {
-  if (typeof opts === 'string') {
-    opts = { blobStoreRoot: opts }
+  if (!opts) {
+    throw new Error('scalable-blob-store options required.')
   }
 
-  if (!opts || !opts.blobStoreRoot) {
-    throw new Error('The blobStoreRoot directory must be set.')
+  if (!opts.blobStoreRoot) {
+    throw new Error('The blobStoreRoot directory option must be set.')
+  }
+
+  if (!opts.idType) {
+    throw new Error('The idType option must be set.')
+  }
+
+  if (opts.idType !== 'uuid' && opts.idType !== 'cuid') {
+    throw new Error('The idType option is invalid.')
   }
 
   mkdirp.sync(opts.blobStoreRoot)

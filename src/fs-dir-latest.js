@@ -1,10 +1,9 @@
 var fsDirList = require('./fs-dir-list')
-var fsFilterUuidItems = require('./fs-filter-uuid-items')
+var fsFilterIdItems = require('./fs-filter-id-items')
 
-module.exports = function (blobStoreRoot, parentPath) {
-  var self = this
-  return fsDirList(blobStoreRoot, parentPath).then((fsItems) => {
-    return fsFilterUuidItems(blobStoreRoot, parentPath, fsItems, true)
+module.exports = function (opts, parentPath) {
+  return fsDirList(opts, parentPath).then((fsItems) => {
+    return fsFilterIdItems(opts, parentPath, fsItems, true)
   }).then((dirs) => {
     if (!dirs || dirs.length === 0) {
       return false

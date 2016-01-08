@@ -1,8 +1,8 @@
 var fs = require('fs')
 var path = require('path')
 
-module.exports = function (blobStoreRoot, parentPath) {
-  var fullParentPath = path.join(blobStoreRoot, parentPath)
+module.exports = function (opts, parentPath) {
+  var fullParentPath = path.join(opts.blobStoreRoot, parentPath)
   return new Promise((resolve, reject) => {
     fs.readdir(fullParentPath, function (err, fsItems) {
       if (err) {
