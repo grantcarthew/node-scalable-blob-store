@@ -1,15 +1,15 @@
-var fs = require('fs')
-var path = require('path')
-var mkdirp = require('mkdirp')
-var fsBlobStoreFactory = require('fs-blob-store')
+const fs = require('fs')
+const path = require('path')
+const mkdirp = require('mkdirp')
+const fsBlobStoreFactory = require('fs-blob-store')
 const idGenerator = require('./id-generator')
-var idValidator = require('./id-validator')
-var Promise = require('bluebird')
+const idValidator = require('./id-validator')
+const Promise = require('bluebird')
 
 // Internal Modules
-var options = require('./options')
-var fsItemCount = require('./fs-item-count')
-var blobPathBuild = require('./blob-path-build')
+const options = require('./options')
+const fsItemCount = require('./fs-item-count')
+const blobPathBuild = require('./blob-path-build')
 
 exports.create = BlobStore
 

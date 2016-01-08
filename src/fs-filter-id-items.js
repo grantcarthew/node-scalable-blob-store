@@ -1,4 +1,4 @@
-var fsItemInfo = require('./fs-item-info')
+const fsItemInfo = require('./fs-item-info')
 
 module.exports = function (state, parentPath, fsItems, onDirs) {
   if (!fsItems || fsItems.length === 0) {

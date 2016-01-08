@@ -1,5 +1,5 @@
-var fs = require('fs')
-var path = require('path')
+const fs = require('fs')
+const path = require('path')
 
 module.exports = function (state, parentPath, fsItems) {
   return new Promise((resolve, reject) => {

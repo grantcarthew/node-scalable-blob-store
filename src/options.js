@@ -1,4 +1,4 @@
-var mkdirp = require('mkdirp')
+const mkdirp = require('mkdirp')
 
 module.exports = function (opts) {
   if (!opts) {

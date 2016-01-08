@@ -1,5 +1,5 @@
-var fs = require('fs')
-var path = require('path')
+const fs = require('fs')
+const path = require('path')
 
 module.exports = function (state, parentPath) {
   var fullParentPath = path.join(state.blobStoreRoot, parentPath)

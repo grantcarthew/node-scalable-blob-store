@@ -1,6 +1,6 @@
-var path = require('path')
-var mkdirp = require('mkdirp')
-var fsDirLatest = require('./fs-dir-latest')
+const path = require('path')
+const mkdirp = require('mkdirp')
+const fsDirLatest = require('./fs-dir-latest')
 
 module.exports = function (state) {
   var loopIndex = state.dirDepth
