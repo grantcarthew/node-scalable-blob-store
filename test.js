@@ -2,7 +2,7 @@ var os = require('os')
 var crispyStream = require('crispy-stream')
 var opts = {
   blobStoreRoot: os.tmpdir() + '/blobs',
-  idType: 'uuid',
+  idType: 'cuid',
   dirDepth: 3,
   dirWidth: 10
 }

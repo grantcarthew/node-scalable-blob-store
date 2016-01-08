@@ -3,24 +3,24 @@ var idGenerator = require('./id-generator')
 var fsItemCount = require('./fs-item-count')
 var fsDirLatestFullDepth = require('./fs-dir-latest-full-depth')
 
-module.exports = function (opts) {
-  return fsDirLatestFullDepth(opts).then((linearBlobPath) => {
-    return fsItemCount(opts, linearBlobPath, false).then((fileCount) => {
-      if (fileCount >= opts.dirWidth) {
+module.exports = function (state) {
+  return fsDirLatestFullDepth(state).then((linearBlobPath) => {
+    return fsItemCount(state, linearBlobPath, false).then((fileCount) => {
+      if (fileCount >= state.dirWidth) {
         return path.dirname(linearBlobPath)
       }
       return linearBlobPath
     })
   }).then((newBlobPath) => {
     var blobPathIdCount = newBlobPath.split('/').length - 1
-    if (blobPathIdCount === opts.dirDepth) {
+    if (blobPathIdCount === state.dirDepth) {
       return newBlobPath
     }
 
     return new Promise((resolve, reject) => {
       function trimBlobPath (nextPath) {
-        fsItemCount(opts, nextPath, true).then((dirCount) => {
-          if (dirCount < opts.dirWidth || nextPath.length === 1) {
+        fsItemCount(state, nextPath, true).then((dirCount) => {
+          if (dirCount < state.dirWidth || nextPath.length === 1) {
             resolve(nextPath)
           } else {
             nextPath = path.dirname(nextPath)
@@ -36,11 +36,11 @@ module.exports = function (opts) {
     })
   }).then((newBlobPath) => {
     var blobPathIdCount = newBlobPath.split('/').length - 1
-    if (blobPathIdCount === opts.dirDepth) {
+    if (blobPathIdCount === state.dirDepth) {
       return newBlobPath
     }
-    for (var i = opts.dirDepth - blobPathIdCount; i > 0; i--) {
-      newBlobPath = path.join(newBlobPath, opts.newId())
+    for (var i = state.dirDepth - blobPathIdCount; i > 0; i--) {
+      newBlobPath = path.join(newBlobPath, state.newId())
     }
     return newBlobPath
   })
