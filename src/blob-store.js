@@ -1,6 +1,5 @@
 const fs = require('fs')
 const path = require('path')
-const mkdirp = require('mkdirp')
 const fsBlobStoreFactory = require('fs-blob-store')
 const idGenerator = require('./id-generator')
 const idValidator = require('./id-validator')
@@ -87,13 +86,13 @@ BlobStore.prototype.remove = function (blobPath) {
   var self = this
   return new Promise((resolve, reject) => {
     self.fsBlobStore.remove({
-        key: blobPath
-      }, (err) => {
-        if (err) {
-          reject(err)
-        }
-        resolve()
-      })
+      key: blobPath
+    }, (err) => {
+      if (err) {
+        reject(err)
+      }
+      resolve()
+    })
   })
 }
 

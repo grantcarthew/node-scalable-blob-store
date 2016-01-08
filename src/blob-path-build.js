@@ -1,5 +1,4 @@
 const path = require('path')
-const idGenerator = require('./id-generator')
 const fsItemCount = require('./fs-item-count')
 const fsDirLatestFullDepth = require('./fs-dir-latest-full-depth')
 

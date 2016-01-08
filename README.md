@@ -6,6 +6,7 @@
 [![bitHound Dependencies][bithound-dep-image]][bithound-dep-url]
 [![bitHound Code][bithound-code-image]][bithound-code-url]
 [![npm version][versionbadge-npm-image]][versionbadge-npm-url]
+[![js-standard-style][js-standard-image]][js-standard-url]
 
 [![NPM][nodei-npm-image]][nodei-npm-url]
 
@@ -450,6 +451,8 @@ MIT
 [bithound-code-url]: https://www.bithound.io/github/grantcarthew/node-scalable-blob-store
 [versionbadge-npm-image]: https://badge.fury.io/js/scalable-blob-store.svg
 [versionbadge-npm-url]: https://badge.fury.io/js/scalable-blob-store
+[js-standard-image]: https://img.shields.io/badge/code%20style-standard-brightgreen.svg
+[js-standard-url]: http://standardjs.com/
 [nodei-npm-image]: https://nodei.co/npm/scalable-blob-store.png?downloads=true&downloadRank=true&stars=true
 [nodei-npm-url]: https://nodei.co/npm/scalable-blob-store/
 [cuid-discuss-url]: https://github.com/ericelliott/cuid/issues/22
