@@ -1,10 +1,13 @@
 const path = require('path')
-const fsItemCount = require('./fs-item-count')
+const fsBlobItemList = require('./fs-blob-item-list')
 const fsDirLatestFullDepth = require('./fs-dir-latest-full-depth')
 
 module.exports = function (state) {
   return fsDirLatestFullDepth(state).then((linearBlobPath) => {
-    return fsItemCount(state, linearBlobPath, false).then((fileCount) => {
+    var fullPath = path.join(state.blobStoreRoot, linearBlobPath)
+    return fsBlobItemList(fullPath, state.validateId, false).then(blobFileItems => {
+      return blobFileItems.length
+    }).then((fileCount) => {
       if (fileCount >= state.dirWidth) {
         return path.dirname(linearBlobPath)
       }
@@ -18,8 +21,10 @@ module.exports = function (state) {
 
     return new Promise((resolve, reject) => {
       function trimBlobPath (nextPath) {
-        fsItemCount(state, nextPath, true).then((dirCount) => {
-          if (dirCount < state.dirWidth || nextPath.length === 1) {
+        return fsBlobItemList(nextPath, state.validateId, true).then(blobDirItems => {
+          return blobDirItems.length
+        }).then((blobDirCount) => {
+          if (blobDirCount < state.dirWidth || nextPath.length === 1) {
             resolve(nextPath)
           } else {
             nextPath = path.dirname(nextPath)

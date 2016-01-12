@@ -1,10 +1,8 @@
 const fs = require('fs')
-const path = require('path')
 
-module.exports = function (blobStoreRoot, parentPath) {
-  var fullParentPath = path.join(blobStoreRoot, parentPath)
+module.exports = function (fsPath) {
   return new Promise((resolve, reject) => {
-    fs.readdir(fullParentPath, function (err, fsItems) {
+    fs.readdir(fsPath, function (err, fsItems) {
       if (err) {
         if (err.code === 'ENOENT') {
           return resolve([])

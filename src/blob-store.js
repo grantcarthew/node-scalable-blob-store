@@ -7,7 +7,7 @@ const Promise = require('bluebird')
 
 // Internal Modules
 const optionsParser = require('./options-parser')
-const fsItemCount = require('./fs-item-count')
+const fsBlobItemList = require('./fs-blob-item-list')
 const blobPathBuild = require('./blob-path-build')
 
 exports.create = BlobStore
@@ -32,7 +32,10 @@ BlobStore.prototype.createWriteStream = function () {
     }
     return blobPath
   }).then((blobPath) => {
-    return fsItemCount(self.state, blobPath, false).then((total) => {
+    var fullPath = path.join(self.state.blobStoreRoot, blobPath)
+    return fsBlobItemList(fullPath, self.state.validateId, false).then(blobFileItems => {
+      return blobFileItems.length
+    }).then(total => {
       if (total >= self.state.dirWidth) {
         return blobPathBuild(self.state)
       }
