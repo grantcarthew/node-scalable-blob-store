@@ -11,9 +11,11 @@
 
 ## Breaking Changes
 
-Version 2 of `scalable-blob-store` has introduced a new directory and file naming option based on [cuid][cuid-url]. There is now a required option to specify the type of id system to use being either CUID or UUID. Also, using a `string` for the options in the create method is no longer supported. Apart from that, the API has not changed.
+With the v2.0 update of `scalable-blob-store` there is a new directory and file naming option based on [cuid][cuid-url]. This new naming system provides shorter directory names giving more room for deeper paths which means more capacity in your blob store.
 
-To migrate to v2 simply add the `idType: 'uuid'` to the options passed into the create method. Alternatively switch to `cuid` with the option `idType: 'cuid'`.
+Rather than remove UUID support, there is now a required option to specify the type of id system to use for your blobs. It is no longer possible to create a blobStore using a `string` option.
+
+To migrate to v2.0 simply add the `idType: 'uuid'` to the options passed into the create method. Alternatively switch to `cuid` with the option `idType: 'cuid'`. See the [Quick Start](#quick-start) below for an example.
 
 ## Topics
 
@@ -50,15 +52,16 @@ To migrate to v2 simply add the `idType: 'uuid'` to the options passed into the 
 
 ## Quick Start
 
-Everything in `scalable-blob-store` is asynchronous and is based on Promises using the [Bluebird][bluebird-url] library. There are no callbacks in the API. I did this for two reasons; I like Promises, and to support the future ES2016 async / await features.
+Everything in `scalable-blob-store` is asynchronous and is based on Promises using the [Bluebird][bluebird-url] library. There are no callbacks in the API. I did this for two reasons; I like Promises, and to support the future ES2017 async / await features.
 
 Basic usage example:
 
 ```js
+var os = require('os')
 var sbsFactory = require('scalable-blob-store')
 
 var options = {
-  blobStoreRoot: '/your/local/root/path',
+  blobStoreRoot: os.homedir() + '/blobs', // Change this!
   idType: 'cuid',
   dirDepth: 4,
   dirWidth: 1000
@@ -71,7 +74,7 @@ var fs = require('fs')
 var readStream = fs.createReadStream('/path/to/file')
 
 // Writing Exapmle
-blobStore.createWriteStream().then((result) => {
+blobStore.createWriteStream().then(result => {
   console.dir(result)
   // Logs the result object which contains the blobPath and writeStream.
   // Use the writeStream to save your blob.
@@ -89,43 +92,43 @@ blobStore.createWriteStream().then((result) => {
     result.writeStream.on('error', reject)
     readStream.pipe(result.writeStream)
   })
-}).then((blobPath) => {
+}).then(blobPath => {
   console.log(blobPath)
   // Logs the blobPath. Save this in your database.
-}).catch((err) => {
+}).catch(err => {
   // Consider removing the empty blob from the file system. Code no included.
   console.error(err)
 })
 
 // Reading Example
-blobStore.createReadStream('/id/path/from/your/database').then((readStream) => {
+blobStore.createReadStream('/id/path/from/your/database').then(readStream => {
   // Pipe the file to the console.
   readStream.pipe(process.stdout)
-}).catch((err) => {
+}).catch(err => {
   console.error(err)
 })
 
 // Delete Example
 blobStore.remove('/id/path/from/your/database').then(() => {
   console.log('Blob removed successfully.')
-}).catch((err) => {
+}).catch(err => {
   console.error(err)
 })
 
 // File Metadata Example
-blobStore.stat('/id/path/from/your/database').then((stats) => {
+blobStore.stat('/id/path/from/your/database').then(stats => {
   // Returns a unix stats object
   // https://en.wikipedia.org/wiki/Stat_(system_call)
   console.dir(stats)
-}).catch((err) => {
+}).catch(err => {
   console.error(err)
 })
 
 // File Exists Example
-blobStore.exists('/id/path/from/your/database').then((result) => {
+blobStore.exists('/id/path/from/your/database').then(result => {
   console.log(result)
   // Logs 'true' or 'false'
-}).catch((err) => {
+}).catch(err => {
   console.error(err)
 })
 ```
@@ -166,7 +169,7 @@ Example with UUID directory and file names:
 
 `scalable-blob-store` supports configuration options to give you control over the type of ids used, depth of the directory structure, and the width of the directories. The default options give 3 directories deep containing 1000 items giving a total storage of 1 billion files within the directory structure.
 
-Other points of interest:
+Other operational points of interest:
 
 -   Files are only stored at the bottom of the directory tree.
 -   The directory used for writing files is determined by the latest creation time (file system birthtime attribute).
@@ -221,7 +224,7 @@ All `API` calls apart from `create(options)` are asynchronous returning Promises
 
 ### `create(options)`
 
-__Returns__: A new `BlobStore` object to be to store data.
+__Returns__: A new `BlobStore` object to be used to store data.
 The `create(options)` function can be called multiple times to create more than one blob store.
 
 Options are passed to the constructor function as a JavaScript `object`.
@@ -239,7 +242,7 @@ Start by creating the `scalable-blob-store` factory object:
 var sbsFactory = require('scalable-blob-store')
 ```
 
-Create a blob store using a JavaScript `object`:
+Create a blob store using a options `object`:
 
 ```js
 var options = {
@@ -306,7 +309,7 @@ Example:
 var fs = require('fs')
 var readStream = fs.createReadStream('/path/to/file')
 
-blobStore.createWriteStream().then((result) => {
+blobStore.createWriteStream().then(result => {
   console.dir(result)
   // result object will be similar to this:
   // {
@@ -321,10 +324,10 @@ blobStore.createWriteStream().then((result) => {
     result.writeStream.on('error', reject)
     readStream.pipe(result.writeStream)
   })
-}).then((blobPath) => {
+}).then(blobPath => {
   console.log(blobPath)
   // Logs the blobPath. Save this in your database.
-}).catch((err) => {
+}).catch(err => {
   console.error(err)
 })
 ```
@@ -341,10 +344,10 @@ Example:
 // Get the blobPath value from your database.
 var blobPath = '/cij50xi3y00iyzph3qs7oatcy/cij50xi3z00izzph3yo053mzs/cij50xi4000j0zph3mshil7p5/cij50xi4100j1zph3loy3hp6h'
 
-blobStore.createReadStream(blobPath).then((readStream) => {
+blobStore.createReadStream(blobPath).then(readStream => {
   // Blob contents is piped to the console.
   readStream.pipe(process.stdout)
-}).catch((err) => {
+}).catch(err => {
   console.error(err)
 })
 ```
@@ -363,7 +366,7 @@ var blobPath = '/cij50xi3y00iyzph3qs7oatcy/cij50xi3z00izzph3yo053mzs/cij50xi4000
 
 blobStore.remove(blobPath).then(() => {
   console.log('Blob removed successfully.')
-}).catch((err) => {
+}).catch(err => {
   console.error(err)
 })
 ```
@@ -375,7 +378,7 @@ blobStore.remove(blobPath).then(() => {
 __Returns__: `object`
 
 Rather than parse the file system [`stats`][nodefs-url] object, `scalable-blob-store` returns the raw `stats` object.
-More stat class details can be found on [Wikipedia][wikistat-url]
+More stat class details can be found on [Wikipedia][wikistat-url].
 
 Example:
 
@@ -383,7 +386,7 @@ Example:
 // Get the blobPath value from your database.
 var blobPath = '/cij50xi3y00iyzph3qs7oatcy/cij50xi3z00izzph3yo053mzs/cij50xi4000j0zph3mshil7p5/cij50xi4100j1zph3loy3hp6h'
 
-blobStore.stat(blobPath).then((stats) => {
+blobStore.stat(blobPath).then(stats => {
   console.dir(stats)
   // Console output will be similar to the following.
   // { dev: 2050,
@@ -400,7 +403,7 @@ blobStore.stat(blobPath).then((stats) => {
   //   mtime: Mon Oct 12 2015 08:51:29 GMT+1000 (AEST),
   //   ctime: Mon Oct 12 2015 08:51:29 GMT+1000 (AEST),
   //   birthtime: Mon Oct 12 2015 08:51:29 GMT+1000 (AEST) }
-}).catch((err) => {
+}).catch(err => {
   console.error(err)
 })
 ```
@@ -419,10 +422,10 @@ Example:
 // Get the blobPath value from your database.
 var blobPath = '/cij50xi3y00iyzph3qs7oatcy/cij50xi3z00izzph3yo053mzs/cij50xi4000j0zph3mshil7p5/cij50xi4100j1zph3loy3hp6h'
 
-blobStore.exists(blobPath).then((result) => {
+blobStore.exists(blobPath).then(result => {
   console.log(result)
   // Logs 'true' or 'false'.
-}).catch((err) => {
+}).catch(err => {
   console.error(err)
 })
 ```
@@ -448,6 +451,7 @@ For my use case, removal of large numbers of files is unlikely to occur, so my m
 
 ## History
 
+-   v2.0.1: Minor performance improvements and bug fixes.
 -   v2.0.0: Added support for [CUID][cuid-url] or [UUID][nodeuuid-url] directory and file names.
 -   v1.0.1: Last release of v1. Work on v2.0.0 to support cuid.
 -   v1.0.0: Minor delint and README updates. Bump to v1.0 for future changes.
