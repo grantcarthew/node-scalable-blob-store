@@ -3,15 +3,15 @@ const fsBlobItemList = require('./fs-blob-item-list')
 const fsBlobDirLatestFullDepth = require('./fs-blob-dir-latest-full-depth')
 
 module.exports = function (state) {
-  return fsBlobDirLatestFullDepth(state).then((linearBlobPath) => {
-    var fullPath = path.join(state.blobStoreRoot, linearBlobPath)
+  return fsBlobDirLatestFullDepth(state).then((fullBlobDirPath) => {
+    var fullPath = path.join(state.blobStoreRoot, fullBlobDirPath)
     return fsBlobItemList(fullPath, state.validateId, false).then(blobFileItems => {
       return blobFileItems.length
-    }).then((fileCount) => {
-      if (fileCount >= state.dirWidth) {
-        return path.dirname(linearBlobPath)
+    }).then((blobFileCount) => {
+      if (blobFileCount >= state.dirWidth) {
+        return path.dirname(fullBlobDirPath)
       }
-      return linearBlobPath
+      return fullBlobDirPath
     })
   }).then((newBlobPath) => {
     var blobPathIdCount = newBlobPath.split('/').length - 1
@@ -20,7 +20,7 @@ module.exports = function (state) {
     }
 
     return new Promise((resolve, reject) => {
-      function trimBlobPath (nextPath) {
+      function trimFullBlobPath (nextPath) {
         return fsBlobItemList(nextPath, state.validateId, true).then(blobDirItems => {
           return blobDirItems.length
         }).then((blobDirCount) => {
@@ -28,7 +28,7 @@ module.exports = function (state) {
             resolve(nextPath)
           } else {
             nextPath = path.dirname(nextPath)
-            trimBlobPath(nextPath)
+            trimFullBlobPath(nextPath)
           }
         }).catch((err) => {
           reject(err)
@@ -36,7 +36,7 @@ module.exports = function (state) {
       }
 
       // Initiate Recursion
-      trimBlobPath(newBlobPath)
+      trimFullBlobPath(newBlobPath)
     })
   }).then((newBlobPath) => {
     var blobPathIdCount = newBlobPath.split('/').length - 1

@@ -5,6 +5,10 @@ module.exports = function (opts) {
     throw new Error('scalable-blob-store options required.')
   }
 
+  if (typeof opts !== 'object') {
+    throw new Error('scalable-blob-store options object required.')
+  }
+
   if (!opts.blobStoreRoot) {
     throw new Error('The blobStoreRoot directory option must be set.')
   }

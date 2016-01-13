@@ -4,15 +4,15 @@ const fs = Promise.promisifyAll(require('fs'))
 
 module.exports = function (fsPath, validateId, onDirOrFile) {
   return fs.readdirAsync(fsPath).filter(fsItem => {
-    var itemPath = path.join(fsPath, fsItem)
-    return fs.statAsync(itemPath).then(stat => {
+    var fsItemPath = path.join(fsPath, fsItem)
+    return fs.statAsync(fsItemPath).then(stat => {
       return onDirOrFile ? stat.isDirectory() : stat.isFile()
     }).catch(err => {
       console.error(err)
       return false
     })
-  }).filter(fileName => {
-    return validateId(fileName)
+  }).filter(fsItemName => {
+    return validateId(fsItemName)
   }).catch(err => {
     if (err.code === 'ENOENT') {
       return []

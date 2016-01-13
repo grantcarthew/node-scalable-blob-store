@@ -32,11 +32,11 @@ BlobStore.prototype.createWriteStream = function () {
     }
     return blobPath
   }).then((blobPath) => {
-    var fullPath = path.join(self.state.blobStoreRoot, blobPath)
-    return fsBlobItemList(fullPath, self.state.validateId, false).then(blobFileItems => {
+    var fullBlobPath = path.join(self.state.blobStoreRoot, blobPath)
+    return fsBlobItemList(fullBlobPath, self.state.validateId, false).then(blobFileItems => {
       return blobFileItems.length
-    }).then(total => {
-      if (total >= self.state.dirWidth) {
+    }).then(blobFileCount => {
+      if (blobFileCount >= self.state.dirWidth) {
         return blobPathBuild(self.state)
       }
       return blobPath

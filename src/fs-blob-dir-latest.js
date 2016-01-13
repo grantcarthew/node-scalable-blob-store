@@ -15,14 +15,14 @@ module.exports = function (fsPath, validateId) {
     return fsUnknownItem.stat.isDirectory()
   }).filter(fsUnvalidatedDirList => {
     return validateId(fsUnvalidatedDirList.name)
-  }).then(fsDirList => {
-    if (!fsDirList || fsDirList.length === 0) {
+  }).then(fsBlobDirList => {
+    if (!fsBlobDirList || fsBlobDirList.length === 0) {
       return false
     }
-    fsDirList.sort((a, b) => {
+    fsBlobDirList.sort((a, b) => {
       return b.stat.birthtime.getTime() - a.stat.birthtime.getTime()
     })
-    return fsDirList[0].name
+    return fsBlobDirList[0].name
   }).catch(err => {
     if (err.code === 'ENOENT') {
       return false
