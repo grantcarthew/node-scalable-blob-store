@@ -1,6 +1,6 @@
 const path = require('path')
 const mkdirp = require('mkdirp')
-const fsDirLatest = require('./fs-dir-latest')
+const fsBlobDirLatest = require('./fs-blob-dir-latest')
 
 module.exports = function (state) {
   var loopIndex = state.dirDepth
@@ -8,7 +8,8 @@ module.exports = function (state) {
 
   return new Promise((resolve, reject) => {
     function buildPath (nextPath) {
-      fsDirLatest(state, nextPath).then((dir) => {
+      var fullNextPath = path.join(state.blobStoreRoot, nextPath)
+      return fsBlobDirLatest(fullNextPath, state.validateId).then((dir) => {
         if (!dir) {
           return state.newId()
         }

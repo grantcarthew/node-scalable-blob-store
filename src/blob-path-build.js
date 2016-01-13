@@ -1,9 +1,9 @@
 const path = require('path')
 const fsBlobItemList = require('./fs-blob-item-list')
-const fsDirLatestFullDepth = require('./fs-dir-latest-full-depth')
+const fsBlobDirLatestFullDepth = require('./fs-blob-dir-latest-full-depth')
 
 module.exports = function (state) {
-  return fsDirLatestFullDepth(state).then((linearBlobPath) => {
+  return fsBlobDirLatestFullDepth(state).then((linearBlobPath) => {
     var fullPath = path.join(state.blobStoreRoot, linearBlobPath)
     return fsBlobItemList(fullPath, state.validateId, false).then(blobFileItems => {
       return blobFileItems.length
