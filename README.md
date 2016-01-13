@@ -5,7 +5,6 @@
 [![bitHound Overall Score][bithound-overall-image]][bithound-overall-url]
 [![bitHound Dependencies][bithound-dep-image]][bithound-dep-url]
 [![bitHound Code][bithound-code-image]][bithound-code-url]
-[![npm version][versionbadge-npm-image]][versionbadge-npm-url]
 [![js-standard-style][js-standard-image]][js-standard-url]
 
 [![NPM][nodei-npm-image]][nodei-npm-url]
@@ -170,7 +169,7 @@ Example with UUID directory and file names:
 Other points of interest:
 
 -   Files are only stored at the bottom of the directory tree.
--   The directory use to write files is determined by the latest creation time.
+-   The directory used for writing files is determined by the latest creation time (file system birthtime attribute).
 -   Once the number of files in a directory reaches the `dirWidth` value, the next directory is created.
 -   Once the number of directories in any directory reaches the `dirWidth` value, the next parent directory is created.
 -   If the number of directories in the highest directory, being the blob store root, has reached the `dirWidth` value, the `dirWidth` value is ignored.
@@ -225,7 +224,7 @@ All `API` calls apart from `create(options)` are asynchronous returning Promises
 __Returns__: A new `BlobStore` object to be to store data.
 The `create(options)` function can be called multiple times to create more than one blob store.
 
-Options are passed to the constructor function as a `JSON object`.
+Options are passed to the constructor function as a JavaScript `object`.
 
 |Key            |Description                                              |Defaults                   |
 |---------------|---------------------------------------------------------|---------------------------|
@@ -240,7 +239,7 @@ Start by creating the `scalable-blob-store` factory object:
 var sbsFactory = require('scalable-blob-store')
 ```
 
-Create a blob store using a `JSON Object`:
+Create a blob store using a JavaScript `object`:
 
 ```js
 var options = {
@@ -278,7 +277,7 @@ var pdfDocumentStore = sbsFactory.create(pdfOptions)
 
 ### `createWriteStream()`
 
-__Returns__: `JSON Object` containing the child path to the file within the blob store root and a writable file stream.
+__Returns__: `object` containing the child path to the file within the blob store root and a writable file stream.
 
 Returned Object using CUID as the idType:
 
@@ -373,7 +372,7 @@ blobStore.remove(blobPath).then(() => {
 
 ### `stat(string)`
 
-__Returns__: `JSON Object`
+__Returns__: `object`
 
 Rather than parse the file system [`stats`][nodefs-url] object, `scalable-blob-store` returns the raw `stats` object.
 More stat class details can be found on [Wikipedia][wikistat-url]
@@ -432,9 +431,10 @@ blobStore.exists(blobPath).then((result) => {
 
 There is an issue in `scalable-blob-store` that I have no work around for as of yet. If there are a large number of blobs added and then removed from the store, you may have directories with small numbers of files in them, or empty. These directories will never be removed and will not be populated.
 
-Possible solutions for this would be a maintenance task to remove empty directories and migrate low numbered directories into other directories. This is not something that `scalable-blob-store` can do and the developer needs to know about this.
+There are two possible solutions for this problem:
 
-A better solution that could be managed inside `scalable-blob-store` would be a background task that would reset the created date on low or empty directories to make them the next directory to receive new blobs. I don't know if resetting the created date is possible.
+-   A maintenance task to remove empty directories and migrate low numbered directories into other directories. This is not something that `scalable-blob-store` can do and the developer needs to build this.
+-   A better solution would be to replace the cached blob path (`this.currentBlobPath`) on the 'blobStore' object with a valid path that is not full.
 
 For my use case, removal of large numbers of files is unlikely to occur, so my motivation to build a solution for this issue is quite low.
 
@@ -486,8 +486,6 @@ MIT
 [bithound-dep-url]: https://www.bithound.io/github/grantcarthew/node-scalable-blob-store/master/dependencies/npm
 [bithound-code-image]: https://www.bithound.io/github/grantcarthew/node-scalable-blob-store/badges/code.svg
 [bithound-code-url]: https://www.bithound.io/github/grantcarthew/node-scalable-blob-store
-[versionbadge-npm-image]: https://badge.fury.io/js/scalable-blob-store.svg
-[versionbadge-npm-url]: https://badge.fury.io/js/scalable-blob-store
 [js-standard-image]: https://img.shields.io/badge/code%20style-standard-brightgreen.svg
 [js-standard-url]: http://standardjs.com/
 [nodei-npm-image]: https://nodei.co/npm/scalable-blob-store.png?downloads=true&downloadRank=true&stars=true
