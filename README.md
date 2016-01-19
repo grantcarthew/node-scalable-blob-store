@@ -52,7 +52,7 @@ To migrate to v2.0 simply add the `idType: 'uuid'` to the options passed into th
 
 ## Quick Start
 
-Everything in `scalable-blob-store` is asynchronous and is based on Promises using the [Bluebird][bluebird-url] library. There are no callbacks in the API. I did this for two reasons; I like Promises, and to support the future ES2017 async / await features.
+Everything in `scalable-blob-store` is asynchronous and is based on Promises using the [Bluebird][bluebird-url] library. There are no callbacks in the API. I did this for two reasons; I like Promises, and to support the future ES2016 async / await features.
 
 Basic usage example:
 
@@ -229,12 +229,12 @@ The `create(options)` function can be called multiple times to create more than 
 
 Options are passed to the constructor function as a JavaScript `object`.
 
-|Key            |Description                                              |Defaults                   |
-|---------------|---------------------------------------------------------|---------------------------|
-|`blobStoreRoot`|Root directory to store blobs                            |Required                   |
-|`idType`       |Either 'cuid' or 'uuid' as directory and file names      |Required                   |
-|`dirDepth`     |How deep you want the directories under the root         |3                          |
-|`dirWidth`     |The maximum number of files or directories in a directory|1000                       |
+|Key            |Description                                              |Defaults|
+|---------------|---------------------------------------------------------|--------|
+|`blobStoreRoot`|Root directory to store blobs                            |Required|
+|`idType`       |Either 'cuid' or 'uuid' as directory and file names      |Required|
+|`dirDepth`     |How deep you want the directories under the root         |3       |
+|`dirWidth`     |The maximum number of files or directories in a directory|1000    |
 
 Start by creating the `scalable-blob-store` factory object:
 
@@ -280,7 +280,7 @@ var pdfDocumentStore = sbsFactory.create(pdfOptions)
 
 ### `createWriteStream()`
 
-__Returns__: `object` containing the child path to the file within the blob store root and a writable file stream.
+__Returns__: `object` containing the child path to the file within the blob store root and a [stream.Writable][writestream-url].
 
 Returned Object using CUID as the idType:
 
@@ -451,6 +451,7 @@ For my use case, removal of large numbers of files is unlikely to occur, so my m
 
 ## History
 
+-   v2.0.2: Added [standard][js-standard-url] to package.json.
 -   v2.0.1: Minor performance improvements and bug fixes.
 -   v2.0.0: Added support for [CUID][cuid-url] or [UUID][nodeuuid-url] directory and file names.
 -   v1.0.1: Last release of v1. Work on v2.0.0 to support cuid.
@@ -481,6 +482,7 @@ MIT
 [nodefs-url]: https://nodejs.org/api/fs.html#fs_class_fs_stats
 [wikistat-url]: https://en.wikipedia.org/wiki/Stat_(system_call)
 [readstream-url]: https://nodejs.org/api/stream.html#stream_class_stream_readable
+[writestream-url]: https://nodejs.org/api/stream.html#stream_class_stream_writable
 [mathiasbuus-url]: https://github.com/mafintosh
 [cuid-url]: https://github.com/ericelliott/cuid
 [fsblobstore-url]: https://github.com/mafintosh/fs-blob-store
