@@ -36,6 +36,7 @@
   "devDependencies": {
     "babel-eslint": "^5.0.0-beta6",
     "crispy-stream": "^0.1.2",
+    "mock-fs": "^3.6.0",
     "standard": "^5.4.1",
     "tape": "^4.4.0"
   },

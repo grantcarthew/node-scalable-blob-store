@@ -23,10 +23,10 @@ module.exports = function (opts) {
   }
 
   mkdirp.sync(opts.blobStoreRoot)
-  if (!opts.dirDepth) { opts.dirDepth = 3 }
   if (opts.dirDepth < 1 || opts.dirDepth > 10) {
     throw new Error('The dirDepth option must be between 1 and 10.')
   }
+  if (!opts.dirDepth) { opts.dirDepth = 3 }
   if (!opts.dirWidth) { opts.dirWidth = 1000 }
   return opts
 }
