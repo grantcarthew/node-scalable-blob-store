@@ -20,34 +20,23 @@ To migrate to v2.0 simply add the `idType: 'uuid'` to the options passed into th
 ## Topics
 
 -   [Quick Start](#quick-start)
-
 -   [Rationale](#rationale)
-
 -   [Function](#function)
-
 -   [Performance](#performance)
-
 -   [Requirements](#requirements)
-
 -   [Installation](#installation)
-
 -   [API](#api)
-
     -   [create](#create)
     -   [createWriteStream](#createWriteStream)
     -   [createReadStream](#createReadStream)
     -   [remove](#remove)
     -   [stat](#stat)
     -   [exists](#exists)
-
 -   [Known Issues](#known-issues)
-
+-   [Testing](#testing)
 -   [Contributing](#contributing)
-
 -   [History](#history)
-
 -   [Credits](#credits)
-
 -   [License](#license)
 
 ## Quick Start
@@ -441,6 +430,54 @@ There are two possible solutions for this problem:
 
 For my use case, removal of large numbers of files is unlikely to occur, so my motivation to build a solution for this issue is quite low.
 
+## Testing
+
+There are two options for testing `scalable-blob-store`:
+1.   _Unit Testing_ which uses [tape][tape-url] and a mock file system using [mock-fs][mock-fs-url].
+2.   _Manual Testing_ which will create directories and files on your local disk.
+
+### Unit Testing
+
+After cloning `scalable-blob-store` in your console:
+
+```sh
+npm install
+npm test
+```
+
+### Manual Testing
+
+Running the `fs-test.js` file will create a `~/blobs` directory in your home directory and then recursively fill it will lots of blobs.
+
+The default options configured in the `fs-test.js` file are:
+
+```js
+const opts = {
+  blobStoreRoot: os.homedir() + '/blobs',
+  idType: 'cuid',
+  dirDepth: 3,
+  dirWidth: 1000
+}
+
+const repeat = 10000
+```
+
+I suggest you have a read through the test file before running it. Change the options if you wish to see different results.
+
+After cloning `scalable-blob-store` in your console:
+
+```sh
+npm install
+node ./tests/fs-test.js
+```
+
+Once complete, inspect the `~/blobs` directory. I suggest using the [tree][tree-url] command which gives you a summary of directories and files within the analyzed directory.
+
+```sh
+tree ~/blobs
+tree -d ~/blobs
+```
+
 ## Contributing
 
 1.  Fork it!
@@ -497,3 +534,6 @@ MIT
 [nodei-npm-image]: https://nodei.co/npm/scalable-blob-store.png?downloads=true&downloadRank=true&stars=true
 [nodei-npm-url]: https://nodei.co/npm/scalable-blob-store/
 [cuid-discuss-url]: https://github.com/ericelliott/cuid/issues/22
+[tape-url]: https://www.npmjs.com/package/tape
+[mock-fs-url]: https://www.npmjs.com/package/mock-fs
+[tree-url]: https://www.debian-administration.org/article/606/Commands_you_might_have_missed_tree

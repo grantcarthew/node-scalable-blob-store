@@ -1,13 +1,13 @@
-var os = require('os')
-var crispyStream = require('crispy-stream')
-var opts = {
+const os = require('os')
+const crispyStream = require('crispy-stream')
+const opts = {
   blobStoreRoot: os.homedir() + '/blobs',
   idType: 'cuid',
   dirDepth: 3,
   dirWidth: 1000
 }
-var repeat = 10000
-var sbs = require('./index').create(opts)
+const repeat = 10000
+const sbs = require('../index').create(opts)
 
 function streamToString (stream) {
   return new Promise((resolve, reject) => {
@@ -21,7 +21,7 @@ function streamToString (stream) {
   })
 }
 
-function writer (repeat) {
+function tester (repeat) {
   console.log('Write/Read tests starting...')
   console.time('Duration')
   var i = repeat
@@ -64,4 +64,4 @@ function writer (repeat) {
 
 console.log('scalable-blob-store testing')
 console.log('Options:', opts)
-writer(repeat)
+tester(repeat)
