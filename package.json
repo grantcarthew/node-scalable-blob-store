@@ -7,7 +7,7 @@
   "license": "MIT",
   "main": "index.js",
   "scripts": {
-    "test": "mocka"
+    "test": "./node_modules/tape/bin/tape ./tests/*.spec.js | ./node_modules/tap-spec/bin/cmd.js"
   },
   "repository": {
     "type": "git",
@@ -36,7 +36,8 @@
   "devDependencies": {
     "babel-eslint": "^5.0.0-beta6",
     "crispy-stream": "^0.1.2",
-    "standard": "^5.4.1"
+    "standard": "^5.4.1",
+    "tape": "^4.4.0"
   },
   "dependencies": {
     "bluebird": "^3.1.1",
