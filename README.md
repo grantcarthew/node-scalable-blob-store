@@ -432,13 +432,14 @@ For my use case, removal of large numbers of files is unlikely to occur, so my m
 
 ## Testing
 
-There are two options for testing `scalable-blob-store`:
-1.   _Unit Testing_ which uses [tape][tape-url] and a mock file system using [mock-fs][mock-fs-url].
-2.   _Manual Testing_ which will create directories and files on your local disk.
+There are two methods for testing `scalable-blob-store`:
+
+1.  _Unit Testing_ which uses [tape][tape-url] and a mock file system using [mock-fs][mock-fs-url].
+2.  _Manual Testing_ which will create directories and files on your local disk.
 
 ### Unit Testing
 
-After cloning `scalable-blob-store` in your console:
+After cloning `scalable-blob-store`, type the following in your console:
 
 ```sh
 npm install
@@ -464,7 +465,7 @@ const repeat = 10000
 
 I suggest you have a read through the test file before running it. Change the options if you wish to see different results.
 
-After cloning `scalable-blob-store` in your console:
+After cloning `scalable-blob-store`, type the following your console:
 
 ```sh
 npm install
@@ -502,26 +503,39 @@ tree -d ~/blobs
 
 ## Credits
 
-Thanks to [Mathias Buus][mathiasbuus-url] for his work on [fs-blob-store][fsblobstore-url].
+Thanks to the following marvelous people for their hard work:
+
+-   [Petka Antonov][petka-url] for [bluebird][bluebird-url]
+-   [Robert Kieffer][broofa-url] for [node-uuid][nodeuuid-url]
+-   [Eric Elliot][ericelliott-url] for [cuid][cuid-url]
+-   [James Halliday][substack-url] for [mkdirp][mkdirp-url]
+-   [Mathias Buus][mathiasbuus-url] for [fs-blob-store][fsblobstore-url]
+
+This list could go on...
 
 ## License
 
 MIT
 
 [bluebird-url]: https://github.com/petkaantonov/bluebird
+[petka-url]: https://github.com/petkaantonov
 [amazones3-url]: https://aws.amazon.com/s3/
 [googlecloud-url]: https://cloud.google.com/storage/
 [azurestorage-url]: https://azure.microsoft.com/en-us/services/storage/
 [filestorage-url]: https://github.com/petersirka/node-filestorage
 [glusterfs-url]: http://www.gluster.org/
 [nodeuuid-url]: https://github.com/broofa/node-uuid
+[broofa-url]: https://github.com/broofa
 [wikiuuid-url]: https://en.wikipedia.org/wiki/Universally_unique_identifier
+[cuid-url]: https://github.com/ericelliott/cuid
+[mkdirp-url]: https://www.npmjs.com/package/mkdirp
+[substack-url]: https://github.com/substack
+[ericelliott-url]: https://github.com/ericelliott
 [nodefs-url]: https://nodejs.org/api/fs.html#fs_class_fs_stats
 [wikistat-url]: https://en.wikipedia.org/wiki/Stat_(system_call)
 [readstream-url]: https://nodejs.org/api/stream.html#stream_class_stream_readable
 [writestream-url]: https://nodejs.org/api/stream.html#stream_class_stream_writable
 [mathiasbuus-url]: https://github.com/mafintosh
-[cuid-url]: https://github.com/ericelliott/cuid
 [fsblobstore-url]: https://github.com/mafintosh/fs-blob-store
 [bithound-overall-image]: https://www.bithound.io/github/grantcarthew/node-scalable-blob-store/badges/score.svg
 [bithound-overall-url]: https://www.bithound.io/github/grantcarthew/node-scalable-blob-store
