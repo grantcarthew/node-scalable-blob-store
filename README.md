@@ -4,9 +4,8 @@
 
 [![bitHound Overall Score][bithound-overall-image]][bithound-overall-url]
 [![bitHound Dependencies][bithound-dep-image]][bithound-dep-url]
-[![bitHound Code][bithound-code-image]][bithound-code-url]
+[![Build Status][travisci-image]][travisci-url]
 [![js-standard-style][js-standard-image]][js-standard-url]
-
 [![NPM][nodei-npm-image]][nodei-npm-url]
 
 ## Breaking Changes
@@ -548,6 +547,8 @@ MIT
 [js-standard-url]: http://standardjs.com/
 [nodei-npm-image]: https://nodei.co/npm/scalable-blob-store.png?downloads=true&downloadRank=true&stars=true
 [nodei-npm-url]: https://nodei.co/npm/scalable-blob-store/
+[travisci-image]: https://travis-ci.org/grantcarthew/node-scalable-blob-store.svg?branch=master
+[travisci-url]: https://travis-ci.org/grantcarthew/node-scalable-blob-store
 [cuid-discuss-url]: https://github.com/ericelliott/cuid/issues/22
 [tape-url]: https://www.npmjs.com/package/tape
 [mock-fs-url]: https://www.npmjs.com/package/mock-fs
