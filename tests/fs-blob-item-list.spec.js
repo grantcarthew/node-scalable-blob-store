@@ -23,29 +23,29 @@ test('fs-blob-item-list tests', t => {
   t.plan(8)
   return fsBlobItemList('/blobs', cuidValidator, true)
   .then(list => {
-    t.equal(list.length, 2, 'List two CUID directories')
+    t.equal(list.length, 2, 'Return two CUID directories')
   }).then(() => {
     return fsBlobItemList('/blobs', uuidValidator, true)
   }).then(list => {
-    t.equal(list.length, 2, 'List two UUID directories')
+    t.equal(list.length, 2, 'Return two UUID directories')
   }).then(() => {
     return fsBlobItemList('/blobs', cuidValidator, false)
   }).then(list => {
-    t.equal(list.length, 2, 'List two CUID files')
+    t.equal(list.length, 2, 'Return two CUID files')
   }).then(() => {
     return fsBlobItemList('/blobs', uuidValidator, false)
   }).then(list => {
-    t.equal(list.length, 2, 'List two UUID files')
+    t.equal(list.length, 2, 'Return two UUID files')
   }).then(() => {
     return fsBlobItemList('/wrongdir', cuidValidator, true)
   }).then(list => {
-    t.ok(Array.isArray(list), 'Invalid dir returns array')
-    t.equal(list.length, 0, 'Invalid dir returns empty array')
+    t.ok(Array.isArray(list), 'Return array if invalid directory')
+    t.equal(list.length, 0, 'Return empty array if invalid directory')
   }).then(() => {
     return fsBlobItemList('/wrongdir', cuidValidator, false)
   }).then(list => {
-    t.ok(Array.isArray(list), 'Invalid dir for files returns array')
-    t.equal(list.length, 0, 'Invalid dir for files returns empty array')
+    t.ok(Array.isArray(list), 'Return array if listing files on invalid directory')
+    t.equal(list.length, 0, 'Return empty array if listing files on invalid directory')
   }).then(() => {
     mock.restore()
   })

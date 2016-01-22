@@ -9,7 +9,7 @@ const oldestConfig = {
   birthtime: new Date('2000/01/01')
 }
 const oldConfig = {
-  content: 'oldest birthtime',
+  content: 'old birthtime',
   birthtime: new Date('2015/01/01')
 }
 

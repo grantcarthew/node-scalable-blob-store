@@ -9,8 +9,8 @@ var notUuid = 'd9-0b0e7-5116-4762-a81b-7c112898a26f'
 
 test('id-validator tests', t => {
   t.plan(4)
-  t.ok(cuidVal(cuid), 'CUID validates')
-  t.notOk(cuidVal(notCuid), 'CUID does not validate')
-  t.ok(uuidVal(uuid), 'UUID validates')
-  t.notOk(uuidVal(notUuid), 'UUID does not validate')
+  t.ok(cuidVal(cuid), 'Validates CUID')
+  t.notOk(cuidVal(notCuid), 'Validation fails on invalid CUID')
+  t.ok(uuidVal(uuid), 'Validates UUID')
+  t.notOk(uuidVal(notUuid), 'Validation fails on invalid UUID')
 })

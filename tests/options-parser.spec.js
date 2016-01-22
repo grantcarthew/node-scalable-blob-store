@@ -1,7 +1,7 @@
 const test = require('tape')
 const mock = require('mock-fs')
 const fs = require('fs')
-const op = require('../src/options-parser')
+const parser = require('../src/options-parser')
 const options = {}
 const optsCuidDefaults = {
   blobStoreRoot: '/tmp/blobs',
@@ -26,24 +26,24 @@ test('options-parser tests', t => {
   mock()
 
   t.plan(11)
-  t.throws(() => { op() }, 'No options passed, throws error')
-  t.throws(() => { op('string') }, 'String option passed, throws error')
-  t.throws(() => { op(options) }, 'No blobStoreRoot option, throws error')
+  t.throws(() => { parser() }, 'Throws error if no options passed')
+  t.throws(() => { parser('string') }, 'Throws error if string option passed')
+  t.throws(() => { parser(options) }, 'Throws error if no blobStoreRoot option')
   options.blobStoreRoot = '/tmp/blobs'
-  t.throws(() => { op(options) }, 'No idType option, throws error')
+  t.throws(() => { parser(options) }, 'Throws error if no idType option')
   options.idType = 'invalid'
-  t.throws(() => { op(options) }, 'Invalid idType option, throws error')
+  t.throws(() => { parser(options) }, 'Throws error if invalid idType option')
   options.idType = 'cuid'
   options.dirDepth = 0
-  t.throws(() => { op(options) }, 'Invalid min dirDepth option, throws error')
+  t.throws(() => { parser(options) }, 'Throws error if invalid min dirDepth option')
   options.dirDepth = 11
-  t.throws(() => { op(options) }, 'Invalid max dirDepth option, throws error')
+  t.throws(() => { parser(options) }, 'Throws error if invalid max dirDepth option')
   delete options.dirDepth
-  t.deepEqual(op(options), optsCuidDefaults, 'CUID returned options with defaults')
+  t.deepEqual(parser(options), optsCuidDefaults, 'Return options for CUID with defaults')
   options.idType = 'uuid'
-  t.deepEqual(op(options), optsUuidDefaults, 'UUID returned options with defaults')
+  t.deepEqual(parser(options), optsUuidDefaults, 'Return options for UUID with defaults')
+  t.deepEqual(parser(optNonDefault), optNonDefault, 'Return options with non-defaults')
   t.ok(fs.existsSync(options.blobStoreRoot), 'blobStoreRoot path created')
-  t.deepEqual(op(optNonDefault), optNonDefault, 'returned options with non-defaults')
 
   mock.restore()
 })
