@@ -8,6 +8,9 @@
 [![js-standard-style][js-standard-image]][js-standard-url]
 [![NPM][nodei-npm-image]][nodei-npm-url]
 
+[![Star][githubstar-image]][sbs-url]
+[![Watch][githubwatch-image]][sbs-url]
+
 ## Breaking Changes
 
 With the v2.0 update of `scalable-blob-store` there is a new directory and file naming option based on [cuid][cuid-url]. This new naming system provides shorter directory names giving more room for deeper paths which means more capacity in your blob store.
@@ -40,7 +43,7 @@ To migrate to v2.0 simply add the `idType: 'uuid'` to the options passed into th
 
 ## Quick Start
 
-Everything in `scalable-blob-store` is asynchronous and is based on Promises using the [Bluebird][bluebird-url] library. There are no callbacks in the API. I did this for two reasons; I like Promises, and to support the future ES2016 async / await features.
+Everything in `scalable-blob-store` is asynchronous and is based on Promises using the [Bluebird][bluebird-url] library ([why Bluebird and not native Promises?][bluebird-speed-url]). There are no callbacks in the API. I did this for two reasons; I like Promises, and to support the future ES2016 async / await features.
 
 Basic usage example:
 
@@ -230,7 +233,7 @@ Start by creating the `scalable-blob-store` factory object:
 var sbsFactory = require('scalable-blob-store')
 ```
 
-Create a blob store using a options `object`:
+Create a blob store using an options `object`:
 
 ```js
 var options = {
@@ -447,7 +450,7 @@ npm test
 
 ### Manual Testing
 
-Running the `test-fs.js` file will create a `~/blobs` directory in your home directory and then recursively fill it will lots of blobs.
+Running the `test-fs.js` file will create a `~/blobs` directory in your home directory and then recursively fill it with lots of blobs.
 
 The default options configured in the `test-fs.js` file are:
 
@@ -517,7 +520,9 @@ This list could go on...
 
 MIT
 
+[sbs-url]: https://github.com/grantcarthew/node-scalable-blob-store
 [bluebird-url]: https://github.com/petkaantonov/bluebird
+[bluebird-speed-url]: http://programmers.stackexchange.com/questions/278778/why-are-native-es6-promises-slower-and-more-memory-intensive-than-bluebird
 [petka-url]: https://github.com/petkaantonov
 [amazones3-url]: https://aws.amazon.com/s3/
 [googlecloud-url]: https://cloud.google.com/storage/
@@ -553,3 +558,5 @@ MIT
 [tape-url]: https://www.npmjs.com/package/tape
 [mock-fs-url]: https://www.npmjs.com/package/mock-fs
 [tree-url]: https://www.debian-administration.org/article/606/Commands_you_might_have_missed_tree
+[githubstar-image]: https://ghbtns.com/github-btn.html?user=grantcarthew&repo=node-scalable-blob-store&type=star&count=true&size=large
+[githubwatch-image]: https://ghbtns.com/github-btn.html?user=grantcarthew&repo=node-scalable-blob-store&type=watch&count=true&size=large&v=2
