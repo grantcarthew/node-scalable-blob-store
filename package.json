@@ -1,6 +1,6 @@
 {
   "name": "scalable-blob-store",
-  "version": "2.0.2",
+  "version": "2.0.3",
   "description": "A simple local file system blob store that is designed to prevent conflicts when used with a distributed or replicated file system.",
   "homepage": "https://github.com/grantcarthew/node-scalable-blob-store",
   "author": "Grant Carthew <dev@carthew.net> (http://uglygizmo.blogspot.com.au/)",
@@ -37,6 +37,8 @@
     "babel-eslint": "^5.0.0-beta6",
     "crispy-stream": "^0.1.2",
     "mock-fs": "^3.6.0",
+    "moment": "^2.11.1",
+    "node-dir": "^0.1.11",
     "standard": "^5.4.1",
     "tape": "^4.4.0"
   },

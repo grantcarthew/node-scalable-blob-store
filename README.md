@@ -448,9 +448,9 @@ npm test
 
 ### Manual Testing
 
-Running the `fs-test.js` file will create a `~/blobs` directory in your home directory and then recursively fill it will lots of blobs.
+Running the `test-fs.js` file will create a `~/blobs` directory in your home directory and then recursively fill it will lots of blobs.
 
-The default options configured in the `fs-test.js` file are:
+The default options configured in the `test-fs.js` file are:
 
 ```js
 const opts = {
@@ -463,16 +463,16 @@ const opts = {
 const repeat = 10000
 ```
 
-I suggest you have a read through the test file before running it. Change the options if you wish to see different results.
+Change the options if you wish to see different results.
 
 After cloning `scalable-blob-store`, type the following your console:
 
 ```sh
 npm install
-node ./tests/fs-test.js
+node ./tests/test-fs.js
 ```
 
-Once complete, inspect the `~/blobs` directory. I suggest using the [tree][tree-url] command which gives you a summary of directories and files within the analyzed directory.
+Once complete, inspect the `~/blobs` directory. I suggest using the [tree][tree-url] command which gives you a summary of directories and files within the target directory.
 
 ```sh
 tree ~/blobs
@@ -489,6 +489,7 @@ tree -d ~/blobs
 
 ## History
 
+-   v2.0.3: Added unit tests and minor fix.
 -   v2.0.2: Added [standard][js-standard-url] to package.json.
 -   v2.0.1: Minor performance improvements and bug fixes.
 -   v2.0.0: Added support for [CUID][cuid-url] or [UUID][nodeuuid-url] directory and file names.
