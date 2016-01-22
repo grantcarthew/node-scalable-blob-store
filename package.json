@@ -7,7 +7,8 @@
   "license": "MIT",
   "main": "index.js",
   "scripts": {
-    "test": "./node_modules/tape/bin/tape ./tests/*.spec.js | ./node_modules/tap-spec/bin/cmd.js"
+    "test": "./node_modules/tape/bin/tape ./tests/*.spec.js",
+    "testc": "./node_modules/tape/bin/tape ./tests/*.spec.js | ./node_modules/tap-spec/bin/cmd.js"
   },
   "repository": {
     "type": "git",
