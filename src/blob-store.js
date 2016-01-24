@@ -44,7 +44,6 @@ BlobStore.prototype.createWriteStream = function () {
   }).then((blobPath) => {
     self.currentBlobPath = blobPath
     var filePath = path.join(blobPath, self.state.newId())
-    console.dir(filePath)
     var writeStream = self.fsBlobStore.createWriteStream({
       key: filePath
     })

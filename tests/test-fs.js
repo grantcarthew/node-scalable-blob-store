@@ -6,8 +6,8 @@ const options = {
   dirWidth: 1000
 }
 const repeat = 10000
-const testBlobCreate = require('./test-blob-create')
+const testBlobBulkCreate = require('./test-blob-bulk-create')
 
-testBlobCreate(options, repeat).then(result => {
+testBlobBulkCreate(options, repeat).then(result => {
   console.dir(result)
 }).catch(console.log.bind)
