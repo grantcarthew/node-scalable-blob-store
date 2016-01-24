@@ -44,6 +44,7 @@ BlobStore.prototype.createWriteStream = function () {
   }).then((blobPath) => {
     self.currentBlobPath = blobPath
     var filePath = path.join(blobPath, self.state.newId())
+    console.dir(filePath)
     var writeStream = self.fsBlobStore.createWriteStream({
       key: filePath
     })
@@ -74,11 +75,11 @@ BlobStore.prototype.exists = function (blobPath) {
   return new Promise((resolve, reject) => {
     self.fsBlobStore.exists({
       key: blobPath
-    }, (err) => {
+    }, (err, exists) => {
       if (err) {
         reject(err)
       }
-      resolve(true)
+      resolve(exists)
     })
   })
 }
