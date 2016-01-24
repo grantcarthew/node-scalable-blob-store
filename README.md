@@ -490,6 +490,7 @@ tree -d ~/blobs
 
 ## History
 
+-   v2.0.4: Minor performance improvements and bug fixes.
 -   v2.0.3: Added unit tests and minor fix.
 -   v2.0.2: Added [standard][js-standard-url] to package.json.
 -   v2.0.1: Minor performance improvements and bug fixes.
