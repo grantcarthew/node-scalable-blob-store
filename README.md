@@ -8,10 +8,7 @@
 [![js-standard-style][js-standard-image]][js-standard-url]
 [![NPM][nodei-npm-image]][nodei-npm-url]
 
-Please Star on GitHub/NPM and Watch for updates.
-
-<iframe src="https://ghbtns.com/github-btn.html?user=grantcarthew&repo=node-scalable-blob-store&type=star&count=true&size=large" frameborder="0" scrolling="0" width="160px" height="30px"></iframe>
-<iframe src="https://ghbtns.com/github-btn.html?user=grantcarthew&repo=node-scalable-blob-store&type=watch&count=true&size=large&v=2" frameborder="0" scrolling="0" width="160px" height="30px"></iframe>
+Please __Star__ on GitHub / NPM and __Watch__ for updates.
 
 ## Breaking Changes
 
