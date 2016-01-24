@@ -43,17 +43,15 @@ BlobStore.prototype.createWriteStream = function () {
     })
   }).then((blobPath) => {
     self.currentBlobPath = blobPath
-    return new Promise((resolve, reject) => {
-      var filePath = path.join(blobPath, self.state.newId())
-      var writeStream = self.fsBlobStore.createWriteStream({
-        key: filePath
-      })
-      var result = {
-        blobPath: filePath,
-        writeStream: writeStream
-      }
-      resolve(result)
+    var filePath = path.join(blobPath, self.state.newId())
+    var writeStream = self.fsBlobStore.createWriteStream({
+      key: filePath
     })
+    var result = {
+      blobPath: filePath,
+      writeStream: writeStream
+    }
+    return result
   })
 }
 
