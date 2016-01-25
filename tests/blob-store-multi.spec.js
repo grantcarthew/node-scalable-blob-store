@@ -1,5 +1,5 @@
-const mock = require('mock-fs')
 const test = require('tape')
+const mock = require('mock-fs')
 const Promise = require('bluebird')
 const sbsFactory = require('../src/blob-store.js')
 const crispyStream = require('crispy-stream')

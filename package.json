@@ -1,13 +1,13 @@
 {
   "name": "scalable-blob-store",
-  "version": "2.0.4",
+  "version": "2.0.5",
   "description": "A simple local file system blob store that is designed to prevent conflicts when used with a distributed or replicated file system.",
   "homepage": "https://github.com/grantcarthew/node-scalable-blob-store",
   "author": "Grant Carthew <dev@carthew.net> (http://uglygizmo.blogspot.com.au/)",
   "license": "MIT",
   "main": "index.js",
   "scripts": {
-    "test": "./node_modules/tape/bin/tape ./tests/*.spec.js | ./node_modules/tap-spec/bin/cmd.js"
+    "test": "tape ./tests/*.spec.js"
   },
   "repository": {
     "type": "git",
@@ -42,7 +42,6 @@
     "moment": "^2.11.1",
     "node-dir": "^0.1.11",
     "standard": "^5.4.1",
-    "tap-spec": "^4.1.1",
     "tape": "^4.4.0"
   },
   "dependencies": {

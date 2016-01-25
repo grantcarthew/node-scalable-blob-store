@@ -1,3 +1,4 @@
+const Promise = require('bluebird')
 const path = require('path')
 const fsBlobItemList = require('./fs-blob-item-list')
 const fsBlobDirLatestFullDepth = require('./fs-blob-dir-latest-full-depth')

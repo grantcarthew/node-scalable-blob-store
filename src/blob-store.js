@@ -1,14 +1,15 @@
 const fs = require('fs')
 const path = require('path')
-const fsBlobStoreFactory = require('fs-blob-store')
-const idGenerator = require('./id-generator')
-const idValidator = require('./id-validator')
 const Promise = require('bluebird')
+const fsBlobStoreFactory = require('fs-blob-store')
+Promise.promisify(fs.stat)
 
 // Internal Modules
 const optionsParser = require('./options-parser')
 const fsBlobItemList = require('./fs-blob-item-list')
 const blobPathBuild = require('./blob-path-build')
+const idGenerator = require('./id-generator')
+const idValidator = require('./id-validator')
 
 exports.create = BlobStore
 
@@ -25,15 +26,13 @@ function BlobStore (opts) {
 
 BlobStore.prototype.createWriteStream = function () {
   var self = this
-
   return Promise.resolve(this.currentBlobPath).then((blobPath) => {
-    if (!blobPath) {
-      return blobPathBuild(self.state)
-    }
+    if (!blobPath) { return blobPathBuild(self.state) }
     return blobPath
   }).then((blobPath) => {
     var fullBlobPath = path.join(self.state.blobStoreRoot, blobPath)
-    return fsBlobItemList(fullBlobPath, self.state.validateId, false).then(blobFileItems => {
+    return fsBlobItemList(fullBlobPath, self.state.validateId, false)
+    .then(blobFileItems => {
       return blobFileItems.length
     }).then(blobFileCount => {
       if (blobFileCount >= self.state.dirWidth) {
@@ -47,26 +46,19 @@ BlobStore.prototype.createWriteStream = function () {
     var writeStream = self.fsBlobStore.createWriteStream({
       key: filePath
     })
-    var result = {
+    return {
       blobPath: filePath,
       writeStream: writeStream
     }
-    return result
   })
 }
 
 BlobStore.prototype.createReadStream = function (blobPath) {
-  var self = this
-  return new Promise((resolve, reject) => {
-    try {
-      var readStream = self.fsBlobStore.createReadStream({
-        key: blobPath
-      })
-      resolve(readStream)
-    } catch (err) {
-      reject(err)
-    }
-  })
+  return Promise.resolve(
+    this.fsBlobStore.createReadStream({
+      key: blobPath
+    })
+  )
 }
 
 BlobStore.prototype.exists = function (blobPath) {
@@ -99,12 +91,5 @@ BlobStore.prototype.remove = function (blobPath) {
 
 BlobStore.prototype.stat = function (blobPath) {
   var fullBlobPath = path.join(this.state.blobStoreRoot, blobPath)
-  return new Promise((resolve, reject) => {
-    fs.stat(fullBlobPath, (err, stat) => {
-      if (err) {
-        return reject(err)
-      }
-      resolve(stat)
-    })
-  })
+  return fs.statAsync(fullBlobPath)
 }
