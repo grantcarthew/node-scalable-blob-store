@@ -6,6 +6,9 @@
 [![bitHound Dependencies][bithound-dep-image]][bithound-dep-url]
 [![Build Status][travisci-image]][travisci-url]
 [![js-standard-style][js-standard-image]][js-standard-url]
+
+[![Mr Blobby][mrblobby-image]][sbs-url]
+
 [![NPM][nodei-npm-image]][nodei-npm-url]
 
 Please __Star__ on GitHub / NPM and __Watch__ for updates.
@@ -522,6 +525,7 @@ This list could go on...
 MIT
 
 [sbs-url]: https://github.com/grantcarthew/node-scalable-blob-store
+[mrblobby-image]: https://cdn.rawgit.com/grantcarthew/node-scalable-blob-store/master/mrblobby.svg
 [bluebird-url]: https://github.com/petkaantonov/bluebird
 [bluebird-speed-url]: http://programmers.stackexchange.com/questions/278778/why-are-native-es6-promises-slower-and-more-memory-intensive-than-bluebird
 [petka-url]: https://github.com/petkaantonov
