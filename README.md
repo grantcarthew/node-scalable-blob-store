@@ -92,6 +92,9 @@ blobStore.createWriteStream().then(result => {
 
 // Reading Example
 blobStore.createReadStream('/id/path/from/your/database').then(readStream => {
+  readStream.on('error', err => {
+    throw err
+  })
   // Pipe the file to the console.
   readStream.pipe(process.stdout)
 }).catch(err => {
@@ -125,7 +128,7 @@ blobStore.exists('/id/path/from/your/database').then(result => {
 
 ## Rationale
 
-After researching user file storage, or blob storage, for a web application I was working on I discovered the most common solution used by web developers is to create an account with a cloud service provider. After creating an account with such providers as [Amazon S3][amazones3-url], [Google Cloud Storage][googlecloud-url], or [Azure Storage][azurestorage-url], they just stash all their users files there.
+After researching user file storage, or blob storage, for a web application I was working on I discovered the most common solution used by web developers is to store files using a cloud service provider. After creating an account with such providers as [Amazon S3][amazones3-url], [Google Cloud Storage][googlecloud-url], or [Azure Storage][azurestorage-url], they just stash all their application files and blobs there.
 
 I researched the price of cloud storage and decided I wanted a free local version that would scale if needed.
 
@@ -135,11 +138,15 @@ On a long car trip I was thinking about a solution for my blob storage and came 
 
 ## Function
 
-`scalable-blob-store` does not use index files or other databases to manage the files on the disk or storage system. Instead, the file system itself is used to find the current storage path and maintain a reasonable number of files in its directories. Each time you write a new blob, the current save directory files are counted to ensure it remains under the configured value. Because of this there is a performance hit when saving blobs. Check the [Performance](#performance) topic below for some detail.
+To achieve scalability on a distributed or replicated file system, `scalable-blob-store` does not use index files or other databases to manage the files on the disk or storage system. Instead, the file system itself is used to find the latest storage path based on the file systems `birthtime` attribute (the directory creation date).
+
+Once the latest path has been determined, the number of files within the directory are counted to ensure it remains under the configured value. This is to prevent disk performance issues when very large numbers of files are stored within a single directory. If the number of items within a directory becomes too large, a new storage path is determined.
 
 Because there are no databases used to manage the files in the root path, it is up to you to maintain the returned `blobStore` path and metadata about the stored files in your own database.
 
-The reason `scalable-blob-store` is scalable is due to the naming of the directories and files. Every directory and file saved to disk is named by a generated id based on either [CUID][cuid-url] or [v4 UUID][nodeuuid-url]. (here is a [discussion about CUIDs and UUIDs][cuid-discuss-url]). If a replicated or cluster file system is in use the only conflict that can occur is when one server is reading a file while another is removing the same file. `scalable-blob-store` does not try to manage this conflict, however it will raise the exception.
+The reason `scalable-blob-store` is scalable is due to the naming of the directories and files within your file system. Every directory and file saved to disk is named by a generated id based on either [CUID][cuid-url] or [UUID v4][nodeuuid-url] (here is a [discussion about CUIDs and UUIDs][cuid-discuss-url]). Merging directories between servers or disks should never cause file name collisions.
+
+If a replicated or cluster file system is in use the only conflict that can occur is when one server is reading a file while another is removing the same file. `scalable-blob-store` does not try to manage this conflict, however it will raise the exception.
 
 Below are examples of the directory structure created by `scalable-blob-store`.
 
@@ -157,7 +164,7 @@ Example with UUID directory and file names:
 \blobs\846a291f-9864-40bb-aefe-f29bdc73a761\..\8b86b6fe-6166-424c-aed9-8faf1e62689e
 ```
 
-`scalable-blob-store` supports configuration options to give you control over the type of ids used, depth of the directory structure, and the width of the directories. The default options give 3 directories deep containing 1000 items giving a total storage of 1 billion files within the directory structure.
+`scalable-blob-store` supports configuration options to give you control over the type of ids used, depth of the directory structure, and the width of the directories. The default options give 3 directories deep containing 1000 items giving a total storage of one billion files within the directory structure.
 
 Other operational points of interest:
 
@@ -335,6 +342,9 @@ Example:
 var blobPath = '/cij50xi3y00iyzph3qs7oatcy/cij50xi3z00izzph3yo053mzs/cij50xi4000j0zph3mshil7p5/cij50xi4100j1zph3loy3hp6h'
 
 blobStore.createReadStream(blobPath).then(readStream => {
+  readStream.on('error', err => {
+    throw err
+  })
   // Blob contents is piped to the console.
   readStream.pipe(process.stdout)
 }).catch(err => {
@@ -440,7 +450,7 @@ There are two methods for testing `scalable-blob-store`:
 
 ### Unit Testing
 
-After cloning `scalable-blob-store`, type the following in your console:
+After cloning `scalable-blob-store`, type the following into your console:
 
 ```sh
 npm install
@@ -466,7 +476,7 @@ const repeat = 10000
 
 Change the options if you wish to see different results.
 
-After cloning `scalable-blob-store`, type the following your console:
+After cloning `scalable-blob-store`, type the following into your console:
 
 ```sh
 npm install

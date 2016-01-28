@@ -39,7 +39,7 @@ function streamToString (stream) {
 test('blob-store multi tests', t => {
   mock()
 
-  t.plan(16)
+  t.plan(22)
   var promises = []
   promises.push(blobStoreA.createWriteStream()
   .then(result => {
@@ -75,6 +75,20 @@ test('blob-store multi tests', t => {
     return blobStoreA.exists(testBlobPathA)
   }).then(result => {
     t.notOk(result, 'BlobStoreA blob file no longer exists')
+  }).then(() => {
+    return blobStoreA.createReadStream('/invalidread')
+  }).then(readStream => {
+    readStream.on('error', err => {
+      t.ok(err, 'BlobStoreA createReadStream on invalid path raises error event')
+    })
+  }).then(() => {
+    return blobStoreA.stat('/invalidstat').catch(err => {
+      t.ok(err, 'BlobStoreA stat on invalid path throws error')
+    })
+  }).then(() => {
+    return blobStoreA.remove('/invalidremove')
+  }).then(result => {
+    t.deepEqual(result, undefined, 'BlobStoreA remove on invalid path returns undefined')
   }))
 
   promises.push(blobStoreB.createWriteStream()
@@ -111,6 +125,20 @@ test('blob-store multi tests', t => {
     return blobStoreB.exists(testBlobPathB)
   }).then(result => {
     t.notOk(result, 'BlobStoreB blob file no longer exists')
+  }).then(() => {
+    return blobStoreB.createReadStream('/invalidread')
+  }).then(readStream => {
+    readStream.on('error', err => {
+      t.ok(err, 'BlobStoreB createReadStream on invalid path raises error event')
+    })
+  }).then(() => {
+    return blobStoreB.stat('/invalidstat').catch(err => {
+      t.ok(err, 'BlobStoreB stat on invalid path throws error')
+    })
+  }).then(() => {
+    return blobStoreB.remove('/invalidremove')
+  }).then(result => {
+    t.deepEqual(result, undefined, 'BlobStoreB remove on invalid path returns undefined')
   }))
 
   return Promise.all(promises).then(() => {

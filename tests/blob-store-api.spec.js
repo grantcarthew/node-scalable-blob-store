@@ -30,7 +30,7 @@ function streamToString (stream) {
 test('blob-store api tests', t => {
   mock()
 
-  t.plan(8)
+  t.plan(11)
   return blobStore.createWriteStream()
   .then(result => {
     t.ok(result.blobPath, 'createWriteStream blob path created')
@@ -60,11 +60,25 @@ test('blob-store api tests', t => {
     t.equal(stat.size, 44, 'blob file stat succeeded')
   }).then(() => {
     return blobStore.remove(testBlobPath)
-  }).then(() => {
-    t.pass('blob file remove succeeded')
+  }).then(result => {
+    t.deepEqual(result, undefined, 'blob file remove succeeded')
     return blobStore.exists(testBlobPath)
   }).then(result => {
     t.notOk(result, 'blob file no longer exists')
+  }).then(() => {
+    return blobStore.createReadStream('/invalidread')
+  }).then(readStream => {
+    readStream.on('error', err => {
+      t.ok(err, 'createReadStream on invalid path raises error event')
+    })
+  }).then(() => {
+    return blobStore.stat('/invalidstat').catch(err => {
+      t.ok(err, 'stat on invalid path throws error')
+    })
+  }).then(() => {
+    return blobStore.remove('/invalidremove')
+  }).then(result => {
+    t.deepEqual(result, undefined, 'remove on invalid path returns undefined')
   }).then(() => {
     mock.restore()
   })
