@@ -1,6 +1,6 @@
 {
   "name": "scalable-blob-store",
-  "version": "2.0.5",
+  "version": "2.0.6",
   "description": "A simple local file system blob store that is designed to prevent conflicts when used with a distributed or replicated file system.",
   "homepage": "https://github.com/grantcarthew/node-scalable-blob-store",
   "author": "Grant Carthew <dev@carthew.net> (http://uglygizmo.blogspot.com.au/)",
@@ -45,7 +45,7 @@
     "tape": "^4.4.0"
   },
   "dependencies": {
-    "bluebird": "^3.1.4",
+    "bluebird": "^3.1.5",
     "cuid": "^1.3.8",
     "fs-blob-store": "^5.2.1",
     "mkdirp": "^0.5.1",

@@ -503,6 +503,7 @@ tree -d ~/blobs
 
 ## History
 
+-   v2.0.6: Added failure unit tests.
 -   v2.0.5: Refactor blob-store.js for minor performance improvement.
 -   v2.0.4: Minor performance improvements and bug fixes.
 -   v2.0.3: Added unit tests and minor fix.
