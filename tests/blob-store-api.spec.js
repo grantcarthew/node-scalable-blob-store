@@ -27,12 +27,12 @@ function streamToString (stream) {
   })
 }
 
-test('blob-store api tests', t => {
+test('blob-store api tests', (t) => {
   mock()
 
   t.plan(11)
   return blobStore.createWriteStream()
-  .then(result => {
+  .then((result) => {
     t.ok(result.blobPath, 'createWriteStream blob path created')
     t.ok(result.writeStream, 'createWriteStream writeStream created')
     testBlobPath = result.blobPath
@@ -44,40 +44,40 @@ test('blob-store api tests', t => {
       result.writeStream.on('error', reject)
       readStream.pipe(result.writeStream)
     })
-  }).then(blobPath => {
+  }).then((blobPath) => {
     return blobStore.createReadStream(blobPath)
-  }).then(readStream => {
+  }).then((readStream) => {
     return streamToString(readStream)
-  }).then(result => {
+  }).then((result) => {
     t.equal(result, data, 'blob file read succeeded')
   }).then(() => {
     return blobStore.exists(testBlobPath)
-  }).then(result => {
+  }).then((result) => {
     t.ok(result, 'blob file exists succeeded')
   }).then(() => {
     return blobStore.stat(testBlobPath)
-  }).then(stat => {
+  }).then((stat) => {
     t.equal(stat.size, 44, 'blob file stat succeeded')
   }).then(() => {
     return blobStore.remove(testBlobPath)
-  }).then(result => {
+  }).then((result) => {
     t.deepEqual(result, undefined, 'blob file remove succeeded')
     return blobStore.exists(testBlobPath)
-  }).then(result => {
+  }).then((result) => {
     t.notOk(result, 'blob file no longer exists')
   }).then(() => {
     return blobStore.createReadStream('/invalidread')
-  }).then(readStream => {
-    readStream.on('error', err => {
+  }).then((readStream) => {
+    readStream.on('error', (err) => {
       t.ok(err, 'createReadStream on invalid path raises error event')
     })
   }).then(() => {
-    return blobStore.stat('/invalidstat').catch(err => {
+    return blobStore.stat('/invalidstat').catch((err) => {
       t.ok(err, 'stat on invalid path throws error')
     })
   }).then(() => {
     return blobStore.remove('/invalidremove')
-  }).then(result => {
+  }).then((result) => {
     t.deepEqual(result, undefined, 'remove on invalid path returns undefined')
   }).then(() => {
     mock.restore()

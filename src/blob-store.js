@@ -32,9 +32,9 @@ BlobStore.prototype.createWriteStream = function () {
   }).then((blobPath) => {
     var fullBlobPath = path.join(self.state.blobStoreRoot, blobPath)
     return fsBlobItemList(fullBlobPath, self.state.validateId, false)
-    .then(blobFileItems => {
+    .then((blobFileItems) => {
       return blobFileItems.length
-    }).then(blobFileCount => {
+    }).then((blobFileCount) => {
       if (blobFileCount >= self.state.dirWidth) {
         return blobPathBuild(self.state)
       }

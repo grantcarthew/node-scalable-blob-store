@@ -22,7 +22,7 @@ const optNonDefault = {
   dirWidth: 6000
 }
 
-test('options-parser tests', t => {
+test('options-parser tests', (t) => {
   mock()
 
   t.plan(11)

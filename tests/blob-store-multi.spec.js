@@ -36,13 +36,13 @@ function streamToString (stream) {
   })
 }
 
-test('blob-store multi tests', t => {
+test('blob-store multi tests', (t) => {
   mock()
 
   t.plan(22)
   var promises = []
   promises.push(blobStoreA.createWriteStream()
-  .then(result => {
+  .then((result) => {
     t.ok(result.blobPath, 'BlobStoreA createWriteStream blob path created')
     t.ok(result.writeStream, 'BlobStoreA createWriteStream writeStream created')
     testBlobPathA = result.blobPath
@@ -54,45 +54,45 @@ test('blob-store multi tests', t => {
       result.writeStream.on('error', reject)
       readStream.pipe(result.writeStream)
     })
-  }).then(blobPath => {
+  }).then((blobPath) => {
     return blobStoreA.createReadStream(blobPath)
-  }).then(readStream => {
+  }).then((readStream) => {
     return streamToString(readStream)
-  }).then(result => {
+  }).then((result) => {
     t.equal(result, data, 'BlobStoreA blob file read succeeded')
   }).then(() => {
     return blobStoreA.exists(testBlobPathA)
-  }).then(result => {
+  }).then((result) => {
     t.ok(result, 'BlobStoreA blob file exists succeeded')
   }).then(() => {
     return blobStoreA.stat(testBlobPathA)
-  }).then(stat => {
+  }).then((stat) => {
     t.equal(stat.size, 44, 'BlobStoreA blob file stat succeeded')
   }).then(() => {
     return blobStoreA.remove(testBlobPathA)
   }).then(() => {
     t.pass('BlobStoreA blob file remove succeeded')
     return blobStoreA.exists(testBlobPathA)
-  }).then(result => {
+  }).then((result) => {
     t.notOk(result, 'BlobStoreA blob file no longer exists')
   }).then(() => {
     return blobStoreA.createReadStream('/invalidread')
-  }).then(readStream => {
-    readStream.on('error', err => {
+  }).then((readStream) => {
+    readStream.on('error', (err) => {
       t.ok(err, 'BlobStoreA createReadStream on invalid path raises error event')
     })
   }).then(() => {
-    return blobStoreA.stat('/invalidstat').catch(err => {
+    return blobStoreA.stat('/invalidstat').catch((err) => {
       t.ok(err, 'BlobStoreA stat on invalid path throws error')
     })
   }).then(() => {
     return blobStoreA.remove('/invalidremove')
-  }).then(result => {
+  }).then((result) => {
     t.deepEqual(result, undefined, 'BlobStoreA remove on invalid path returns undefined')
   }))
 
   promises.push(blobStoreB.createWriteStream()
-  .then(result => {
+  .then((result) => {
     t.ok(result.blobPath, 'BlobStoreB createWriteStream blob path created')
     t.ok(result.writeStream, 'BlobStoreB createWriteStream writeStream created')
     testBlobPathB = result.blobPath
@@ -104,40 +104,40 @@ test('blob-store multi tests', t => {
       result.writeStream.on('error', reject)
       readStream.pipe(result.writeStream)
     })
-  }).then(blobPath => {
+  }).then((blobPath) => {
     return blobStoreB.createReadStream(blobPath)
-  }).then(readStream => {
+  }).then((readStream) => {
     return streamToString(readStream)
-  }).then(result => {
+  }).then((result) => {
     t.equal(result, data, 'BlobStoreB blob file read succeeded')
   }).then(() => {
     return blobStoreB.exists(testBlobPathB)
-  }).then(result => {
+  }).then((result) => {
     t.ok(result, 'BlobStoreB blob file exists succeeded')
   }).then(() => {
     return blobStoreB.stat(testBlobPathB)
-  }).then(stat => {
+  }).then((stat) => {
     t.equal(stat.size, 44, 'BlobStoreB blob file stat succeeded')
   }).then(() => {
     return blobStoreB.remove(testBlobPathB)
   }).then(() => {
     t.pass('BlobStoreB blob file remove succeeded')
     return blobStoreB.exists(testBlobPathB)
-  }).then(result => {
+  }).then((result) => {
     t.notOk(result, 'BlobStoreB blob file no longer exists')
   }).then(() => {
     return blobStoreB.createReadStream('/invalidread')
-  }).then(readStream => {
-    readStream.on('error', err => {
+  }).then((readStream) => {
+    readStream.on('error', (err) => {
       t.ok(err, 'BlobStoreB createReadStream on invalid path raises error event')
     })
   }).then(() => {
-    return blobStoreB.stat('/invalidstat').catch(err => {
+    return blobStoreB.stat('/invalidstat').catch((err) => {
       t.ok(err, 'BlobStoreB stat on invalid path throws error')
     })
   }).then(() => {
     return blobStoreB.remove('/invalidremove')
-  }).then(result => {
+  }).then((result) => {
     t.deepEqual(result, undefined, 'BlobStoreB remove on invalid path returns undefined')
   }))
 

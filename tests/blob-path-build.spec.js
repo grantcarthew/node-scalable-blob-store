@@ -44,23 +44,23 @@ const mockFsConfig = {
 const newestCuid = '/cijownavg0000z9h3khpjxieo/cijownavj0001z9h3ltkiynq7'
 const newestUuid = '/574e9ed7-f99d-4c3b-8ed8-7340ae42f669/77dc7904-8f3a-4847-95b8-61a12306716a'
 
-test('blob-path-build tests', t => {
+test('blob-path-build tests', (t) => {
   mock(mockFsConfig)
 
   t.plan(5)
   return blobPathBuild(stateCuid)
-  .then(dir => {
+  .then((dir) => {
     t.ok(dir.startsWith(newestCuid), 'Return directory that starts with current CUID directory')
     t.equal(dir.split('/').length - 1, 3, 'Return directory that is three directories deep')
   }).then(() => {
     return blobPathBuild(stateUuid)
-  }).then(dir => {
+  }).then((dir) => {
     t.ok(dir.startsWith(newestUuid), 'Return directory that starts with current UUID directory')
     t.equal(dir.split('/').length - 1, 3, 'Return directory that is three directories deep')
   }).then(() => {
     stateCuid.blobStoreRoot = '/emptyCuidBlobStoreRoot'
     return blobPathBuild(stateCuid)
-  }).then(dir => {
+  }).then((dir) => {
     t.equal(dir.split('/').length - 1, 3, 'Return new directory that is three directories deep')
   }).then(() => {
     mock.restore()

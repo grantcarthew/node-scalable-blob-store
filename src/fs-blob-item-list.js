@@ -3,17 +3,17 @@ const Promise = require('bluebird')
 const fs = Promise.promisifyAll(require('fs'))
 
 module.exports = function (fsPath, validateId, onDirOrFile) {
-  return fs.readdirAsync(fsPath).filter(fsItem => {
+  return fs.readdirAsync(fsPath).filter((fsItem) => {
     var fsItemPath = path.join(fsPath, fsItem)
-    return fs.statAsync(fsItemPath).then(stat => {
+    return fs.statAsync(fsItemPath).then((stat) => {
       return onDirOrFile ? stat.isDirectory() : stat.isFile()
-    }).catch(err => {
+    }).catch((err) => {
       console.error(err)
       return false
     })
-  }).filter(fsItemName => {
+  }).filter((fsItemName) => {
     return validateId(fsItemName)
-  }).catch(err => {
+  }).catch((err) => {
     if (err.code === 'ENOENT') {
       return []
     }

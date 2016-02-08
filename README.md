@@ -13,14 +13,6 @@
 
 Please __Star__ on GitHub / NPM and __Watch__ for updates.
 
-## Breaking Changes
-
-With the v2.0 update of `scalable-blob-store` there is a new directory and file naming option based on [cuid][cuid-url]. This new naming system provides shorter directory names giving more room for deeper paths which means more capacity in your blob store.
-
-Rather than remove UUID support, there is now a required option to specify the type of id system to use for your blobs. It is no longer possible to create a blobStore using a `string` option.
-
-To migrate to v2.0 simply add the `idType: 'uuid'` to the options passed into the create method. Alternatively switch to `cuid` with the option `idType: 'cuid'`. See the [Quick Start](#quick-start) below for an example.
-
 ## Topics
 
 -   [Quick Start](#quick-start)
@@ -45,7 +37,7 @@ To migrate to v2.0 simply add the `idType: 'uuid'` to the options passed into th
 
 ## Quick Start
 
-Everything in `scalable-blob-store` is asynchronous and is based on Promises using the [Bluebird][bluebird-url] library ([why Bluebird and not native Promises?][bluebird-speed-url]). There are no callbacks in the API. I did this for two reasons; I like Promises, and to support the future ES2016 async / await features.
+Everything in `scalable-blob-store` is asynchronous and is based on Promises using the [Bluebird][bluebird-url] library ([why Bluebird and not native Promises?][bluebird-speed-url]). There are no callbacks in the API. I did this for two reasons; I like Promises, and to support the future ES2017 async / await features.
 
 Basic usage example:
 
@@ -207,8 +199,9 @@ Read performance will be close to, if not the same, as disk speed.
 
 ## Requirements
 
--   Node.js v4.1.2 or greater.
-  Mainly due to the ES6 (ES2015) syntax used. There is no reason a transpiled version would not work against an earlier version of node.
+Node.js v4.1.2 or greater is specified in the `package.json` file mainly due to the ES6 (ES2015) syntax used.
+
+If you wish to use an older version of node, use the `blob-store.js` file in the `es5dist` directory.
 
 ## Installation
 
@@ -503,6 +496,7 @@ tree -d ~/blobs
 
 ## History
 
+-   v2.0.7: Added `es5dist` for over versions of node. Packages updated.
 -   v2.0.6: Added failure unit tests.
 -   v2.0.5: Refactor blob-store.js for minor performance improvement.
 -   v2.0.4: Minor performance improvements and bug fixes.

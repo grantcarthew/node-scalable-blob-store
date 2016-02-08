@@ -6,7 +6,8 @@ const fsBlobDirLatestFullDepth = require('./fs-blob-dir-latest-full-depth')
 module.exports = function (state) {
   return fsBlobDirLatestFullDepth(state).then((fullBlobDirPath) => {
     var fullPath = path.join(state.blobStoreRoot, fullBlobDirPath)
-    return fsBlobItemList(fullPath, state.validateId, false).then(blobFileItems => {
+    return fsBlobItemList(fullPath, state.validateId, false)
+    .then((blobFileItems) => {
       return blobFileItems.length
     }).then((blobFileCount) => {
       if (blobFileCount >= state.dirWidth) {
@@ -22,7 +23,8 @@ module.exports = function (state) {
 
     return new Promise((resolve, reject) => {
       function trimFullBlobPath (nextPath) {
-        return fsBlobItemList(nextPath, state.validateId, true).then(blobDirItems => {
+        return fsBlobItemList(nextPath, state.validateId, true)
+        .then((blobDirItems) => {
           return blobDirItems.length
         }).then((blobDirCount) => {
           if (blobDirCount < state.dirWidth || nextPath.length === 1) {

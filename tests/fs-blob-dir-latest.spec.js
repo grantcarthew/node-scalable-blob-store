@@ -26,20 +26,20 @@ const mockFsConfig = {
   '/blobs/3a60e19f-7d1f-4d19-8ca5-9c0882c2f64a': mock.directory(oldestFsConfig)
 }
 
-test('fs-blob-dir-latest tests', t => {
+test('fs-blob-dir-latest tests', (t) => {
   mock(mockFsConfig)
 
   t.plan(3)
   return fsBlobDirLatest('/blobs', cuidValidator)
-  .then(dir => {
+  .then((dir) => {
     t.equal(dir, 'cijnrmu9y0002jph3gp68qaph', 'Return newest CUID directory')
   }).then(() => {
     return fsBlobDirLatest('/blobs', uuidValidator)
-  }).then(dir => {
+  }).then((dir) => {
     t.equal(dir, 'efcecc00-a6a7-4871-bd94-c54814bd3d80', 'Return newest UUID directory')
   }).then(() => {
     return fsBlobDirLatest('/', cuidValidator)
-  }).then(dir => {
+  }).then((dir) => {
     t.notOk(dir, 'Return false if invalid directory')
   }).then(() => {
     mock.restore()
