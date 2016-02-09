@@ -69,8 +69,10 @@ BlobStore.prototype.exists = function (blobPath) {
     }, (err, exists) => {
       if (err) {
         reject(err)
+        return null
       }
       resolve(exists)
+      return null
     })
   })
 }
@@ -83,8 +85,10 @@ BlobStore.prototype.remove = function (blobPath) {
     }, (err) => {
       if (err) {
         reject(err)
+        return null
       }
       resolve()
+      return null
     })
   })
 }

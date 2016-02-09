@@ -21,12 +21,14 @@ module.exports = function (state) {
         if (loopIndex === 1) {
           mkdirp(path.join(state.blobStoreRoot, blobPath))
           resolve(blobPath)
+          return null
         } else {
           loopIndex--
           buildPath(blobPath)
         }
       }).catch((err) => {
         reject(err)
+        return null
       })
     }
 

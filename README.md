@@ -496,7 +496,8 @@ tree -d ~/blobs
 
 ## History
 
--   v2.0.7: Added `es5dist` for over versions of node. Packages updated.
+-   v2.0.8: Added `return null` after resolve/reject calls to prevent Bluebird warnings.
+-   v2.0.7: Added `es5dist` for older versions of node. Packages updated.
 -   v2.0.6: Added failure unit tests.
 -   v2.0.5: Refactor blob-store.js for minor performance improvement.
 -   v2.0.4: Minor performance improvements and bug fixes.
