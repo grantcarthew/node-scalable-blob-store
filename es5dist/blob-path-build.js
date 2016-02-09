@@ -29,12 +29,14 @@ module.exports = function (state) {
         }).then(function (blobDirCount) {
           if (blobDirCount < state.dirWidth || nextPath.length === 1) {
             resolve(nextPath);
+            return null;
           } else {
             nextPath = path.dirname(nextPath);
             trimFullBlobPath(nextPath);
           }
         }).catch(function (err) {
           reject(err);
+          return null;
         });
       }
 

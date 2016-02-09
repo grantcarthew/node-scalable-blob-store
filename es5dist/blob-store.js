@@ -70,8 +70,10 @@ BlobStore.prototype.exists = function (blobPath) {
     }, function (err, exists) {
       if (err) {
         reject(err);
+        return null;
       }
       resolve(exists);
+      return null;
     });
   });
 };
@@ -84,8 +86,10 @@ BlobStore.prototype.remove = function (blobPath) {
     }, function (err) {
       if (err) {
         reject(err);
+        return null;
       }
       resolve();
+      return null;
     });
   });
 };
