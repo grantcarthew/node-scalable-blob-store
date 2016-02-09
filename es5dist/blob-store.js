@@ -24,6 +24,7 @@ function BlobStore(opts) {
   this.state.validateId = idValidator(this.state.idType);
   this.currentBlobPath = false;
   this.fsBlobStore = fsBlobStoreFactory(this.state.blobStoreRoot);
+  Promise.promisifyAll(Object.getPrototypeOf(this.fsBlobStore));
 }
 
 BlobStore.prototype.createWriteStream = function () {
@@ -63,34 +64,14 @@ BlobStore.prototype.createReadStream = function (blobPath) {
 };
 
 BlobStore.prototype.exists = function (blobPath) {
-  var self = this;
-  return new Promise(function (resolve, reject) {
-    self.fsBlobStore.exists({
-      key: blobPath
-    }, function (err, exists) {
-      if (err) {
-        reject(err);
-        return null;
-      }
-      resolve(exists);
-      return null;
-    });
+  return this.fsBlobStore.existsAsync({
+    key: blobPath
   });
 };
 
 BlobStore.prototype.remove = function (blobPath) {
-  var self = this;
-  return new Promise(function (resolve, reject) {
-    self.fsBlobStore.remove({
-      key: blobPath
-    }, function (err) {
-      if (err) {
-        reject(err);
-        return null;
-      }
-      resolve();
-      return null;
-    });
+  return this.fsBlobStore.removeAsync({
+    key: blobPath
   });
 };
 

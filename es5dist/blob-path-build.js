@@ -33,6 +33,7 @@ module.exports = function (state) {
           } else {
             nextPath = path.dirname(nextPath);
             trimFullBlobPath(nextPath);
+            return null;
           }
         }).catch(function (err) {
           reject(err);
@@ -42,6 +43,7 @@ module.exports = function (state) {
 
       // Initiate Recursion
       trimFullBlobPath(newBlobPath);
+      return null;
     });
   }).then(function (newBlobPath) {
     var blobPathIdCount = newBlobPath.split('/').length - 1;

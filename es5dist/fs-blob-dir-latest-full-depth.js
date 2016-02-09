@@ -27,6 +27,7 @@ module.exports = function (state) {
         } else {
           loopIndex--;
           buildPath(blobPath);
+          return null;
         }
       }).catch(function (err) {
         reject(err);
@@ -36,5 +37,6 @@ module.exports = function (state) {
 
     // Initiate Recursion
     buildPath(blobPath);
+    return null;
   });
 };
