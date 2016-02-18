@@ -9,7 +9,12 @@
   "scripts": {
     "test": "node ./tests/test-runner.js | tap-spec",
     "build": "babel src --presets babel-preset-es2015 --out-dir es5dist",
-    "lint": "standard"
+    "lint": "standard",
+    "upgrade": "npm run upgrade:rm && npm run upgrade:ncu && npm run upgrade:install && npm run upgrade:finish",
+    "upgrade:rm": "rm -Rf node_modules",
+    "upgrade:ncu": "npm-check-updates --upgradeAll",
+    "upgrade:install": "npm install",
+    "upgrade:finish": "npm run build && npm run test"
   },
   "repository": {
     "type": "git",
@@ -40,18 +45,19 @@
   },
   "devDependencies": {
     "babel-cli": "^6.5.1",
-    "babel-eslint": "^5.0.0-beta6",
+    "babel-eslint": "^5.0.0",
     "babel-preset-es2015": "^6.5.0",
     "crispy-stream": "^0.1.2",
     "mock-fs": "^3.7.0",
     "moment": "^2.11.2",
     "node-dir": "^0.1.11",
-    "standard": "^6.0.4",
+    "npm-check-updates": "^2.5.8",
+    "standard": "^6.0.5",
     "tap-spec": "^4.1.1",
     "tape": "^4.4.0"
   },
   "dependencies": {
-    "bluebird": "^3.2.2",
+    "bluebird": "^3.3.1",
     "cuid": "^1.3.8",
     "fs-blob-store": "^5.2.1",
     "mkdirp": "^0.5.1",
