@@ -496,7 +496,8 @@ tree -d ~/blobs
 
 ## History
 
--   v2.0.9: Added `Promise.promisifyAll(Object.getPrototypeOf(fsBlobStore))`. More `return null` statements.
+-   v2.0.10: Dependency packages updated.
+-   v2.0.9: Added promisifyAll to the fsBlobStore instance. More `return null` statements.
 -   v2.0.8: Added `return null` after resolve/reject calls to prevent Bluebird warnings.
 -   v2.0.7: Added `es5dist` for older versions of node. Packages updated.
 -   v2.0.6: Added failure unit tests.
