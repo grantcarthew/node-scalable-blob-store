@@ -202,7 +202,7 @@ Read performance will be close to, if not the same, as disk speed.
 npm install scalable-blob-store --save
 ```
 
-If you clone from [Github](https://github.com) you will need to run the build script:
+If you clone from [GitHub](https://github.com) you will need to run the build script:
 ```sh
 npm run build
 ```
