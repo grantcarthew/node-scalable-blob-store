@@ -1,5 +1,5 @@
 const test = require('tape')
-const idGen = require('../src/id-generator')
+const idGen = require('../dist/id-generator')
 const cuidGen = idGen('cuid')
 const uuidGen = idGen('uuid')
 var cuidRegEx = /^c[^\s-]{8,}$/

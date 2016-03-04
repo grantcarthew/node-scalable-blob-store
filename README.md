@@ -19,7 +19,6 @@ Please __Star__ on GitHub / NPM and __Watch__ for updates.
 -   [Rationale](#rationale)
 -   [Function](#function)
 -   [Performance](#performance)
--   [Requirements](#requirements)
 -   [Installation](#installation)
 -   [API](#api)
     -   [create](#create)
@@ -197,16 +196,15 @@ It is also worth noting there's not a lot of content in each file however a larg
 
 Read performance will be close to, if not the same, as disk speed.
 
-## Requirements
-
-Node.js v4.1.2 or greater is specified in the `package.json` file mainly due to the ES6 (ES2015) syntax used.
-
-If you wish to use an older version of node, use the `blob-store.js` file in the `es5dist` directory.
-
 ## Installation
 
 ```sh
 npm install scalable-blob-store --save
+```
+
+If you clone from [Github](https://github.com) you will need to run the build script:
+```sh
+npm run build
 ```
 
 ## API
@@ -450,6 +448,7 @@ After cloning `scalable-blob-store`, type the following into your console:
 
 ```sh
 npm install
+npm run build
 npm test
 ```
 
@@ -476,6 +475,7 @@ After cloning `scalable-blob-store`, type the following into your console:
 
 ```sh
 npm install
+npm run build
 node ./tests/test-fs.js
 ```
 
@@ -496,6 +496,7 @@ tree -d ~/blobs
 
 ## History
 
+-   v2.1.0: Switched to using the `ES5` build code. Removed Nodejs engine requirements.
 -   v2.0.10: Dependency packages updated.
 -   v2.0.9: Added promisifyAll to the fsBlobStore instance. More `return null` statements.
 -   v2.0.8: Added `return null` after resolve/reject calls to prevent Bluebird warnings.

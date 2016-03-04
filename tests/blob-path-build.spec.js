@@ -1,8 +1,8 @@
 const test = require('tape')
 const mock = require('mock-fs')
-const blobPathBuild = require('../src/blob-path-build')
-const idValidator = require('../src/id-validator')
-const idGenerator = require('../src/id-generator')
+const blobPathBuild = require('../dist/blob-path-build')
+const idValidator = require('../dist/id-validator')
+const idGenerator = require('../dist/id-generator')
 
 const stateCuid = {
   blobStoreRoot: '/blobs',

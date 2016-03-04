@@ -1,1 +1,1 @@
-module.exports = require('./src/blob-store')
+module.exports = require('./dist/blob-store')

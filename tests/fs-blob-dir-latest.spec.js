@@ -1,8 +1,8 @@
 const test = require('tape')
 const mock = require('mock-fs')
-const fsBlobDirLatest = require('../src/fs-blob-dir-latest')
-const cuidValidator = require('../src/id-validator')('cuid')
-const uuidValidator = require('../src/id-validator')('uuid')
+const fsBlobDirLatest = require('../dist/fs-blob-dir-latest')
+const cuidValidator = require('../dist/id-validator')('cuid')
+const uuidValidator = require('../dist/id-validator')('uuid')
 
 const oldestFsConfig = {
   content: 'oldest birthtime',

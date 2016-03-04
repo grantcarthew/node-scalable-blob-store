@@ -1,7 +1,7 @@
 const test = require('tape')
 const mock = require('mock-fs')
 const fs = require('fs')
-const parser = require('../src/options-parser')
+const parser = require('../dist/options-parser')
 const options = {}
 const optsCuidDefaults = {
   blobStoreRoot: '/tmp/blobs',

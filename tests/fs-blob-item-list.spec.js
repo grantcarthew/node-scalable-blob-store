@@ -1,8 +1,8 @@
 const test = require('tape')
 const mock = require('mock-fs')
-const fsBlobItemList = require('../src/fs-blob-item-list')
-const cuidValidator = require('../src/id-validator')('cuid')
-const uuidValidator = require('../src/id-validator')('uuid')
+const fsBlobItemList = require('../dist/fs-blob-item-list')
+const cuidValidator = require('../dist/id-validator')('cuid')
+const uuidValidator = require('../dist/id-validator')('uuid')
 
 const mockFsConfig = {
   '/blobs/cijnrl8iu0000jph3r3cg96w1': 'data',

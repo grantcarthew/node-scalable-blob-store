@@ -1,5 +1,6 @@
 # Ignore Folders
 node_modules
+dist
 
 # Ignore Files
 .idea

@@ -1,5 +1,5 @@
 const test = require('tape')
-const idVal = require('../src/id-validator')
+const idVal = require('../dist/id-validator')
 const cuidVal = idVal('cuid')
 const uuidVal = idVal('uuid')
 var cuid = 'cijnhaaye0000xmh3mhqb60jm'

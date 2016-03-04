@@ -1,0 +1,5 @@
+# Ignore Folders
+src
+
+# Ignore Files
+.remarkrc
