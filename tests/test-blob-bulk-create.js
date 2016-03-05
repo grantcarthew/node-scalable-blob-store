@@ -3,18 +3,7 @@ const moment = require('moment')
 const crispyStream = require('crispy-stream')
 const nodeDir = require('node-dir')
 const sbsFactory = require('../index')
-
-function streamToString (stream) {
-  return new Promise((resolve, reject) => {
-    const chunks = []
-    stream.on('data', (chunk) => {
-      chunks.push(chunk)
-    })
-    stream.on('end', () => {
-      resolve(chunks.join(''))
-    })
-  })
-}
+const streamToString = require('./test-streamtostring')
 
 module.exports = function (options, repeat) {
   var blobStore = sbsFactory.create(options)

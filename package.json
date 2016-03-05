@@ -1,6 +1,6 @@
 {
   "name": "scalable-blob-store",
-  "version": "2.1.1",
+  "version": "2.1.2",
   "description": "A simple local file system blob store that is designed to prevent conflicts when used with a distributed or replicated file system.",
   "homepage": "https://github.com/grantcarthew/node-scalable-blob-store",
   "author": "Grant Carthew <dev@carthew.net> (http://uglygizmo.blogspot.com.au/)",
@@ -32,7 +32,7 @@
   "scripts": {
     "prepublish": "npm run build",
     "clean": "rm -Rf dist",
-    "test": "node ./tests/test-runner.js | tap-spec",
+    "test": "npm run lint && node ./tests/test-runner.js | tap-spec",
     "build": "npm run clean && babel src --presets babel-preset-es2015 --out-dir dist",
     "lint": "standard",
     "upgrade": "npm run upgrade:rm && npm run upgrade:ncu && npm run upgrade:install && npm run upgrade:finish",

@@ -496,6 +496,7 @@ tree -d ~/blobs
 
 ## History
 
+-   v2.1.2: Missed duplicate function in tests, removed.
 -   v2.1.1: Refactored duplicate function in tests.
 -   v2.1.0: Switched to using the `ES5` build code. Removed Nodejs engine requirements.
 -   v2.0.10: Dependency packages updated.
