@@ -25,56 +25,86 @@ function BlobStore (opts) {
   Promise.promisifyAll(Object.getPrototypeOf(this.fsBlobStore))
 }
 
-BlobStore.prototype.createWriteStream = function () {
+BlobStore.prototype.createWriteStream = function (callback) {
+  callback = callback || function () {}
   var self = this
-  return Promise.resolve(this.currentBlobPath).then((blobPath) => {
-    if (!blobPath) { return blobPathBuild(self.state) }
-    return blobPath
-  }).then((blobPath) => {
-    var fullBlobPath = path.join(self.state.blobStoreRoot, blobPath)
-    return fsBlobItemList(fullBlobPath, self.state.validateId, false)
-    .then((blobFileItems) => {
-      return blobFileItems.length
-    }).then((blobFileCount) => {
-      if (blobFileCount >= self.state.dirWidth) {
-        return blobPathBuild(self.state)
-      }
+
+  return new Promise((resolve, reject) => {
+    return Promise.resolve(this.currentBlobPath).then((blobPath) => {
+      if (!blobPath) { return blobPathBuild(self.state) }
       return blobPath
+    }).then((blobPath) => {
+      var fullBlobPath = path.join(self.state.blobStoreRoot, blobPath)
+      return fsBlobItemList(fullBlobPath, self.state.validateId, false)
+      .then((blobFileItems) => {
+        return blobFileItems.length
+      }).then((blobFileCount) => {
+        if (blobFileCount >= self.state.dirWidth) {
+          return blobPathBuild(self.state)
+        }
+        return blobPath
+      })
+    }).then((blobPath) => {
+      self.currentBlobPath = blobPath
+      var filePath = path.join(blobPath, self.state.newId())
+      var writeStream = self.fsBlobStore.createWriteStream({
+        key: filePath
+      })
+      let blobData = {
+        blobPath: filePath,
+        writeStream: writeStream
+      }
+      resolve(blobData)
+      return callback(null, blobData)
     })
-  }).then((blobPath) => {
-    self.currentBlobPath = blobPath
-    var filePath = path.join(blobPath, self.state.newId())
-    var writeStream = self.fsBlobStore.createWriteStream({
-      key: filePath
-    })
-    return {
-      blobPath: filePath,
-      writeStream: writeStream
-    }
   })
 }
 
 BlobStore.prototype.createReadStream = function (blobPath) {
-  return Promise.resolve(
-    this.fsBlobStore.createReadStream({
-      key: blobPath
+  return this.fsBlobStore.createReadStream({
+    key: blobPath
+  })
+}
+
+BlobStore.prototype.exists = function (blobPath, callback) {
+  callback = callback || function () {}
+  return new Promise((resolve, reject) => {
+    this.fsBlobStore.exists({ key: blobPath }, (err, exists) => {
+      if (err) {
+        reject(err)
+        return callback(err)
+      }
+      resolve(exists)
+      return callback(null, exists)
     })
-  )
-}
-
-BlobStore.prototype.exists = function (blobPath) {
-  return this.fsBlobStore.existsAsync({
-    key: blobPath
   })
 }
 
-BlobStore.prototype.remove = function (blobPath) {
-  return this.fsBlobStore.removeAsync({
-    key: blobPath
+BlobStore.prototype.remove = function (blobPath, callback) {
+  callback = callback || function () {}
+  return new Promise((resolve, reject) => {
+    this.fsBlobStore.remove({ key: blobPath }, (err, result) => {
+      if (err) {
+        reject(err)
+        return callback(err)
+      }
+      resolve(result)
+      return callback(null, result)
+    })
   })
 }
 
-BlobStore.prototype.stat = function (blobPath) {
+BlobStore.prototype.stat = function (blobPath, callback) {
   var fullBlobPath = path.join(this.state.blobStoreRoot, blobPath)
-  return fs.statAsync(fullBlobPath)
+  callback = callback || function () {}
+  return new Promise((resolve, reject) => {
+    fs.stat(fullBlobPath, (err, result) => {
+      if (err) {
+        reject(err)
+        return callback(err)
+      }
+      resolve(result)
+      return callback(null, result)
+    })
+  })
 }
