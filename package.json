@@ -6,18 +6,6 @@
   "author": "Grant Carthew <dev@carthew.net> (http://uglygizmo.blogspot.com.au/)",
   "license": "MIT",
   "main": "index.js",
-  "scripts": {
-    "prepublish": "npm run build",
-    "clean": "rm -Rf dist",
-    "test": "node ./tests/test-runner.js | tap-spec",
-    "build": "npm run clean && babel src --presets babel-preset-es2015 --out-dir dist",
-    "lint": "standard src/**/*.js",
-    "upgrade": "npm run upgrade:rm && npm run upgrade:ncu && npm run upgrade:install && npm run upgrade:finish",
-    "upgrade:rm": "rm -Rf node_modules",
-    "upgrade:ncu": "npm-check-updates --upgradeAll",
-    "upgrade:install": "npm install",
-    "upgrade:finish": "npm run build && npm run test"
-  },
   "repository": {
     "type": "git",
     "url": "git://github.com/grantcarthew/node-scalable-blob-store.git"
@@ -41,9 +29,21 @@
   "engines": {
     "node": "*"
   },
+  "scripts": {
+    "prepublish": "npm run build",
+    "clean": "rm -Rf dist",
+    "test": "node ./tests/test-runner.js | tap-spec",
+    "build": "npm run clean && babel src --presets babel-preset-es2015 --out-dir dist",
+    "lint": "standard",
+    "upgrade": "npm run upgrade:rm && npm run upgrade:ncu && npm run upgrade:install && npm run upgrade:finish",
+    "upgrade:rm": "rm -Rf node_modules",
+    "upgrade:ncu": "npm-check-updates --upgradeAll",
+    "upgrade:install": "npm install",
+    "upgrade:finish": "npm run build && npm run test"
+  },
   "standard": {
     "parser": "babel-eslint",
-    "ignore": "es5dist"
+    "ignore": "dist"
   },
   "devDependencies": {
     "babel-cli": "^6.6.4",

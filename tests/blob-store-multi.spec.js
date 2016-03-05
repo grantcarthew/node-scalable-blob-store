@@ -2,6 +2,7 @@ const test = require('tape')
 const mock = require('mock-fs')
 const Promise = require('bluebird')
 const sbsFactory = require('../dist/blob-store.js')
+const streamToString = require('./test-streamtostring')
 const crispyStream = require('crispy-stream')
 const data = 'The quick brown fox jumped over the lazy dog'
 const readStream = crispyStream.createReadStream(data)
@@ -23,18 +24,6 @@ const blobStoreA = sbsFactory.create(optionsA)
 const blobStoreB = sbsFactory.create(optionsB)
 var testBlobPathA = ''
 var testBlobPathB = ''
-
-function streamToString (stream) {
-  return new Promise((resolve, reject) => {
-    const chunks = []
-    stream.on('data', (chunk) => {
-      chunks.push(chunk)
-    })
-    stream.on('end', () => {
-      resolve(chunks.join(''))
-    })
-  })
-}
 
 test('blob-store multi tests', (t) => {
   mock()
