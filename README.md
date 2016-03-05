@@ -496,6 +496,7 @@ tree -d ~/blobs
 
 ## History
 
+-   v2.1.1: Refactored duplicate function in tests.
 -   v2.1.0: Switched to using the `ES5` build code. Removed Nodejs engine requirements.
 -   v2.0.10: Dependency packages updated.
 -   v2.0.9: Added promisifyAll to the fsBlobStore instance. More `return null` statements.
