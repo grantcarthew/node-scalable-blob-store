@@ -34,8 +34,7 @@ test('blob-store api promise tests', (t) => {
       readStream.pipe(result.writeStream)
     })
   }).then((blobPath) => {
-    return blobStore.createReadStream(blobPath)
-  }).then((readStream) => {
+    var readStream = blobStore.createReadStream(blobPath)
     return streamToString(readStream)
   }).then((result) => {
     t.equal(result, data, 'blob file read succeeded')
