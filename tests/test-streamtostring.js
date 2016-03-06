@@ -1,11 +1,19 @@
-module.exports = function streamToString (stream) {
+module.exports = function streamToString (stream, callback) {
+  callback = callback || function () {}
+
   return new Promise((resolve, reject) => {
     const chunks = []
+    stream.on('error', (err) => {
+      reject(err)
+      return callback(err)
+    })
     stream.on('data', (chunk) => {
       chunks.push(chunk)
     })
     stream.on('end', () => {
-      resolve(chunks.join(''))
+      var result = chunks.join('')
+      resolve(result)
+      return callback(null, result)
     })
   })
 }

@@ -16,7 +16,7 @@ const options = {
 const blobStore = sbsFactory.create(options)
 var testBlobPath = ''
 
-test('blob-store api tests', (t) => {
+test('blob-store api promise tests', (t) => {
   mock()
 
   t.plan(11)

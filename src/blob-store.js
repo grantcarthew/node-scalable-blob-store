@@ -83,28 +83,34 @@ BlobStore.prototype.exists = function (blobPath, callback) {
 BlobStore.prototype.remove = function (blobPath, callback) {
   callback = callback || function () {}
   return new Promise((resolve, reject) => {
-    this.fsBlobStore.remove({ key: blobPath }, (err, result) => {
+    this.fsBlobStore.remove({ key: blobPath }, (err) => {
       if (err) {
         reject(err)
         return callback(err)
       }
-      resolve(result)
-      return callback(null, result)
+      resolve()
+      return callback()
     })
   })
 }
 
 BlobStore.prototype.stat = function (blobPath, callback) {
   var fullBlobPath = path.join(this.state.blobStoreRoot, blobPath)
-  callback = callback || function () {}
-  return new Promise((resolve, reject) => {
+  if (callback) {
     fs.stat(fullBlobPath, (err, result) => {
-      if (err) {
-        reject(err)
-        return callback(err)
-      }
-      resolve(result)
+      if (err) { return callback(err) }
       return callback(null, result)
     })
-  })
+  } else {
+    return new Promise((resolve, reject) => {
+      fs.stat(fullBlobPath, (err, result) => {
+        if (err) {
+          reject(err)
+          return null
+        }
+        resolve(result)
+        return null
+      })
+    })
+  }
 }
