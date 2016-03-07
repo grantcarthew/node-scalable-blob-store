@@ -15,11 +15,11 @@ Please __Star__ on GitHub / NPM and __Watch__ for updates.
 
 ## Version 3 Migration
 
-After reading a great article by [RisingStack][risingstack-url] called [How to Become a Better Node.js Developer in 2016][risingstack-article-url], I have added callback support to Scalable Blob Store. Because I was making major changes to the BlobStore object I decided to take this time to fix a public API call I mistakenly made as Promise based when it is a synchronous call.
+After reading a great article by [RisingStack][risingstack-url] called [How to Become a Better Node.js Developer in 2016][risingstack-article-url], I have added callback support to Scalable Blob Store. Because I was making major changes to the BlobStore object I decided to take this time to fix a public API call I mistakenly made as Promise based when it is synchronous.
 
-In version 1 and 2 the `createReadStream` returned a Promise. Version 3 is now synchronous and returns the readStream.
+In version 1 and 2 the function `createReadStream` returned a Promise. Version 3 is now synchronous and returns the [stream.Readable][readstream-url].
 
-To migrate to version 3, convert your code from this:
+Migrate to version 3 by converting your code __from this__:
 
 ```js
 blobStore.createReadStream('/id/path/from/your/database').then(readStream => {
@@ -33,12 +33,12 @@ blobStore.createReadStream('/id/path/from/your/database').then(readStream => {
 })
 ```
 
-To this:
+__To this__:
 
 ```js
 var readStream = blobStore.createReadStream('/id/path/from/your/database')
 readStream.on('error', err => {
-  throw err
+  console.error(err)
 })
 // Pipe the file to the console.
 readStream.pipe(process.stdout)
@@ -120,15 +120,12 @@ blobStore.createWriteStream().then(result => {
 })
 
 // Reading Example
-blobStore.createReadStream('/id/path/from/your/database').then(readStream => {
-  readStream.on('error', err => {
-    throw err
-  })
-  // Pipe the file to the console.
-  readStream.pipe(process.stdout)
-}).catch(err => {
+var readStream = blobStore.createReadStream('/id/path/from/your/database')
+readStream.on('error', err => {
   console.error(err)
 })
+// Pipe the file to the console.
+readStream.pipe(process.stdout)
 
 // Delete Example
 blobStore.remove('/id/path/from/your/database').then(() => {
@@ -480,7 +477,7 @@ readStream.pipe(process.stdout)
 
 ### `remove(string)`
 
-__Returns__: `undefined` if nothing went wrong or `error`
+__Returns__: `undefined` if nothing went wrong or the file did not exist.
 
 Promise example:
 
@@ -552,8 +549,6 @@ var blobPath = '/cij50xi3y00iyzph3qs7oatcy/cij50xi3z00izzph3yo053mzs/cij50xi4000
 
 blobStore.stat(blobPath, (err, stats) => {
   if (err) { console.error(err) }
-  // Returns a unix stats object
-  // https://en.wikipedia.org/wiki/Stat_(system_call)
   console.dir(stats)
   // Console output will be similar to the following.
   // { dev: 2050,
@@ -680,6 +675,7 @@ tree -d ~/blobs
 
 ## History
 
+-   v3.0.0: Callback support added. createReadStream API changed.
 -   v2.1.2: Missed duplicate function in tests, removed.
 -   v2.1.1: Refactored duplicate function in tests.
 -   v2.1.0: Switched to using the `ES5` build code. Removed Nodejs engine requirements.
