@@ -13,9 +13,44 @@
 
 Please __Star__ on GitHub / NPM and __Watch__ for updates.
 
+## Version 3 Migration
+
+After reading a great article by [RisingStack][risingstack-url] called [How to Become a Better Node.js Developer in 2016][risingstack-article-url], I have added callback support to Scalable Blob Store. Because I was making major changes to the BlobStore object I decided to take this time to fix a public API call I mistakenly made as Promise based when it is a synchronous call.
+
+In version 1 and 2 the `createReadStream` returned a Promise. Version 3 is now synchronous and returns the readStream.
+
+To migrate to version 3, convert your code from this:
+
+```js
+blobStore.createReadStream('/id/path/from/your/database').then(readStream => {
+  readStream.on('error', err => {
+    throw err
+  })
+  // Pipe the file to the console.
+  readStream.pipe(process.stdout)
+}).catch(err => {
+  console.error(err)
+})
+```
+
+To this:
+
+```js
+var readStream = blobStore.createReadStream('/id/path/from/your/database')
+readStream.on('error', err => {
+  throw err
+})
+// Pipe the file to the console.
+readStream.pipe(process.stdout)
+```
+
+All blob paths and other options remain the same.
+
 ## Topics
 
 -   [Quick Start](#quick-start)
+    -   [Promise API Example](#promise-api-example)
+    -   [Callback API Example](#callback-api-example)
 -   [Rationale](#rationale)
 -   [Function](#function)
 -   [Performance](#performance)
@@ -36,9 +71,9 @@ Please __Star__ on GitHub / NPM and __Watch__ for updates.
 
 ## Quick Start
 
-Everything in `scalable-blob-store` is asynchronous and is based on Promises using the [Bluebird][bluebird-url] library ([why Bluebird and not native Promises?][bluebird-speed-url]). There are no callbacks in the API. I did this for two reasons; I like Promises, and to support the future ES2017 async / await features.
+You can use either Promise or callback APIs in `scalable-blob-store`. The returned Promises are using the [Bluebird][bluebird-url] library ([why Bluebird and not native Promises?][bluebird-speed-url]).
 
-Basic usage example:
+### Promise API Example
 
 ```js
 var os = require('os')
@@ -117,6 +152,78 @@ blobStore.exists('/id/path/from/your/database').then(result => {
   // Logs 'true' or 'false'
 }).catch(err => {
   console.error(err)
+})
+```
+
+### Callback API Example
+
+```js
+var os = require('os')
+var sbsFactory = require('scalable-blob-store')
+
+var options = {
+  blobStoreRoot: os.homedir() + '/blobs', // Change this!
+  idType: 'cuid',
+  dirDepth: 4,
+  dirWidth: 1000
+}
+
+// Creating the blobStore Object
+var blobStore = sbsFactory.create(options)
+
+var fs = require('fs')
+var readStream = fs.createReadStream('/path/to/file')
+
+// Writing Exapmle
+blobStore.createWriteStream((err, result) => {
+  console.dir(result)
+  // Logs the result object which contains the blobPath and writeStream.
+  // Use the writeStream to save your blob.
+  // Store the blobPath in your database.
+  //
+  // result object will be similar to this:
+  // {
+  //   blobPath: "/cij50xids00ulzph3n49znlex/cij50xidu00upzph327c9zwwh/cij50xidx00utzph3ikjxzkt7/cij50xidq00ujzph3o3nsthq7",
+  //   writeStream: [object Object]
+  // }
+  result.writeStream.on('finish', () => {
+    console.log(result.blobPath)
+    // Logs the blobPath. Save this in your database.
+  })
+  result.writeStream.on('error', (err) => {
+    // Consider removing the empty blob from the file system. Code no included.
+    console.error(err)
+  })
+  readStream.pipe(result.writeStream)
+})
+
+// Reading Example
+var readStream = blobStore.createReadStream('/id/path/from/your/database')
+readStream.on('error', err => {
+  console.error(err)
+})
+// Pipe the file to the console.
+readStream.pipe(process.stdout)
+
+// Delete Example
+blobStore.remove('/id/path/from/your/database', (err) => {
+  if (err) { console.error(err) }
+  console.log('Blob removed successfully.')
+})
+
+// File Metadata Example
+blobStore.stat('/id/path/from/your/database', (err, stats) => {
+  if (err) { console.error(err) }
+  // Returns a unix stats object
+  // https://en.wikipedia.org/wiki/Stat_(system_call)
+  console.dir(stats)
+})
+
+// File Exists Example
+blobStore.exists('/id/path/from/your/database', (err, exists) => {
+  if (err) { console.error(err) }
+  console.log(exists)
+  // Logs 'true' or 'false'
 })
 ```
 
@@ -209,7 +316,7 @@ npm run build
 
 ## API
 
-All `API` calls apart from `create(options)` are asynchronous returning Promises resolving to the values below.
+Scalable Blob Store supports both Promise or Callback APIs for asynchronous calls.
 
 <a name="create" />
 
@@ -294,7 +401,7 @@ Returned Object using UUID as the idType:
 Use the `writeStream` to save your blob or file.
 The `blobPath` needs to be saved to your database for future access.
 
-Example:
+Promise example:
 
 ```js
 var fs = require('fs')
@@ -323,6 +430,32 @@ blobStore.createWriteStream().then(result => {
 })
 ```
 
+Callback example:
+
+```js
+var fs = require('fs')
+var readStream = fs.createReadStream('/path/to/file')
+
+blobStore.createWriteStream((err, result) => {
+  console.dir(result)
+  // result object will be similar to this:
+  // {
+  //   blobPath: "/cij50xi3y00iyzph3qs7oatcy/cij50xi3z00izzph3yo053mzs/cij50xi4000j0zph3mshil7p5/cij50xi4100j1zph3loy3hp6h",
+  //   writeStream: [object Object]
+  // }
+
+  result.writeStream.on('finish', () => {
+    console.log(result.blobPath)
+    // Logs the blobPath. Save this in your database.
+  })
+  result.writeStream.on('error', (err) => {
+    // Consider removing the empty blob from the file system. Code no included.
+    console.error(err)
+  })
+  readStream.pipe(result.writeStream)
+})
+```
+
 <a name="createReadStream" />
 
 ### `createReadStream(string)`
@@ -335,15 +468,12 @@ Example:
 // Get the blobPath value from your database.
 var blobPath = '/cij50xi3y00iyzph3qs7oatcy/cij50xi3z00izzph3yo053mzs/cij50xi4000j0zph3mshil7p5/cij50xi4100j1zph3loy3hp6h'
 
-blobStore.createReadStream(blobPath).then(readStream => {
-  readStream.on('error', err => {
-    throw err
-  })
-  // Blob contents is piped to the console.
-  readStream.pipe(process.stdout)
-}).catch(err => {
+var readStream = blobStore.createReadStream(blobPath)
+readStream.on('error', err => {
   console.error(err)
 })
+// Blob contents is piped to the console.
+readStream.pipe(process.stdout)
 ```
 
 <a name="remove" />
@@ -352,7 +482,7 @@ blobStore.createReadStream(blobPath).then(readStream => {
 
 __Returns__: `undefined` if nothing went wrong or `error`
 
-Example:
+Promise example:
 
 ```js
 // Get the blobPath value from your database.
@@ -365,6 +495,18 @@ blobStore.remove(blobPath).then(() => {
 })
 ```
 
+Callback example:
+
+```js
+// Get the blobPath value from your database.
+var blobPath = '/cij50xi3y00iyzph3qs7oatcy/cij50xi3z00izzph3yo053mzs/cij50xi4000j0zph3mshil7p5/cij50xi4100j1zph3loy3hp6h'
+
+blobStore.remove(blobPath, (err) => {
+  if (err) { console.error(err) }
+  console.log('Blob removed successfully.')
+})
+```
+
 <a name="stat" />
 
 ### `stat(string)`
@@ -374,7 +516,7 @@ __Returns__: `object`
 Rather than parse the file system [`stats`][nodefs-url] object, `scalable-blob-store` returns the raw `stats` object.
 More stat class details can be found on [Wikipedia][wikistat-url].
 
-Example:
+Promise example:
 
 ```js
 // Get the blobPath value from your database.
@@ -402,6 +544,35 @@ blobStore.stat(blobPath).then(stats => {
 })
 ```
 
+Callback example:
+
+```js
+// Get the blobPath value from your database.
+var blobPath = '/cij50xi3y00iyzph3qs7oatcy/cij50xi3z00izzph3yo053mzs/cij50xi4000j0zph3mshil7p5/cij50xi4100j1zph3loy3hp6h'
+
+blobStore.stat(blobPath, (err, stats) => {
+  if (err) { console.error(err) }
+  // Returns a unix stats object
+  // https://en.wikipedia.org/wiki/Stat_(system_call)
+  console.dir(stats)
+  // Console output will be similar to the following.
+  // { dev: 2050,
+  //   mode: 33188,
+  //   nlink: 1,
+  //   uid: 1000,
+  //   gid: 1000,
+  //   rdev: 0,
+  //   blksize: 4096,
+  //   ino: 6707277,
+  //   size: 44,
+  //   blocks: 8,
+  //   atime: Mon Oct 12 2015 08:51:29 GMT+1000 (AEST),
+  //   mtime: Mon Oct 12 2015 08:51:29 GMT+1000 (AEST),
+  //   ctime: Mon Oct 12 2015 08:51:29 GMT+1000 (AEST),
+  //   birthtime: Mon Oct 12 2015 08:51:29 GMT+1000 (AEST) }
+})
+```
+
 <a name="exists" />
 
 ### `exists(string)`
@@ -410,7 +581,7 @@ __Returns__: `boolean`
 
 `true` if the file exists, otherwise `false`.
 
-Example:
+Promise example:
 
 ```js
 // Get the blobPath value from your database.
@@ -421,6 +592,19 @@ blobStore.exists(blobPath).then(result => {
   // Logs 'true' or 'false'.
 }).catch(err => {
   console.error(err)
+})
+```
+
+Callback example:
+
+```js
+// Get the blobPath value from your database.
+var blobPath = '/cij50xi3y00iyzph3qs7oatcy/cij50xi3z00izzph3yo053mzs/cij50xi4000j0zph3mshil7p5/cij50xi4100j1zph3loy3hp6h'
+
+blobStore.exists(blobPath, (err, exists) => {
+  if (err) { console.error(err) }
+  console.log(exists)
+  // Logs 'true' or 'false'
 })
 ```
 
@@ -574,3 +758,5 @@ MIT
 [tape-url]: https://www.npmjs.com/package/tape
 [mock-fs-url]: https://www.npmjs.com/package/mock-fs
 [tree-url]: https://www.debian-administration.org/article/606/Commands_you_might_have_missed_tree
+[risingstack-url]: https://risingstack.com/
+[risingstack-article-url]: https://blog.risingstack.com/how-to-become-a-better-node-js-developer-in-2016
