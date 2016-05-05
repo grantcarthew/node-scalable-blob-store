@@ -1,6 +1,5 @@
 const test = require('tape')
 const mock = require('mock-fs')
-const Promise = require('bluebird')
 const sbsFactory = require('../dist/blob-store.js')
 const streamToString = require('./test-streamtostring')
 const crispyStream = require('crispy-stream')
