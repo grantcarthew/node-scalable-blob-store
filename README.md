@@ -642,6 +642,7 @@ tree -d ~/blobs
 
 ## History
 
+-   v3.0.1: Packages updated and minor refactor.
 -   v3.0.0: Callback support added. createReadStream API changed.
 -   v2.1.2: Missed duplicate function in tests, removed.
 -   v2.1.1: Refactored duplicate function in tests.
