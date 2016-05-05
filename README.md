@@ -13,39 +13,6 @@
 
 Please __Star__ on GitHub / NPM and __Watch__ for updates.
 
-## Version 3 Migration
-
-After reading a great article by [RisingStack][risingstack-url] called [How to Become a Better Node.js Developer in 2016][risingstack-article-url], I have added callback support to Scalable Blob Store. Because I was making major changes to the BlobStore object I decided to take this time to fix a public API call I mistakenly made as Promise based when it is synchronous.
-
-In version 1 and 2 the function `createReadStream` returned a Promise. Version 3 is now synchronous and returns the [stream.Readable][readstream-url].
-
-Migrate to version 3 by converting your code __from this__:
-
-```js
-blobStore.createReadStream('/id/path/from/your/database').then(readStream => {
-  readStream.on('error', err => {
-    throw err
-  })
-  // Pipe the file to the console.
-  readStream.pipe(process.stdout)
-}).catch(err => {
-  console.error(err)
-})
-```
-
-__To this__:
-
-```js
-var readStream = blobStore.createReadStream('/id/path/from/your/database')
-readStream.on('error', err => {
-  console.error(err)
-})
-// Pipe the file to the console.
-readStream.pipe(process.stdout)
-```
-
-All blob paths and other options remain the same.
-
 ## Topics
 
 -   [Quick Start](#quick-start)
