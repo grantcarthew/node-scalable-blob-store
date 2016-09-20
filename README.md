@@ -6,6 +6,7 @@
 [![bitHound Dependencies][bithound-dep-image]][bithound-dep-url]
 [![Build Status][travisci-image]][travisci-url]
 [![js-standard-style][js-standard-image]][js-standard-url]
+[![NSP Status][nsp-image]][nsp-url]
 
 [![Mr Blobby][mrblobby-image]][sbs-url]
 
@@ -715,6 +716,8 @@ MIT
 [bithound-code-url]: https://www.bithound.io/github/grantcarthew/node-scalable-blob-store
 [js-standard-image]: https://img.shields.io/badge/code%20style-standard-brightgreen.svg
 [js-standard-url]: http://standardjs.com/
+[nsp-image]: https://nodesecurity.io/orgs/openjs/projects/3871d340-0ca9-471c-be9a-39df3871262d/badge
+[nsp-url]: https://nodesecurity.io/orgs/openjs/projects/3871d340-0ca9-471c-be9a-39df3871262d
 [nodei-npm-image]: https://nodei.co/npm/scalable-blob-store.png?downloads=true&downloadRank=true&stars=true
 [nodei-npm-url]: https://nodei.co/npm/scalable-blob-store/
 [travisci-image]: https://travis-ci.org/grantcarthew/node-scalable-blob-store.svg?branch=master
