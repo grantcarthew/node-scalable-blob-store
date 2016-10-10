@@ -643,6 +643,7 @@ tree -d ~/blobs
 
 ## History
 
+-   v3.0.3 2016-10-10: Replaced `node-uuid` with `uuid`.
 -   v3.0.2 2016-09-20: Packages updated.
 -   v3.0.1: Packages updated and minor refactor.
 -   v3.0.0: Callback support added. createReadStream API changed.
