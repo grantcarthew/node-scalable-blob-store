@@ -210,7 +210,7 @@ Once the latest path has been determined, the number of files within the directo
 
 Because there are no databases used to manage the files in the root path, it is up to you to maintain the returned `blobStore` path and metadata about the stored files in your own database.
 
-The reason `scalable-blob-store` is scalable is due to the naming of the directories and files within your file system. Every directory and file saved to disk is named by a generated id based on either [CUID][cuid-url] or [UUID v4][nodeuuid-url] (here is a [discussion about CUIDs and UUIDs][cuid-discuss-url]). Merging directories between servers or disks should never cause file name collisions.
+The reason `scalable-blob-store` is scalable is due to the naming of the directories and files within your file system. Every directory and file saved to disk is named by a generated id based on either [CUID][cuid-url] or [UUID v4][uuid-url] (here is a [discussion about CUIDs and UUIDs][cuid-discuss-url]). Merging directories between servers or disks should never cause file name collisions.
 
 If a replicated or cluster file system is in use the only conflict that can occur is when one server is reading a file while another is removing the same file. `scalable-blob-store` does not try to manage this conflict, however it will raise the exception.
 
@@ -659,7 +659,7 @@ tree -d ~/blobs
 -   v2.0.3: Added unit tests and minor fix.
 -   v2.0.2: Added [standard][js-standard-url] to package.json.
 -   v2.0.1: Minor performance improvements and bug fixes.
--   v2.0.0: Added support for [CUID][cuid-url] or [UUID][nodeuuid-url] directory and file names.
+-   v2.0.0: Added support for [CUID][cuid-url] or [UUID][uuid-url] directory and file names.
 -   v1.0.1: Last release of v1. Work on v2.0.0 to support cuid.
 -   v1.0.0: Minor delint and README updates. Bump to v1.0 for future changes.
 -   v0.4.1: Fix reference error.
@@ -674,7 +674,7 @@ tree -d ~/blobs
 Thanks to the following marvelous people for their hard work:
 
 -   [Petka Antonov][petka-url] for [bluebird][bluebird-url]
--   [Robert Kieffer][broofa-url] for [node-uuid][nodeuuid-url]
+-   [Roman Shtylman][defunctzombie-url] for [uuid][uuid-url]
 -   [Eric Elliot][ericelliott-url] for [cuid][cuid-url]
 -   [James Halliday][substack-url] for [mkdirp][mkdirp-url]
 -   [Mathias Buus][mathiasbuus-url] for [fs-blob-store][fsblobstore-url]
@@ -695,8 +695,8 @@ MIT
 [azurestorage-url]: https://azure.microsoft.com/en-us/services/storage/
 [filestorage-url]: https://github.com/petersirka/node-filestorage
 [glusterfs-url]: http://www.gluster.org/
-[nodeuuid-url]: https://github.com/broofa/node-uuid
-[broofa-url]: https://github.com/broofa
+[uuid-url]: https://www.npmjs.com/package/uuid
+[defunctzombie-url]: https://github.com/defunctzombie
 [wikiuuid-url]: https://en.wikipedia.org/wiki/Universally_unique_identifier
 [cuid-url]: https://github.com/ericelliott/cuid
 [mkdirp-url]: https://www.npmjs.com/package/mkdirp

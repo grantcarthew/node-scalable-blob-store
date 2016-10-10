@@ -1,4 +1,4 @@
-const uuid = require('node-uuid')
+const uuid = require('uuid')
 const cuid = require('cuid')
 
 module.exports = function (idType) {
