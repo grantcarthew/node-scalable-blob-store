@@ -52,7 +52,6 @@ module.exports = function (options, repeat) {
         readTotal += data.length
         i--
         recurse()
-        return
       }).catch((err) => {
         return reject(err)
       })

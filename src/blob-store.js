@@ -32,7 +32,6 @@ BlobStore.prototype.createWriteStream = function (callback) {
     }, function (err) {
       callback(err)
     })
-    return
   } else {
     return CreateWriteStreamPromise.call(this)
   }
