@@ -643,6 +643,7 @@ tree -d ~/blobs
 
 ## History
 
+-   v3.0.5 2017-03-20: Packages updated to support Node.js v7.7.3 and mock-fs v4.2.0.
 -   v3.0.4 2016-12-05: Packages updated.
 -   v3.0.3 2016-10-10: Replaced `node-uuid` with `uuid`.
 -   v3.0.2 2016-09-20: Packages updated.
