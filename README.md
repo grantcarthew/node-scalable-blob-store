@@ -659,7 +659,7 @@ See my [other projects on NPM](https://www.npmjs.com/~grantcarthew).
 
 ## History
 
--   v3.0.6  [2017-04-17]: Dependency packages updated.
+-   v3.0.6  [2017-05-17]: Dependency packages updated.
 -   v3.0.5  [2017-03-20]: Dependency packages updated to support Node.js v7.7.3 and mock-fs v4.2.0.
 -   v3.0.4  [2016-12-05]: Dependency packages updated.
 -   v3.0.3  [2016-10-10]: Replaced `node-uuid` with `uuid`.
