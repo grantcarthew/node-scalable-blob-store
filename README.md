@@ -639,7 +639,7 @@ tree -d ~/blobs
 
 I, Grant Carthew, am a technologist, trainer, and Dad from Queensland, Australia. I work on code in a number of personal projects and when the need arises I build my own packages.
 
-This project exists because I needed a local blob store that would scale if the need arises.
+This project exists because I needed a local blob store that could scale.
 
 Everything I do in open source is done in my own time and as a contribution to the open source community.
 
