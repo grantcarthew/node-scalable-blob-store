@@ -7,6 +7,7 @@
 [![Build Status][travisci-image]][travisci-url]
 [![js-standard-style][js-standard-image]][js-standard-url]
 [![NSP Status][nsp-image]][nsp-url]
+[![Patreon Donation][patreon-image]][patreon-url]
 
 [![Mr Blobby][mrblobby-image]][sbs-url]
 
@@ -32,6 +33,7 @@ Please __Star__ on GitHub / NPM and __Watch__ for updates.
     -   [exists](#exists)
 -   [Known Issues](#known-issues)
 -   [Testing](#testing)
+-   [About the Owner](#about-the-owner)
 -   [Contributing](#contributing)
 -   [History](#history)
 -   [Credits](#credits)
@@ -633,6 +635,20 @@ tree ~/blobs
 tree -d ~/blobs
 ```
 
+## About the Owner
+
+I, Grant Carthew, am a technologist, trainer, and Dad from Queensland, Australia. I work on code in a number of personal projects and when the need arises I build my own packages.
+
+This project exists because I needed a local blob store that would scale if the need arises.
+
+Everything I do in open source is done in my own time and as a contribution to the open source community.
+
+If you are using my projects and would like to thank me or support me, please click the Patreon link below.
+
+[![Patreon Donation][patreon-image]][patreon-url]
+
+See my [other projects on NPM](https://www.npmjs.com/~grantcarthew).
+
 ## Contributing
 
 1.  Fork it!
@@ -643,34 +659,35 @@ tree -d ~/blobs
 
 ## History
 
--   v3.0.5 2017-03-20: Packages updated to support Node.js v7.7.3 and mock-fs v4.2.0.
--   v3.0.4 2016-12-05: Packages updated.
--   v3.0.3 2016-10-10: Replaced `node-uuid` with `uuid`.
--   v3.0.2 2016-09-20: Packages updated.
--   v3.0.1: Packages updated and minor refactor.
--   v3.0.0: Callback support added. createReadStream API changed.
--   v2.1.2: Missed duplicate function in tests, removed.
--   v2.1.1: Refactored duplicate function in tests.
--   v2.1.0: Switched to using the `ES5` build code. Removed Nodejs engine requirements.
--   v2.0.10: Dependency packages updated.
--   v2.0.9: Added promisifyAll to the fsBlobStore instance. More `return null` statements.
--   v2.0.8: Added `return null` after resolve/reject calls to prevent Bluebird warnings.
--   v2.0.7: Added `es5dist` for older versions of node. Packages updated.
--   v2.0.6: Added failure unit tests.
--   v2.0.5: Refactor blob-store.js for minor performance improvement.
--   v2.0.4: Minor performance improvements and bug fixes.
--   v2.0.3: Added unit tests and minor fix.
--   v2.0.2: Added [standard][js-standard-url] to package.json.
--   v2.0.1: Minor performance improvements and bug fixes.
--   v2.0.0: Added support for [CUID][cuid-url] or [UUID][uuid-url] directory and file names.
--   v1.0.1: Last release of v1. Work on v2.0.0 to support cuid.
--   v1.0.0: Minor delint and README updates. Bump to v1.0 for future changes.
--   v0.4.1: Fix reference error.
--   v0.4.0: Changed read and write to createReadStream and createWriteStream.
--   v0.3.1: Fix write stream event order.
--   v0.3.0: Removed file path function, change of plans.
--   v0.2.0: Added file path function.
--   v0.1.0: Initial release.
+-   v3.0.6  [2017-04-17]: Dependency packages updated.
+-   v3.0.5  [2017-03-20]: Dependency packages updated to support Node.js v7.7.3 and mock-fs v4.2.0.
+-   v3.0.4  [2016-12-05]: Dependency packages updated.
+-   v3.0.3  [2016-10-10]: Replaced `node-uuid` with `uuid`.
+-   v3.0.2  [2016-09-20]: Dependency packages updated.
+-   v3.0.1  [2016-05-05]: Packages updated and minor refactor.
+-   v3.0.0  [2016-03-07]: Callback support added. createReadStream API changed.
+-   v2.1.2  [2016-03-05]: Missed duplicate function in tests, removed.
+-   v2.1.1  [2016-03-05]: Refactored duplicate function in tests.
+-   v2.1.0  [2016-03-05]: Switched to using the `ES5` build code. Removed Nodejs engine requirements.
+-   v2.0.10 [2016-03-03]: Dependency packages updated.
+-   v2.0.9  [2016-02-09]: Added promisifyAll to the fsBlobStore instance. More `return null` statements.
+-   v2.0.8  [2016-02-09]: Added `return null` after resolve/reject calls to prevent Bluebird warnings.
+-   v2.0.7  [2016-02-09]: Added `es5dist` for older versions of node. Packages updated.
+-   v2.0.6  [2016-01-28]: Added failure unit tests.
+-   v2.0.5  [2016-01-26]: Refactor blob-store.js for minor performance improvement.
+-   v2.0.4  [2016-01-24]: Minor performance improvements and bug fixes.
+-   v2.0.3  [2016-01-22]: Added unit tests and minor fix.
+-   v2.0.2  [2016-01-19]: Added [standard][js-standard-url] to package.json.
+-   v2.0.1  [2016-01-12]: Minor performance improvements and bug fixes.
+-   v2.0.0  [2016-01-08]: Added support for [CUID][cuid-url] or [UUID][uuid-url] directory and file names.
+-   v1.0.1  [2016-01-07]: Last release of v1. Work on v2.0.0 to support cuid.
+-   v1.0.0  [2016-01-05]: Minor delint and README updates. Bump to v1.0 for future changes.
+-   v0.4.1  [2015-08-20]: Fix reference error.
+-   v0.4.0  [2015-08-16]: Changed read and write to createReadStream and createWriteStream.
+-   v0.3.1  [2015-08-16]: Fix write stream event order.
+-   v0.3.0  [2015-08-16]: Removed file path function, change of plans.
+-   v0.2.0  [2015-08-16]: Added file path function.
+-   v0.1.0  [2015-09-30]: Initial release.
 
 ## Credits
 
@@ -721,6 +738,8 @@ MIT
 [js-standard-url]: http://standardjs.com/
 [nsp-image]: https://nodesecurity.io/orgs/openjs/projects/3871d340-0ca9-471c-be9a-39df3871262d/badge
 [nsp-url]: https://nodesecurity.io/orgs/openjs/projects/3871d340-0ca9-471c-be9a-39df3871262d
+[patreon-image]: https://img.shields.io/badge/patreon-donate-yellow.svg
+[patreon-url]: https://www.patreon.com/grantcarthew
 [nodei-npm-image]: https://nodei.co/npm/scalable-blob-store.png?downloads=true&downloadRank=true&stars=true
 [nodei-npm-url]: https://nodei.co/npm/scalable-blob-store/
 [travisci-image]: https://travis-ci.org/grantcarthew/node-scalable-blob-store.svg?branch=master
