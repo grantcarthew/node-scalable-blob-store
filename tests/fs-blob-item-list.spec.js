@@ -17,36 +17,27 @@ const mockFsConfig = {
   '/blobs/3a60e19f-7d1f-4d19-8ca5-9c0882c2f64a': {}
 }
 
-test('fs-blob-item-list tests', (t) => {
-  mock(mockFsConfig)
+module.exports = async function fsBlobItemListSpec () {
+  test('fs-blob-item-list tests', async function (t) {
+    mock(mockFsConfig)
 
-  t.plan(8)
-  return fsBlobItemList('/blobs', cuidValidator, true)
-  .then((list) => {
-    t.equal(list.length, 2, 'Return two CUID directories')
-  }).then(() => {
-    return fsBlobItemList('/blobs', uuidValidator, true)
-  }).then((list) => {
-    t.equal(list.length, 2, 'Return two UUID directories')
-  }).then(() => {
-    return fsBlobItemList('/blobs', cuidValidator, false)
-  }).then((list) => {
-    t.equal(list.length, 2, 'Return two CUID files')
-  }).then(() => {
-    return fsBlobItemList('/blobs', uuidValidator, false)
-  }).then((list) => {
-    t.equal(list.length, 2, 'Return two UUID files')
-  }).then(() => {
-    return fsBlobItemList('/wrongdir', cuidValidator, true)
-  }).then((list) => {
-    t.ok(Array.isArray(list), 'Return array if invalid directory')
-    t.equal(list.length, 0, 'Return empty array if invalid directory')
-  }).then(() => {
-    return fsBlobItemList('/wrongdir', cuidValidator, false)
-  }).then((list) => {
-    t.ok(Array.isArray(list), 'Return array if listing files on invalid directory')
-    t.equal(list.length, 0, 'Return empty array if listing files on invalid directory')
-  }).then(() => {
+    t.plan(8)
+    let item
+    item = await fsBlobItemList('/blobs', cuidValidator, true)
+    t.equal(item.length, 2, 'Return two CUID directories')
+    item = await fsBlobItemList('/blobs', uuidValidator, true)
+    t.equal(item.length, 2, 'Return two UUID directories')
+    item = await fsBlobItemList('/blobs', cuidValidator, false)
+    t.equal(item.length, 2, 'Return two CUID files')
+    item = await fsBlobItemList('/blobs', uuidValidator, false)
+    t.equal(item.length, 2, 'Return two UUID files')
+    item = await fsBlobItemList('/wrongdir', cuidValidator, true)
+    t.ok(Array.isArray(item), 'Return array if invalid directory')
+    t.equal(item.length, 0, 'Return empty array if invalid directory')
+    item = await fsBlobItemList('/wrongdir', cuidValidator, false)
+    t.ok(Array.isArray(item), 'Return array if listing files on invalid directory')
+    t.equal(item.length, 0, 'Return empty array if listing files on invalid directory')
+    
     mock.restore()
   })
-})
+}

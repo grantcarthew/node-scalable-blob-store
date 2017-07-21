@@ -5,7 +5,7 @@ const nodeDir = require('node-dir')
 const sbsFactory = require('../index')
 const streamToString = require('./test-streamtostring')
 
-module.exports = function (options, repeat) {
+module.exports = async function (options, repeat) {
   var blobStore = sbsFactory.create(options)
 
   return new Promise((resolve, reject) => {
