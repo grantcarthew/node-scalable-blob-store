@@ -25,9 +25,9 @@ async function main () {
   // await fsBlobDirLatestSpec()
   // await fsBlobDirLatestFullDepthSpec()
   // await blobPathBuildSpec()
-  // await blobStoreApiPromiseSpec()
+  await blobStoreApiPromiseSpec()
   // await blobStoreApiCallbackSpec()
-  await blobStoreMultiSpec()
+  // await blobStoreMultiSpec()
   // await blobStoreBulkSpec()
 }
 
