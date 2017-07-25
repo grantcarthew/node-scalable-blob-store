@@ -1,3 +1,4 @@
+const os = require('os')
 const test = require('tape')
 const mock = require('mock-fs')
 const Promise = require('bluebird')
