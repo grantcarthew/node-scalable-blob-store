@@ -1,6 +1,5 @@
 const os = require('os')
 const test = require('tape')
-const mock = require('mock-fs')
 const Promise = require('bluebird')
 const testBlobStore = require('./test-blob-store')
 
@@ -19,7 +18,6 @@ const optionsB = {
 
 module.exports = async function blobStoreMultiSpec () {
   test('blob-store multi tests', (t) => {
-    mock()
 
     t.plan(23)
     const promises = []
@@ -27,7 +25,6 @@ module.exports = async function blobStoreMultiSpec () {
     promises.push(testBlobStore(t, optionsB))
     return Promise.all(promises).then(() => {
       t.pass('blob-store multi tests completed')
-      mock.restore()
     })
   })
 }

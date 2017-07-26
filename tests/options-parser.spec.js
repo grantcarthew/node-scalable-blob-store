@@ -1,6 +1,5 @@
 const os = require('os')
 const test = require('tape')
-const mock = require('mock-fs')
 const fs = require('fs')
 const parser = require('../dist/options-parser')
 const options = {}
@@ -25,7 +24,6 @@ const optNonDefault = {
 
 module.exports = async function optionsParserSpec () {
   test('options-parser tests', (t) => {
-    mock()
 
     t.plan(11)
     t.throws(() => { parser() }, 'Throws error if no options passed')
@@ -47,6 +45,5 @@ module.exports = async function optionsParserSpec () {
     t.deepEqual(parser(optNonDefault), optNonDefault, 'Return options with non-defaults')
     t.ok(fs.existsSync(options.blobStoreRoot), 'blobStoreRoot path created')
 
-    mock.restore()
   })
 }

@@ -1,6 +1,5 @@
 const os = require('os')
 const test = require('tape')
-const mock = require('mock-fs')
 const fsBlobDirLatestFullDepth = require('../dist/fs-blob-dir-latest-full-depth')
 const idValidator = require('../dist/id-validator')
 const idGenerator = require('../dist/id-generator')
@@ -31,6 +30,9 @@ const oldFsConfig = {
   birthtime: new Date('2015/01/01')
 }
 
+const mock = {}
+mock.directory = () => {}
+mock.file = () => {}
 const mockFsConfig = {
   '/blobs/cijownavg0000z9h3khpjxieo': mock.directory(currentFsConfig),
   '/blobs/cijownavg0000z9h3khpjxieo/cijownavj0001z9h3ltkiynq7': mock.directory(currentFsConfig),
@@ -74,6 +76,5 @@ module.exports = async function fsBlobDirLatestFullDepthSpec () {
     dir = await fsBlobDirLatestFullDepth(stateCuid)
     t.equal(dir.split('/').length - 1, 3, 'Return new UUID directory')
 
-    mock.restore()
   })
 }

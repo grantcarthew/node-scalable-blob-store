@@ -1,6 +1,5 @@
 const os = require('os')
 const test = require('tape')
-const mock = require('mock-fs')
 const fsBlobItemList = require('../dist/fs-blob-item-list')
 const cuidValidator = require('../dist/id-validator')('cuid')
 const uuidValidator = require('../dist/id-validator')('uuid')
@@ -20,7 +19,6 @@ const mockFsConfig = {
 
 module.exports = async function fsBlobItemListSpec () {
   test('fs-blob-item-list tests', async function (t) {
-    mock(mockFsConfig)
 
     t.plan(8)
     let item
@@ -39,6 +37,5 @@ module.exports = async function fsBlobItemListSpec () {
     t.ok(Array.isArray(item), 'Return array if listing files on invalid directory')
     t.equal(item.length, 0, 'Return empty array if listing files on invalid directory')
     
-    mock.restore()
   })
 }

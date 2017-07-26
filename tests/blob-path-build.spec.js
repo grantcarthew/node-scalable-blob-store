@@ -1,6 +1,5 @@
 const os = require('os')
 const test = require('tape')
-const mock = require('mock-fs')
 const blobPathBuild = require('../dist/blob-path-build')
 const idValidator = require('../dist/id-validator')
 const idGenerator = require('../dist/id-generator')
@@ -31,6 +30,9 @@ const oldFsConfig = {
   birthtime: new Date('2015/01/01')
 }
 
+const mock = {}
+mock.directory = () => {}
+mock.file = () => {}
 const mockFsConfig = {
   '/blobs/cijownavg0000z9h3khpjxieo': mock.directory(currentFsConfig),
   '/blobs/cijownavg0000z9h3khpjxieo/cijownavj0001z9h3ltkiynq7': mock.directory(currentFsConfig),
@@ -47,7 +49,6 @@ const newestUuid = '/574e9ed7-f99d-4c3b-8ed8-7340ae42f669/77dc7904-8f3a-4847-95b
 
 module.exports = async function blobPathBuildSpec () {
   test('blob-path-build tests', async function (t) {
-    mock(mockFsConfig)
 
     t.plan(5)
     let dir
@@ -61,6 +62,5 @@ module.exports = async function blobPathBuildSpec () {
     dir = await blobPathBuild(stateCuid)
     t.equal(dir.split('/').length - 1, 3, 'Return new directory that is three directories deep')
 
-    mock.restore()
   })
 }
