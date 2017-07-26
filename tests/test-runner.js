@@ -18,7 +18,7 @@ const blobStoreMultiSpec = require('./blob-store-multi.spec')
 const blobStoreBulkSpec = require('./blob-store-bulk.spec')
 
 async function main () {
-  // await optionsParserSpec()
+  await optionsParserSpec()
   // await idGeneratorSpec()
   // await idValidatorSpec()
   // await fsBlobItemListSpec()

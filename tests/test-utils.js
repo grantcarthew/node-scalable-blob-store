@@ -1,28 +1,25 @@
 const os = require('os')
 const fs = require('fs')
 const Promise = require('bluebird')
-const mkdir = Promise.promisify(require('mkdirp'))
+const mkdirp = require('mkdirp')
 const writeFile = Promise.promisify(fs.writeFile)
-const rmdir = Promise.promisify(fs.rmdir)
 const path = require('path')
-
-module.exports.blobRoot = async function blobRoot (name) {
-  let rootPath = path.join(os.tmpdir(), 'blobs')
-  await mkdir(rootPath)
-  return rootPath
-}
-
-module.exports.rmBlobRoot = async function rmBlobRoot (blobRoot) {
-  return await rmdir(blobRoot)
-}
+const cuid = require('cuid')
+const uuid = require('uuid')
 
 module.exports.mkBlobDir = mkBlobDir = async function mkBlobDir (blobRoot, ...dirs) {
-  let currentPath = blobRoot
-  for (let dir of dirs) {
-    let fullPath = path.join(currentPath, dir)
-    !fs.existsSync(fullPath) && await fs.mkdir(fullPath)
-    currentPath = fullPath
-  }
+  return new Promise((resolve, reject) => {
+    const fullPath = path.join(blobRoot, ...dirs)
+    mkdirp(fullPath, (err) => {
+      err && reject(err)
+      resolve()
+    })
+  })
+}
+
+module.exports.blobRoot = function blobRoot (name) {
+  let rootPath = path.join(os.tmpdir(), 'blobs', name)
+  return rootPath
 }
 
 module.exports.createBlobFile = async function createBlobFile (blobRoot, ...pathPart) {
@@ -33,4 +30,20 @@ module.exports.createBlobFile = async function createBlobFile (blobRoot, ...path
 
 module.exports.delay = function delay (ms) {
   return new Promise.delay(ms)
+}
+
+module.exports.generateCuids = function generateCuids (total) {
+  const cuids = []
+  for (let i = 0; i < total; i++) {
+    cuids.push(cuid())
+  }
+  return cuids
+}
+
+module.exports.generateUuids = function generateUuids (total) {
+  const uuids = []
+  for (let i = 0; i < total; i++) {
+    uuids.push(uuid.v4())
+  }
+  return uuids
 }
