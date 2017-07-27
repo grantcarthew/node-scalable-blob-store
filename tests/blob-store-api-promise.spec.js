@@ -1,9 +1,10 @@
-const os = require('os')
 const test = require('tape')
 const testBlobStore = require('./test-blob-store')
+const utils = require('./test-utils')
+const blobRoot = utils.blobRoot('blob-store-api-promise')
 
 const options = {
-  blobStoreRoot: os.tmpdir() + '/blobs',
+  blobStoreRoot: blobRoot,
   idType: 'cuid',
   dirDepth: 5,
   dirWidth: 10
@@ -12,7 +13,11 @@ const options = {
 module.exports = async function blobStoreApiPromiseSpec (opt) {
   test('blob-store api promise tests', async function (t) {
     t.plan(12)
-    await testBlobStore(t, options)
+    try {
+      await testBlobStore(t, options)
+    } catch (err) {
+      console.error(err)      
+    }
     t.pass('blob-store api promise tests completed')
   })
 }

@@ -47,6 +47,10 @@ module.exports = async function optionsParserSpec () {
     t.deepEqual(parser(optNonDefault), optNonDefault, 'Return options with non-defaults')
     t.ok(fs.existsSync(options.blobStoreRoot), 'blobStoreRoot path created')
 
-    blobRoot.startsWith('/tmp') && await del(blobRoot, {force: true})
+    try {
+      blobRoot.startsWith('/tmp') && await del(blobRoot, {force: true})
+    } catch (err) {
+      console.error(err)      
+    }
   })
 }

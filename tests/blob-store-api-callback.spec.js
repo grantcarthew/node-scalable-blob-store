@@ -3,11 +3,12 @@ const test = require('tape')
 const sbsFactory = require('../dist/blob-store.js')
 const streamToString = require('./test-streamtostring')
 const crispyStream = require('crispy-stream')
-const data = 'The quick brown fox jumped over the lazy dog'
-const readStream = crispyStream.createReadStream(data)
+const utils = require('./test-utils')
+const readStream = crispyStream.createReadStream(utils.data)
+const blobRoot = utils.blobRoot('blob-store-api-callback')
 
 const options = {
-  blobStoreRoot: '/tmp/blobs',
+  blobStoreRoot: blobRoot,
   idType: 'cuid',
   dirDepth: 5,
   dirWidth: 10
@@ -29,7 +30,7 @@ module.exports = async function blobStoreApiCallbackSpec () {
         var blobReadStream = blobStore.createReadStream(result.blobPath)
         streamToString(blobReadStream, (err2, readData) => {
           if (err2) { t.fail(err2.message) }
-          t.equal(readData, data, 'blob file read succeeded')
+          t.equal(readData, utils.data, 'blob file read succeeded')
           blobStore.exists(testBlobPath, (err3, exists) => {
             if (err3) { t.fail(err3.message) }
             t.ok(exists, 'blob file exists succeeded')
