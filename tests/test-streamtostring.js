@@ -4,6 +4,7 @@ module.exports = function streamToString (stream, callback) {
   return new Promise((resolve, reject) => {
     const chunks = []
     stream.on('error', (err) => {
+      console.error(err)
       reject(err)
       return callback(err)
     })

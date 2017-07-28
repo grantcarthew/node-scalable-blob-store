@@ -27,8 +27,8 @@ async function main () {
   await blobPathBuildSpec()
   await blobStoreApiPromiseSpec()
   await blobStoreApiCallbackSpec()
-  // await blobStoreMultiSpec()
-  // await blobStoreBulkSpec()
+  await blobStoreMultiSpec()
+  await blobStoreBulkSpec()
 }
 
 main()
