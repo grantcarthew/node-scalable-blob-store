@@ -588,7 +588,7 @@ For my use case, removal of large numbers of files is unlikely to occur, so my m
 
 There are two methods for testing `scalable-blob-store`:
 
-1.  _Unit Testing_ which uses [tape][tape-url] and a mock file system using [mock-fs][mock-fs-url].
+1.  _Unit Testing_ which uses [tape][tape-url] and the local `os.tmpdir()` directory.
 2.  _Manual Testing_ which will create directories and files on your local disk.
 
 ### Unit Testing
@@ -659,6 +659,7 @@ See my [other projects on NPM](https://www.npmjs.com/~grantcarthew).
 
 ## History
 
+-   v3.0.7  [2017-07-28]: Fixed test. Removed mock-fs (now uses /tmp). Dependency packages updated.
 -   v3.0.6  [2017-05-17]: Dependency packages updated.
 -   v3.0.5  [2017-03-20]: Dependency packages updated to support Node.js v7.7.3 and mock-fs v4.2.0.
 -   v3.0.4  [2016-12-05]: Dependency packages updated.
@@ -746,7 +747,6 @@ MIT
 [travisci-url]: https://travis-ci.org/grantcarthew/node-scalable-blob-store
 [cuid-discuss-url]: https://github.com/ericelliott/cuid/issues/22
 [tape-url]: https://www.npmjs.com/package/tape
-[mock-fs-url]: https://www.npmjs.com/package/mock-fs
 [tree-url]: https://www.debian-administration.org/article/606/Commands_you_might_have_missed_tree
 [risingstack-url]: https://risingstack.com/
 [risingstack-article-url]: https://blog.risingstack.com/how-to-become-a-better-node-js-developer-in-2016
