@@ -8,7 +8,7 @@ const blobRoot = utils.blobRoot('fs-blob-item-list')
 module.exports = async function fsBlobItemListSpec () {
   test('fs-blob-item-list tests', async function (t) {
     try {
-      const blobFs = await utils.buildTestFs(blobRoot)
+      await utils.buildTestFs(blobRoot)
 
       t.plan(8)
       let item
@@ -26,10 +26,10 @@ module.exports = async function fsBlobItemListSpec () {
       item = await fsBlobItemList('/wrongdir', cuidValidator, false)
       t.ok(Array.isArray(item), 'Return array if listing files on invalid directory')
       t.equal(item.length, 0, 'Return empty array if listing files on invalid directory')
-      
+
       await utils.rmBlobDir(blobRoot)
     } catch (err) {
-      console.error(err) 
+      console.error(err)
     }
   })
 }

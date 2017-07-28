@@ -36,11 +36,10 @@ module.exports = async function testBlobStore (t, opt, postfix = '') {
     t.ok(err, 'createReadStream on invalid path raises error event' + postfix)
   })
   try {
-    const invalidStat = await blobStore.stat('/invalidstat')
+    await blobStore.stat('/invalidstat')
   } catch (err) {
     t.ok(err, 'stat on invalid path throws error' + postfix)
   }
   const invalidRemove = await blobStore.remove('/invalidremove')
   t.deepEqual(invalidRemove, undefined, 'remove on invalid path result = awaits undefined' + postfix)
 }
-

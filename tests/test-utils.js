@@ -8,9 +8,11 @@ const path = require('path')
 const cuid = require('cuid')
 const uuid = require('uuid')
 
-module.exports.data = data = 'The quick brown fox jumped over the lazy dog'
+const data = 'The quick brown fox jumped over the lazy dog'
+module.exports.data = data
 
-module.exports.mkBlobDir = mkBlobDir = async function mkBlobDir (blobRoot, ...dirs) {
+module.exports.mkBlobDir = mkBlobDir
+async function mkBlobDir (blobRoot, ...dirs) {
   const fullPath = path.join(blobRoot, ...dirs)
   return new Promise((resolve, reject) => {
     mkdirp(fullPath, (err) => {
@@ -41,7 +43,7 @@ async function mkBlobFile (blobRoot, ...pathPart) {
 
 module.exports.delay = delay
 function delay (ms) {
-  return new Promise.delay(ms)
+  return Promise.delay(ms)
 }
 
 module.exports.generateCuids = generateCuids
@@ -64,25 +66,25 @@ function generateUuids (total) {
 
 module.exports.buildTestFs = buildTestFs
 async function buildTestFs (blobRoot) {
-    const cuids = generateCuids(10)
-    const uuids = generateUuids(10)
-    const newestCuid = `/${cuids[5]}/${cuids[6]}/${cuids[7]}`
-    const newestUuid = `/${uuids[5]}/${uuids[6]}/${uuids[7]}`
+  const cuids = generateCuids(10)
+  const uuids = generateUuids(10)
+  const newestCuid = `/${cuids[5]}/${cuids[6]}/${cuids[7]}`
+  const newestUuid = `/${uuids[5]}/${uuids[6]}/${uuids[7]}`
 
-    try {
-      await mkBlobFile(blobRoot, cuids[0], cuids[1], cuids[2], cuids[3])
-      await mkBlobFile(blobRoot, uuids[0], uuids[1], uuids[2], uuids[3])
-      await mkBlobFile(blobRoot, cuids[4])
-      await mkBlobFile(blobRoot, uuids[4])
-      await mkBlobFile(blobRoot, 'wrongnamefile')
-      await mkBlobDir(blobRoot, 'wrongnamedir')
-      await delay(200)
-      await mkBlobFile(blobRoot, cuids[5], cuids[6], cuids[7], cuids[8])
-      await mkBlobFile(blobRoot, uuids[5], uuids[6], uuids[7], uuids[8])
-      await mkBlobFile(blobRoot, cuids[9])
-      await mkBlobFile(blobRoot, uuids[9])
-    } catch (err) {
-      console.log(err) 
-    }
-    return { newestCuid, newestUuid }
+  try {
+    await mkBlobFile(blobRoot, cuids[0], cuids[1], cuids[2], cuids[3])
+    await mkBlobFile(blobRoot, uuids[0], uuids[1], uuids[2], uuids[3])
+    await mkBlobFile(blobRoot, cuids[4])
+    await mkBlobFile(blobRoot, uuids[4])
+    await mkBlobFile(blobRoot, 'wrongnamefile')
+    await mkBlobDir(blobRoot, 'wrongnamedir')
+    await delay(200)
+    await mkBlobFile(blobRoot, cuids[5], cuids[6], cuids[7], cuids[8])
+    await mkBlobFile(blobRoot, uuids[5], uuids[6], uuids[7], uuids[8])
+    await mkBlobFile(blobRoot, cuids[9])
+    await mkBlobFile(blobRoot, uuids[9])
+  } catch (err) {
+    console.log(err)
+  }
+  return { newestCuid, newestUuid }
 }

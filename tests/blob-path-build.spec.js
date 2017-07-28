@@ -26,7 +26,7 @@ module.exports = async function blobPathBuildSpec () {
   test('blob-path-build tests', async function (t) {
     try {
       const blobFs = await utils.buildTestFs(blobRoot)
-      
+
       t.plan(5)
       let dir
       dir = await blobPathBuild(stateCuid)
@@ -39,8 +39,9 @@ module.exports = async function blobPathBuildSpec () {
       dir = await blobPathBuild(stateCuid)
       t.equal(dir.split('/').length - 1, 3, 'Return new directory that is three directories deep')
 
+      await utils.rmBlobDir(blobRoot)
     } catch (err) {
-      console.error(err)  
+      console.error(err)
     }
   })
 }

@@ -3,6 +3,7 @@ const test = require('tape')
 const sbsFactory = require('../dist/blob-store.js')
 const streamToString = require('./test-streamtostring')
 const crispyStream = require('crispy-stream')
+const del = require('del')
 const utils = require('./test-utils')
 const readStream = crispyStream.createReadStream(utils.data)
 const blobRoot = utils.blobRoot('blob-store-api-callback')
@@ -18,7 +19,6 @@ var testBlobPath = ''
 
 module.exports = async function blobStoreApiCallbackSpec () {
   test('blob-store api callback tests', (t) => {
-
     t.plan(11)
     blobStore.createWriteStream((err1, result) => {
       if (err1) { t.fail(err1.message) }
@@ -50,6 +50,7 @@ module.exports = async function blobStoreApiCallbackSpec () {
                       t.ok(err8, 'stat on invalid path throws error')
                       blobStore.remove('/invalidremove', (err9) => {
                         if (err9) { t.fail(err9.message) }
+                        blobRoot.startsWith(os.tmpdir()) && del.sync(blobRoot, {force: true})
                         t.deepEqual(err9, undefined, 'remove on invalid path returns undefined')
                       })
                     })

@@ -1,4 +1,3 @@
-const os = require('os')
 const test = require('tape')
 const utils = require('./test-utils')
 const testBlobBulkCreate = require('./test-blob-bulk-create')

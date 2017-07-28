@@ -26,7 +26,6 @@ const optNonDefault = {
 
 module.exports = async function optionsParserSpec () {
   test('options-parser tests', async function (t) {
-
     t.plan(11)
     t.throws(() => { parser() }, 'Throws error if no options passed')
     t.throws(() => { parser('string') }, 'Throws error if string option passed')
@@ -50,7 +49,7 @@ module.exports = async function optionsParserSpec () {
     try {
       blobRoot.startsWith('/tmp') && await del(blobRoot, {force: true})
     } catch (err) {
-      console.error(err)      
+      console.error(err)
     }
   })
 }

@@ -21,8 +21,7 @@ module.exports = async function fsBlobDirLatestSpec () {
 
       await utils.rmBlobDir(blobRoot)
     } catch (err) {
-      console.error(err)      
+      console.error(err)
     }
   })
 }
-

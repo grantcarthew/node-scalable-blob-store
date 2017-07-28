@@ -15,8 +15,9 @@ module.exports = async function blobStoreApiPromiseSpec (opt) {
     t.plan(12)
     try {
       await testBlobStore(t, options)
+      await utils.rmBlobDir(blobRoot)
     } catch (err) {
-      console.error(err)      
+      console.error(err)
     }
     t.pass('blob-store api promise tests completed')
   })

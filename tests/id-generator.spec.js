@@ -1,4 +1,3 @@
-const os = require('os')
 const test = require('tape')
 const idGen = require('../dist/id-generator')
 const cuidGen = idGen('cuid')
