@@ -1,6 +1,6 @@
 {
   "name": "scalable-blob-store",
-  "version": "3.0.7",
+  "version": "3.0.8",
   "description": "A simple local file system blob store that is designed to prevent conflicts when used with a distributed or replicated file system.",
   "homepage": "https://github.com/grantcarthew/node-scalable-blob-store",
   "author": "Grant Carthew <dev@carthew.net> (http://uglygizmo.blogspot.com.au/)",
@@ -46,20 +46,20 @@
     "ignore": "dist"
   },
   "devDependencies": {
-    "babel-cli": "^6.24.1",
-    "babel-eslint": "^7.2.3",
+    "babel-cli": "^6.26.0",
+    "babel-eslint": "^8.0.3",
     "babel-preset-es2015": "^6.24.1",
     "crispy-stream": "^0.1.2",
     "del": "^3.0.0",
-    "moment": "^2.18.1",
+    "moment": "^2.20.1",
     "node-dir": "^0.1.17",
-    "npm-check-updates": "^2.12.1",
-    "standard": "^10.0.2",
+    "npm-check-updates": "^2.14.0",
+    "standard": "^10.0.3",
     "tap-spec": "^4.1.1",
-    "tape": "^4.7.0"
+    "tape": "^4.8.0"
   },
   "dependencies": {
-    "bluebird": "^3.5.0",
+    "bluebird": "^3.5.1",
     "cuid": "^1.3.8",
     "fs-blob-store": "^5.2.1",
     "mkdirp": "^0.5.1",

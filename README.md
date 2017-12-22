@@ -659,6 +659,7 @@ See my [other projects on NPM](https://www.npmjs.com/~grantcarthew).
 
 ## History
 
+-   v3.0.8  [2017-12-22]: Dependency packages updated.
 -   v3.0.7  [2017-07-28]: Fixed test. Removed mock-fs (now uses /tmp). Dependency packages updated.
 -   v3.0.6  [2017-05-17]: Dependency packages updated.
 -   v3.0.5  [2017-03-20]: Dependency packages updated to support Node.js v7.7.3 and mock-fs v4.2.0.
