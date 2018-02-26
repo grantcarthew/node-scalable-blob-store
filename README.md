@@ -17,27 +17,27 @@ Please __Star__ on GitHub / NPM and __Watch__ for updates.
 
 ## Topics
 
--   [Quick Start](#quick-start)
-    -   [Promise API Example](#promise-api-example)
-    -   [Callback API Example](#callback-api-example)
--   [Rationale](#rationale)
--   [Function](#function)
--   [Performance](#performance)
--   [Installation](#installation)
--   [API](#api)
-    -   [create](#create)
-    -   [createWriteStream](#createWriteStream)
-    -   [createReadStream](#createReadStream)
-    -   [remove](#remove)
-    -   [stat](#stat)
-    -   [exists](#exists)
--   [Known Issues](#known-issues)
--   [Testing](#testing)
--   [About the Owner](#about-the-owner)
--   [Contributing](#contributing)
--   [History](#history)
--   [Credits](#credits)
--   [License](#license)
+- [Quick Start](#quick-start)
+    - [Promise API Example](#promise-api-example)
+    - [Callback API Example](#callback-api-example)
+- [Rationale](#rationale)
+- [Function](#function)
+- [Performance](#performance)
+- [Installation](#installation)
+- [API](#api)
+    - [create](#create)
+    - [createWriteStream](#createWriteStream)
+    - [createReadStream](#createReadStream)
+    - [remove](#remove)
+    - [stat](#stat)
+    - [exists](#exists)
+- [Known Issues](#known-issues)
+- [Testing](#testing)
+- [About the Owner](#about-the-owner)
+- [Contributing](#contributing)
+- [History](#history)
+- [Credits](#credits)
+- [License](#license)
 
 ## Quick Start
 
@@ -236,11 +236,11 @@ Example with UUID directory and file names:
 
 Other operational points of interest:
 
--   Files are only stored at the bottom of the directory tree.
--   The directory used for writing files is determined by the latest creation time (file system birthtime attribute).
--   Once the number of files in a directory reaches the `dirWidth` value, the next directory is created.
--   Once the number of directories in any directory reaches the `dirWidth` value, the next parent directory is created.
--   If the number of directories in the highest directory, being the blob store root, has reached the `dirWidth` value, the `dirWidth` value is ignored.
+- Files are only stored at the bottom of the directory tree.
+- The directory used for writing files is determined by the latest creation time (file system birthtime attribute).
+- Once the number of files in a directory reaches the `dirWidth` value, the next directory is created.
+- Once the number of directories in any directory reaches the `dirWidth` value, the next parent directory is created.
+- If the number of directories in the highest directory, being the blob store root, has reached the `dirWidth` value, the `dirWidth` value is ignored.
 
 ## Performance
 
@@ -248,19 +248,19 @@ Other operational points of interest:
 
 This is an unscientific measurement, however just to get some idea of the write performance I ran a test with the following configuration:
 
--   Virtual Machine with Debian GNU/Linux running on an SSD disk
--   File Content: "The quick brown fox jumped over the lazy dog"
--   dirDepth: 3
--   dirWidth: 1000
--   Repeat: 10,000
+- Virtual Machine with Debian GNU/Linux running on an SSD disk
+- File Content: "The quick brown fox jumped over the lazy dog"
+- dirDepth: 3
+- dirWidth: 1000
+- Repeat: 10,000
 
 With this configuration the following performance was observed:
 
--   Files Created: 10,000
--   Total File Size: 40MB
--   Total Size on Disk: 9.76GB (ext4 file system)
--   Total Time CUID: 115123 milliseconds (115 seconds)
--   Total Time UUID: 115743 milliseconds (116 seconds)
+- Files Created: 10,000
+- Total File Size: 40MB
+- Total Size on Disk: 9.76GB (ext4 file system)
+- Total Time CUID: 115123 milliseconds (115 seconds)
+- Total Time UUID: 115743 milliseconds (116 seconds)
 
 Not surprisingly, this configuration created one top tier directory, one second tier directory, and ten third tier directories.
 
@@ -579,8 +579,8 @@ There is an issue in `scalable-blob-store` that I have no work around for as of 
 
 There are two possible solutions for this problem:
 
--   A maintenance task to remove empty directories and migrate low numbered directories into other directories. This is not something that `scalable-blob-store` can do and the developer needs to build this.
--   A better solution would be to replace the cached blob path (`this.currentBlobPath`) on the 'blobStore' object with a valid path that is not full.
+- A maintenance task to remove empty directories and migrate low numbered directories into other directories. This is not something that `scalable-blob-store` can do and the developer needs to build this.
+- A better solution would be to replace the cached blob path (`this.currentBlobPath`) on the 'blobStore' object with a valid path that is not full.
 
 For my use case, removal of large numbers of files is unlikely to occur, so my motivation to build a solution for this issue is quite low.
 
@@ -659,47 +659,48 @@ See my [other projects on NPM](https://www.npmjs.com/~grantcarthew).
 
 ## History
 
--   v3.0.8  [2017-12-22]: Dependency packages updated.
--   v3.0.7  [2017-07-28]: Fixed test. Removed mock-fs (now uses /tmp). Dependency packages updated.
--   v3.0.6  [2017-05-17]: Dependency packages updated.
--   v3.0.5  [2017-03-20]: Dependency packages updated to support Node.js v7.7.3 and mock-fs v4.2.0.
--   v3.0.4  [2016-12-05]: Dependency packages updated.
--   v3.0.3  [2016-10-10]: Replaced `node-uuid` with `uuid`.
--   v3.0.2  [2016-09-20]: Dependency packages updated.
--   v3.0.1  [2016-05-05]: Packages updated and minor refactor.
--   v3.0.0  [2016-03-07]: Callback support added. createReadStream API changed.
--   v2.1.2  [2016-03-05]: Missed duplicate function in tests, removed.
--   v2.1.1  [2016-03-05]: Refactored duplicate function in tests.
--   v2.1.0  [2016-03-05]: Switched to using the `ES5` build code. Removed Nodejs engine requirements.
--   v2.0.10 [2016-03-03]: Dependency packages updated.
--   v2.0.9  [2016-02-09]: Added promisifyAll to the fsBlobStore instance. More `return null` statements.
--   v2.0.8  [2016-02-09]: Added `return null` after resolve/reject calls to prevent Bluebird warnings.
--   v2.0.7  [2016-02-09]: Added `es5dist` for older versions of node. Packages updated.
--   v2.0.6  [2016-01-28]: Added failure unit tests.
--   v2.0.5  [2016-01-26]: Refactor blob-store.js for minor performance improvement.
--   v2.0.4  [2016-01-24]: Minor performance improvements and bug fixes.
--   v2.0.3  [2016-01-22]: Added unit tests and minor fix.
--   v2.0.2  [2016-01-19]: Added [standard][js-standard-url] to package.json.
--   v2.0.1  [2016-01-12]: Minor performance improvements and bug fixes.
--   v2.0.0  [2016-01-08]: Added support for [CUID][cuid-url] or [UUID][uuid-url] directory and file names.
--   v1.0.1  [2016-01-07]: Last release of v1. Work on v2.0.0 to support cuid.
--   v1.0.0  [2016-01-05]: Minor delint and README updates. Bump to v1.0 for future changes.
--   v0.4.1  [2015-08-20]: Fix reference error.
--   v0.4.0  [2015-08-16]: Changed read and write to createReadStream and createWriteStream.
--   v0.3.1  [2015-08-16]: Fix write stream event order.
--   v0.3.0  [2015-08-16]: Removed file path function, change of plans.
--   v0.2.0  [2015-08-16]: Added file path function.
--   v0.1.0  [2015-09-30]: Initial release.
+- v3.0.9  [2018-02-26]: Dependency packages updated.
+- v3.0.8  [2017-12-22]: Dependency packages updated.
+- v3.0.7  [2017-07-28]: Fixed test. Removed mock-fs (now uses /tmp). Dependency packages updated.
+- v3.0.6  [2017-05-17]: Dependency packages updated.
+- v3.0.5  [2017-03-20]: Dependency packages updated to support Node.js v7.7.3 and mock-fs v4.2.0.
+- v3.0.4  [2016-12-05]: Dependency packages updated.
+- v3.0.3  [2016-10-10]: Replaced `node-uuid` with `uuid`.
+- v3.0.2  [2016-09-20]: Dependency packages updated.
+- v3.0.1  [2016-05-05]: Packages updated and minor refactor.
+- v3.0.0  [2016-03-07]: Callback support added. createReadStream API changed.
+- v2.1.2  [2016-03-05]: Missed duplicate function in tests, removed.
+- v2.1.1  [2016-03-05]: Refactored duplicate function in tests.
+- v2.1.0  [2016-03-05]: Switched to using the `ES5` build code. Removed Nodejs engine requirements.
+- v2.0.10 [2016-03-03]: Dependency packages updated.
+- v2.0.9  [2016-02-09]: Added promisifyAll to the fsBlobStore instance. More `return null` statements.
+- v2.0.8  [2016-02-09]: Added `return null` after resolve/reject calls to prevent Bluebird warnings.
+- v2.0.7  [2016-02-09]: Added `es5dist` for older versions of node. Packages updated.
+- v2.0.6  [2016-01-28]: Added failure unit tests.
+- v2.0.5  [2016-01-26]: Refactor blob-store.js for minor performance improvement.
+- v2.0.4  [2016-01-24]: Minor performance improvements and bug fixes.
+- v2.0.3  [2016-01-22]: Added unit tests and minor fix.
+- v2.0.2  [2016-01-19]: Added [standard][js-standard-url] to package.json.
+- v2.0.1  [2016-01-12]: Minor performance improvements and bug fixes.
+- v2.0.0  [2016-01-08]: Added support for [CUID][cuid-url] or [UUID][uuid-url] directory and file names.
+- v1.0.1  [2016-01-07]: Last release of v1. Work on v2.0.0 to support cuid.
+- v1.0.0  [2016-01-05]: Minor delint and README updates. Bump to v1.0 for future changes.
+- v0.4.1  [2015-08-20]: Fix reference error.
+- v0.4.0  [2015-08-16]: Changed read and write to createReadStream and createWriteStream.
+- v0.3.1  [2015-08-16]: Fix write stream event order.
+- v0.3.0  [2015-08-16]: Removed file path function, change of plans.
+- v0.2.0  [2015-08-16]: Added file path function.
+- v0.1.0  [2015-09-30]: Initial release.
 
 ## Credits
 
 Thanks to the following marvelous people for their hard work:
 
--   [Petka Antonov][petka-url] for [bluebird][bluebird-url]
--   [Roman Shtylman][defunctzombie-url] for [uuid][uuid-url]
--   [Eric Elliot][ericelliott-url] for [cuid][cuid-url]
--   [James Halliday][substack-url] for [mkdirp][mkdirp-url]
--   [Mathias Buus][mathiasbuus-url] for [fs-blob-store][fsblobstore-url]
+- [Petka Antonov][petka-url] for [bluebird][bluebird-url]
+- [Roman Shtylman][defunctzombie-url] for [uuid][uuid-url]
+- [Eric Elliot][ericelliott-url] for [cuid][cuid-url]
+- [James Halliday][substack-url] for [mkdirp][mkdirp-url]
+- [Mathias Buus][mathiasbuus-url] for [fs-blob-store][fsblobstore-url]
 
 This list could go on...
 
