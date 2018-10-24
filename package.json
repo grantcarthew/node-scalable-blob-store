@@ -27,12 +27,12 @@
     "local"
   ],
   "engines": {
-    "node": "*"
+    "node": ">=10.12.0"
   },
   "scripts": {
     "prepublish": "npm run build",
     "clean": "rm -Rf dist",
-    "test": "node ./tests/test-runner.js | tap-spec",
+    "test": "jest --watch",
     "build": "npm run clean && babel src --presets babel-preset-es2015 --out-dir dist",
     "lint": "standard",
     "upgrade": "npm run upgrade:rm && npm run upgrade:ncu && npm run upgrade:install && npm run upgrade:finish",
@@ -41,28 +41,37 @@
     "upgrade:install": "npm install",
     "upgrade:finish": "npm run build && npm run test"
   },
+  "jest": {
+    "globalSetup": "",
+    "globalTeardown": ""
+  },
   "standard": {
     "parser": "babel-eslint",
-    "ignore": "dist"
+    "ignore": "dist",
+    "globals": [
+      "describe",
+      "test",
+      "expect"
+    ]
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",
-    "babel-eslint": "^8.2.2",
+    "babel-eslint": "^10.0.1",
     "babel-preset-es2015": "^6.24.1",
     "crispy-stream": "^0.1.2",
     "del": "^3.0.0",
-    "moment": "^2.20.1",
+    "jest": "^23.6.0",
+    "moment": "^2.22.2",
     "node-dir": "^0.1.17",
-    "npm-check-updates": "^2.14.0",
-    "standard": "^11.0.0",
-    "tap-spec": "^4.1.1",
-    "tape": "^4.9.0"
+    "npm-check-updates": "^2.14.2",
+    "standard": "^12.0.1",
+    "tap-spec": "^5.0.0",
+    "tape": "^4.9.1",
+    "ulid": "^2.3.0",
+    "cuid": "^2.1.4",
+    "uuid": "^3.3.2"
   },
   "dependencies": {
-    "bluebird": "^3.5.1",
-    "cuid": "^2.1.0",
-    "fs-blob-store": "^5.2.1",
-    "mkdirp": "^0.5.1",
-    "uuid": "^3.2.1"
+    "fs-blob-store": "^5.2.1"
   }
 }

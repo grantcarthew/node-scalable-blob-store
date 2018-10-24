@@ -11,9 +11,15 @@ const blobPathBuild = require('./blob-path-build')
 const idGenerator = require('./id-generator')
 const idValidator = require('./id-validator')
 
-exports.create = BlobStore
+class BlobStore {
+  constructor (options) {
+    optionsParser(options)
+  }
+}
 
-function BlobStore (opts) {
+module.exports = BlobStore
+
+function BlobStoreOld (opts) {
   if (!(this instanceof BlobStore)) {
     return new BlobStore(opts)
   }
@@ -45,14 +51,14 @@ function CreateWriteStreamPromise () {
   }).then((blobPath) => {
     var fullBlobPath = path.join(self.state.blobStoreRoot, blobPath)
     return fsBlobItemList(fullBlobPath, self.state.validateId, false)
-    .then((blobFileItems) => {
-      return blobFileItems.length
-    }).then((blobFileCount) => {
-      if (blobFileCount >= self.state.dirWidth) {
-        return blobPathBuild(self.state)
-      }
-      return blobPath
-    })
+      .then((blobFileItems) => {
+        return blobFileItems.length
+      }).then((blobFileCount) => {
+        if (blobFileCount >= self.state.dirWidth) {
+          return blobPathBuild(self.state)
+        }
+        return blobPath
+      })
   }).then((blobPath) => {
     self.currentBlobPath = blobPath
     var filePath = path.join(blobPath, self.state.newId())

@@ -1,6 +1,6 @@
 const Promise = require('bluebird')
 const path = require('path')
-const mkdirp = require('mkdirp')
+const mkdir = require('fs')
 const fsBlobDirLatest = require('./fs-blob-dir-latest')
 
 module.exports = function (state) {
