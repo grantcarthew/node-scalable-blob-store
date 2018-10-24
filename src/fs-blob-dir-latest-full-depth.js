@@ -1,40 +1,27 @@
-const Promise = require('bluebird')
 const path = require('path')
-const mkdir = require('fs')
+const fs = require('fs')
 const fsBlobDirLatest = require('./fs-blob-dir-latest')
 
-module.exports = function (state) {
-  var loopIndex = state.dirDepth
-  var blobPath = '/'
+module.exports = async function fsBlobDirLatestFullDepth (state) {
+  let loopIndex = state.dirDepth
+  let blobPath = '/'
+  await buildPath(blobPath)
+  return blobPath
 
-  return new Promise((resolve, reject) => {
-    function buildPath (nextPath) {
-      var fullNextPath = path.join(state.blobStoreRoot, nextPath)
-      return fsBlobDirLatest(fullNextPath, state.validateId).then((dir) => {
-        if (!dir) {
-          return state.newId()
-        }
-        return dir
-      }).then((dir) => {
-        blobPath = path.join(blobPath, dir)
+  async function buildPath (nextPath) {
+    const fullNextPath = path.join(state.blobStoreRoot, nextPath)
+    let dirLatest = await fsBlobDirLatest(fullNextPath)
+    if (!dirLatest) {
+      dirLatest = state.idFunction()
+    }
+    blobPath = path.join(blobPath, dirLatest)
 
-        if (loopIndex === 1) {
-          mkdirp(path.join(state.blobStoreRoot, blobPath))
-          resolve(blobPath)
-          return null
-        } else {
-          loopIndex--
-          buildPath(blobPath)
-          return null
-        }
-      }).catch((err) => {
-        reject(err)
-        return null
-      })
+    if (loopIndex < 2) {
+      fs.mkdirSync(path.join(state.blobStoreRoot, blobPath), { recursive: true })
+      return
     }
 
-    // Initiate Recursion
-    buildPath(blobPath)
-    return null
-  })
+    loopIndex--
+    await buildPath(blobPath)
+  }
 }

@@ -1,58 +1,49 @@
-const Promise = require('bluebird')
 const path = require('path')
-const fsBlobItemList = require('./fs-blob-item-list')
+const fsBlobFileList = require('./fs-blob-file-list')
+const fsBlobDirList = require('./fs-blob-dir-list')
 const fsBlobDirLatestFullDepth = require('./fs-blob-dir-latest-full-depth')
 
-module.exports = function (state) {
-  return fsBlobDirLatestFullDepth(state).then((fullBlobDirPath) => {
-    var fullPath = path.join(state.blobStoreRoot, fullBlobDirPath)
-    return fsBlobItemList(fullPath, state.validateId, false)
-      .then((blobFileItems) => {
-        return blobFileItems.length
-      }).then((blobFileCount) => {
-        if (blobFileCount >= state.dirWidth) {
-          return path.dirname(fullBlobDirPath)
-        }
-        return fullBlobDirPath
-      })
-  }).then((newBlobPath) => {
-    var blobPathIdCount = newBlobPath.split('/').length - 1
-    if (blobPathIdCount === state.dirDepth) {
-      return newBlobPath
-    }
+module.exports = async function (state) {
+  const fullBlobDirPath = await fsBlobDirLatestFullDepth(state)
+  const blobFiles = await fsBlobFileList(state.blobStoreRoot, fullBlobDirPath)
+  let newBlobPath = fullBlobDirPath
+  if (blobFiles.length >= state.dirWidth) {
+    newBlobPath = path.dirname(fullBlobDirPath)
+  }
+  let isFullDepth = fullDepthPath(state, newBlobPath)
+  if (!isFullDepth) {
+    newBlobPath = await trimFullBlobPath(state, newBlobPath)
+  }
 
-    return new Promise((resolve, reject) => {
-      function trimFullBlobPath (nextPath) {
-        return fsBlobItemList(nextPath, state.validateId, true)
-          .then((blobDirItems) => {
-            return blobDirItems.length
-          }).then((blobDirCount) => {
-            if (blobDirCount < state.dirWidth || nextPath.length === 1) {
-              resolve(nextPath)
-              return null
-            } else {
-              nextPath = path.dirname(nextPath)
-              trimFullBlobPath(nextPath)
-              return null
-            }
-          }).catch((err) => {
-            reject(err)
-            return null
-          })
-      }
+  isFullDepth = fullDepthPath(state, newBlobPath)
 
-      // Initiate Recursion
-      trimFullBlobPath(newBlobPath)
-      return null
-    })
-  }).then((newBlobPath) => {
-    var blobPathIdCount = newBlobPath.split('/').length - 1
-    if (blobPathIdCount === state.dirDepth) {
-      return newBlobPath
-    }
-    for (var i = state.dirDepth - blobPathIdCount; i > 0; i--) {
-      newBlobPath = path.join(newBlobPath, state.newId())
-    }
+  if (isFullDepth) {
     return newBlobPath
-  })
+  }
+
+  const blobPathIdCount = newBlobPath.split('/').length - 1
+  for (var i = state.dirDepth - blobPathIdCount; i > 0; i--) {
+    newBlobPath = path.join(newBlobPath, state.idFunction())
+  }
+  return newBlobPath
+}
+
+function fullDepthPath (state, blobPath) {
+  const blobPathIdCount = blobPath.split('/').length - 1
+  return blobPathIdCount === state.dirDepth
+}
+
+async function trimFullBlobPath (state, blobPath) {
+  let trimmedPath = ''
+  trimFullBlobPathRecursive(blobPath)
+  return trimmedPath
+
+  async function trimFullBlobPathRecursive (nextPath) {
+    const blobDirItems = await fsBlobDirList(state, nextPath)
+    if (blobDirItems.length < state.dirWidth || nextPath.length < 2) {
+      trimmedPath = nextPath
+    }
+    const parentPath = path.dirname(nextPath)
+    trimFullBlobPathRecursive(parentPath)
+  }
 }

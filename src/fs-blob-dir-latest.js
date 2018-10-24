@@ -1,32 +1,33 @@
 const path = require('path')
-const Promise = require('bluebird')
-const fs = Promise.promisifyAll(require('fs'))
+const fsp = require('fs').promises
 
-module.exports = function (fsPath, validateId) {
-  return fs.readdirAsync(fsPath).map((fsItem) => {
-    var fsItemPath = path.join(fsPath, fsItem)
-    return fs.statAsync(fsItemPath).then((fsItemStat) => {
-      return {
-        name: fsItem,
-        stat: fsItemStat
-      }
-    })
-  }).filter((fsUnknownItem) => {
-    return fsUnknownItem.stat.isDirectory()
-  }).filter((fsUnvalidatedDirList) => {
-    return validateId(fsUnvalidatedDirList.name)
-  }).then((fsBlobDirList) => {
-    if (!fsBlobDirList || fsBlobDirList.length === 0) {
-      return false
+module.exports = async function (fsPath) {
+  const fsItems = await fsp.readdir(fsPath)
+  const fsBlobDirList = []
+
+  try {
+    for (const fsItem of fsItems) {
+      const fsItemPath = path.join(fsPath, fsItem)
+      const fsItemStat = await fsp.stat(fsItemPath)
+      fsItemStat.isDirectory() && fsBlobDirList.push({
+        fsItem,
+        fsItemStat
+      })
     }
-    fsBlobDirList.sort((a, b) => {
-      return b.stat.birthtime.getTime() - a.stat.birthtime.getTime()
-    })
-    return fsBlobDirList[0].name
-  }).catch((err) => {
+  } catch (err) {
     if (err.code === 'ENOENT') {
       return false
     }
     throw err
+  }
+
+  if (fsBlobDirList.length < 1) {
+    return false
+  }
+
+  fsBlobDirList.sort((a, b) => {
+    return b.fsItemStat.birthtime.getTime() - a.fsItemStat.birthtime.getTime()
   })
+
+  return fsBlobDirList[0].fsItem
 }

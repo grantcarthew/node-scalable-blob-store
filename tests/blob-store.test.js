@@ -2,17 +2,32 @@ const BlobStore = require('../src/blob-store')
 const os = require('os')
 const fs = require('fs')
 const ulid = require('ulid').ulid
-const testDir = os.tmpdir() + '/sbs/blob-store'
+const streamToString = require('./test-streamtostring')
+const crispyStream = require('crispy-stream')
+const data = 'The quick brown fox jumps over the lazy dog'
+const blobStoreRoot = os.tmpdir() + '/sbs/blob-store'
+const testOptions = {
+  blobStoreRoot,
+  idFunction: ulid
+}
 
 describe('scalable-blob-store tests', () => {
   test('basic constructor test', () => {
     const options = {}
     expect(() => new BlobStore()).toThrow()
     expect(() => new BlobStore(options)).toThrow()
-    options.blobStoreRoot = testDir
+    options.blobStoreRoot = blobStoreRoot
     expect(() => new BlobStore(options)).toThrow()
     options.idFunction = ulid
     expect(new BlobStore(options)).toBeDefined()
-    expect(fs.existsSync(testDir)).toBe(true)
+    expect(fs.existsSync(blobStoreRoot)).toBe(true)
+  })
+
+  test('createWriteStream test', async () => {
+    const bs = new BlobStore(testOptions)
+    const ws = await bs.createWriteStream()
+    expect(typeof ws.blobPath).toBe('string')
+    expect(typeof ws.writeStream).toBe('object')
+    expect(bs.createWriteStream()).toBeDefined()
   })
 })
