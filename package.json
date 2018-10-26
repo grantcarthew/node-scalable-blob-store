@@ -45,8 +45,6 @@
     "globalTeardown": ""
   },
   "standard": {
-    "parser": "babel-eslint",
-    "ignore": "dist",
     "globals": [
       "describe",
       "test",

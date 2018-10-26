@@ -46,17 +46,14 @@ async function blobPathBuild (state) {
  * @returns {Promise<string>}
  */
 async function trimFullBlobPath (state, blobPath) {
-  let trimmedPath = ''
-  await trimFullBlobPathRecursive(blobPath)
-  return trimmedPath
+  return trimFullBlobPathRecursive(blobPath)
 
   async function trimFullBlobPathRecursive (nextPath) {
     const blobDirItems = await fsBlobDirList(state.blobStoreRoot, nextPath)
-    if (blobDirItems.length < state.dirWidth || nextPath.length < 2) {
-      trimmedPath = nextPath
-      return
+    if (blobDirItems.length >= state.dirWidth && nextPath.length > 1) {
+      const parentPath = path.dirname(nextPath)
+      return trimFullBlobPathRecursive(parentPath)
     }
-    const parentPath = path.dirname(nextPath)
-    await trimFullBlobPathRecursive(parentPath)
+    return nextPath
   }
 }
