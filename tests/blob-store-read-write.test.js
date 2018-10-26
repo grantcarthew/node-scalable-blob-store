@@ -1,17 +1,19 @@
 const BlobStore = require('../src/blob-store')
 const os = require('os')
 const ulid = require('ulid').ulid
+const del = require('del')
 const streamToString = require('./test-streamtostring')
 const crispyStream = require('crispy-stream')
 const data = 'The quick brown fox jumps over the lazy dog'
-const blobStoreRoot = os.tmpdir() + '/sbs/blob-store'
+const blobStoreRoot = os.tmpdir() + '/sbs/blob-store-read-write'
 const testOptions = {
   blobStoreRoot,
   idFunction: ulid
 }
 
 describe('scalable-blob-store read/write tests', () => {
-  test('beep', async () => {
+  test('read/write, exists, stat, and remove tests', async () => {
+    await del(blobStoreRoot, { force: true })
     const bs = new BlobStore(testOptions)
     const ws1 = await bs.createWriteStream()
     expect(typeof ws1.blobPath).toBe('string')

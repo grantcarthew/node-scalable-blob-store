@@ -1,33 +1,42 @@
 const path = require('path')
 const fsp = require('fs').promises
 
-module.exports = async function (fsPath) {
-  const fsItems = await fsp.readdir(fsPath)
-  const fsBlobDirList = []
+module.exports = fsBlobDirLatest
 
+/**
+ *  Returns the most recently created directory from within the fsPath.
+ *  Returns false if the fsPath does not exist or has no directories within it.
+ *
+ *  @param {string} fsPath
+ *  @returns {Promise<string|boolean>}
+ */
+async function fsBlobDirLatest (fsPath) {
+  const listOfDir = []
   try {
+    const fsItems = await fsp.readdir(fsPath)
+
     for (const fsItem of fsItems) {
       const fsItemPath = path.join(fsPath, fsItem)
       const fsItemStat = await fsp.stat(fsItemPath)
-      fsItemStat.isDirectory() && fsBlobDirList.push({
+      fsItemStat.isDirectory() && listOfDir.push({
         fsItem,
         fsItemStat
       })
     }
   } catch (err) {
-    if (err.code === 'ENOENT') {
-      return false
-    }
+    if (err.code === 'ENOENT') { return false }
     throw err
   }
 
-  if (fsBlobDirList.length < 1) {
+  if (listOfDir.length < 1) {
     return false
   }
 
-  fsBlobDirList.sort((a, b) => {
-    return b.fsItemStat.birthtime.getTime() - a.fsItemStat.birthtime.getTime()
-  })
+  if (listOfDir.length > 1) {
+    listOfDir.sort((a, b) => {
+      return b.fsItemStat.birthtime.getTime() - a.fsItemStat.birthtime.getTime()
+    })
+  }
 
-  return fsBlobDirList[0].fsItem
+  return listOfDir[0].fsItem
 }

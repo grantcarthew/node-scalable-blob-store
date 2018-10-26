@@ -1,6 +1,7 @@
 const BlobStore = require('../src/blob-store')
 const os = require('os')
 const fs = require('fs')
+const del = require('del')
 const ulid = require('ulid').ulid
 const streamToString = require('./test-streamtostring')
 const crispyStream = require('crispy-stream')
@@ -12,7 +13,8 @@ const testOptions = {
 }
 
 describe('scalable-blob-store tests', () => {
-  test('basic constructor test', () => {
+  test('basic constructor test', async () => {
+    await del(blobStoreRoot, { force: true })
     const options = {}
     expect(() => new BlobStore()).toThrow()
     expect(() => new BlobStore(options)).toThrow()
