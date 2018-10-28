@@ -1,25 +1,28 @@
 const test = require('tape')
-const blobPathBuild = require('../dist/blob-path-build')
-const idValidator = require('../dist/id-validator')
-const idGenerator = require('../dist/id-generator')
+const ulid = require('ulid').ulid
+const cuid = require('cuid')
+const uuid = require('uuid')
+const blobPathBuild = require('../src/blob-path-build')
 const utils = require('./test-utils')
 const blobRoot = utils.blobRoot('blob-path-build')
 
+const stateUlid = {
+  blobStoreRoot: blobRoot,
+  idFunction: ulid,
+  dirDepth: 3,
+  dirWidth: 1000
+}
 const stateCuid = {
   blobStoreRoot: blobRoot,
-  idType: 'cuid',
+  idFunction: cuid,
   dirDepth: 3,
-  dirWidth: 1000,
-  validateId: idValidator('cuid'),
-  newId: idGenerator('cuid')
+  dirWidth: 1000
 }
 const stateUuid = {
   blobStoreRoot: blobRoot,
-  idType: 'uuid',
+  idFunction: uuid.v4,
   dirDepth: 3,
-  dirWidth: 1000,
-  validateId: idValidator('uuid'),
-  newId: idGenerator('uuid')
+  dirWidth: 1000
 }
 
 module.exports = async function blobPathBuildSpec () {

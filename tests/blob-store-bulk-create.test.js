@@ -1,19 +1,9 @@
-const BlobStore = require('../src/blob-store')
-const os = require('os')
-const fs = require('fs')
-const del = require('del')
 const ulid = require('ulid').ulid
-const streamToString = require('./test-streamtostring')
-const crispyStream = require('crispy-stream')
-const data = 'The quick brown fox jumps over the lazy dog'
-const blobStoreRoot = os.tmpdir() + '/sbs/blob-store-bulk-create'
-const testOptions = {
-  blobStoreRoot,
-  idFunction: ulid,
-  dirDepth: 2,
-  dirWidth: 2
-}
-const nodeDir = require('node-dir')
+const cuid = require('cuid')
+const uuid = require('uuid')
+const utils = require('./test-utils')
+const bulkCreate = require('./bulk-create')
+const blobStoreRoot = utils.genBlobStoreRoot('blob-store-bulk-create')
 
 beforeAll(() => {
   jest.setTimeout(1000000)
@@ -21,56 +11,46 @@ beforeAll(() => {
 
 describe('scalable-blob-store bulk create tests', () => {
   test('bulk create tests', async () => {
-    const bs = new BlobStore(testOptions)
-    await del(blobStoreRoot, { force: true })
-
-    const startTime = new Date()
-    let i = 124
-    let readTotal = 0
-    let testResults = await recurse()
-    console.dir(testResults)
-
-    async function recurse () {
-      if (i < 1) {
-        const endTime = new Date()
-        return dirSummary(testOptions, readTotal, startTime, endTime)
-      }
-      const readStream = crispyStream.createReadStream(data)
-
-      const blobStream = await bs.createWriteStream()
-      const blobPath = await new Promise((resolve, reject) => {
-        blobStream.writeStream.on('finish', () => {
-          resolve(blobStream.blobPath)
-        })
-        blobStream.writeStream.on('error', reject)
-        readStream.pipe(blobStream.writeStream)
-      }).catch((err) => {
-        console.error(err)
-      })
-      const rs = bs.createReadStream(blobPath)
-      const fileData = await streamToString(rs)
-      readTotal += fileData.length
-      i--
-      return recurse()
+    const t1 = {
+      blobStoreRoot: blobStoreRoot + '-t1',
+      idFunction: ulid,
+      dirDepth: 2,
+      dirWidth: 2
     }
+    const r1 = await bulkCreate(t1, 124)
+    expect(r1.totalDirectories).toBe(93)
+    expect(r1.totalFiles).toBe(124)
+    expect(r1.totalBytes).toBe(5332)
+    const s1 = r1.lastBlobPath.split('/').filter(x => x)
+    expect(s1[0].length).toBe(26)
+    expect(s1.length).toBe(3)
+
+    const t2 = {
+      blobStoreRoot: blobStoreRoot + '-t2',
+      idFunction: cuid,
+      dirDepth: 8,
+      dirWidth: 2
+    }
+    const r2 = await bulkCreate(t2, 8)
+    expect(r2.totalDirectories).toBe(12)
+    expect(r2.totalFiles).toBe(8)
+    expect(r2.totalBytes).toBe(344)
+    const s2 = r2.lastBlobPath.split('/').filter(x => x)
+    expect(s2[0].length).toBe(25)
+    expect(s2.length).toBe(9)
+
+    const t3 = {
+      blobStoreRoot: blobStoreRoot + '-t3',
+      idFunction: uuid.v4,
+      dirDepth: 10,
+      dirWidth: 2
+    }
+    const r3 = await bulkCreate(t3, 8)
+    expect(r3.totalDirectories).toBe(14)
+    expect(r3.totalFiles).toBe(8)
+    expect(r3.totalBytes).toBe(344)
+    const s3 = r3.lastBlobPath.split('/').filter(x => x)
+    expect(s3[0].length).toBe(36)
+    expect(s3.length).toBe(11)
   })
 })
-
-function dirSummary (options, readTotal, startTime, endTime) {
-  return new Promise((resolve, reject) => {
-    return nodeDir.paths(options.blobStoreRoot, (err, paths) => {
-      if (err) { return reject(err) }
-      const runTime = Math.abs(startTime.getTime() - endTime.getTime())
-      var result = {
-        'blobStoreRoot': options.blobStoreRoot,
-        'dirDepth': options.dirDepth,
-        'dirWidth': options.dirWidth,
-        'runTimeMilliseconds': runTime,
-        'totalDirectories': paths.dirs.length,
-        'totalFiles': paths.files.length,
-        'totalBytes': readTotal
-      }
-      return resolve(result)
-    })
-  })
-}

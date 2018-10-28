@@ -1,11 +1,11 @@
 const BlobStore = require('../src/blob-store')
-const os = require('os')
 const ulid = require('ulid').ulid
 const del = require('del')
+const utils = require('./test-utils')
 const streamToString = require('./test-streamtostring')
 const crispyStream = require('crispy-stream')
 const data = 'The quick brown fox jumps over the lazy dog'
-const blobStoreRoot = os.tmpdir() + '/sbs/blob-store-read-write'
+const blobStoreRoot = utils.genBlobStoreRoot('blob-store-read-write')
 const testOptions = {
   blobStoreRoot,
   idFunction: ulid

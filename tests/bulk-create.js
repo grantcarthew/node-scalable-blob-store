@@ -1,36 +1,27 @@
 const BlobStore = require('../src/blob-store')
-const os = require('os')
-const fs = require('fs')
 const del = require('del')
-const ulid = require('ulid').ulid
 const streamToString = require('./test-streamtostring')
 const crispyStream = require('crispy-stream')
 const data = 'The quick brown fox jumps over the lazy dog'
-const blobStoreRoot = os.tmpdir() + '/sbs/blob-store-bulk-create'
 const nodeDir = require('node-dir')
-// const options = {
-//   blobStoreRoot,
-//   idFunction: ulid,
-//   dirDepth: 2,
-//   dirWidth: 2
-// }
 
 module.exports = bulkCreate
 
-async function bulkCreate (options) {
+async function bulkCreate (options, numberOfFiles) {
   const bs = new BlobStore(options)
-  await del(blobStoreRoot, { force: true })
+  await del(options.blobStoreRoot, { force: true })
 
   const startTime = new Date()
-  let i = 124
+  let i = numberOfFiles
   let readTotal = 0
+  let lastBlobPath = ''
   let testResults = await recurse()
-  console.dir(testResults)
+  return testResults
 
   async function recurse () {
     if (i < 1) {
       const endTime = new Date()
-      return dirSummary(options, readTotal, startTime, endTime)
+      return dirSummary(options, readTotal, lastBlobPath, startTime, endTime)
     }
     const readStream = crispyStream.createReadStream(data)
 
@@ -47,12 +38,13 @@ async function bulkCreate (options) {
     const rs = bs.createReadStream(blobPath)
     const fileData = await streamToString(rs)
     readTotal += fileData.length
+    lastBlobPath = blobPath
     i--
     return recurse()
   }
 }
 
-function dirSummary (options, readTotal, startTime, endTime) {
+function dirSummary (options, readTotal, lastBlobPath, startTime, endTime) {
   return new Promise((resolve, reject) => {
     return nodeDir.paths(options.blobStoreRoot, (err, paths) => {
       if (err) { return reject(err) }
@@ -64,7 +56,8 @@ function dirSummary (options, readTotal, startTime, endTime) {
         'runTimeMilliseconds': runTime,
         'totalDirectories': paths.dirs.length,
         'totalFiles': paths.files.length,
-        'totalBytes': readTotal
+        'totalBytes': readTotal,
+        lastBlobPath
       }
       return resolve(result)
     })
