@@ -8,7 +8,7 @@ const ulid = require('ulid').ulid
 const cuid = require('cuid')
 const uuid = require('uuid')
 
-const data = 'The quick brown fox jumped over the lazy dog'
+const data = 'The quick brown fox jumps over the lazy dog'
 module.exports.data = data
 
 module.exports.mkBlobDir = mkBlobDir
