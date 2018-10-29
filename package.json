@@ -1,7 +1,7 @@
 {
   "name": "scalable-blob-store",
-  "version": "3.0.9",
-  "description": "A simple local file system blob store that is designed to prevent conflicts when used with a distributed or replicated file system.",
+  "version": "4.0.0",
+  "description": "A local file system blob store that is designed to prevent conflicts when used with a distributed file system or storage area network.",
   "homepage": "https://github.com/grantcarthew/node-scalable-blob-store",
   "author": "Grant Carthew <dev@carthew.net> (http://uglygizmo.blogspot.com.au/)",
   "license": "MIT",
@@ -20,11 +20,11 @@
     "store",
     "file",
     "scalable",
-    "uuid",
-    "guid",
-    "cuid",
     "distributed",
-    "local"
+    "san",
+    "local",
+    "stream",
+    "buffer"
   ],
   "engines": {
     "node": ">=10.12.0"
@@ -40,7 +40,16 @@
     "upgrade:finish": "npm run test"
   },
   "jest": {
-    "verbose": true
+    "verbose": true,
+    "collectCoverage": true,
+    "coveragePathIgnorePatterns": [
+      "<rootDir>/node_modules/",
+      "<rootDir>/tests/"
+    ],
+    "collectCoverageFrom": [
+      "**/src/**/*.js"
+    ],
+    "testURL": "http://localhost"
   },
   "standard": {
     "globals": [

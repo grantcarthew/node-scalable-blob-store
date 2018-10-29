@@ -34,8 +34,8 @@ class BlobStore {
    * Returns the root filesystem path used by the Blob Store.
    *
    * @readonly
-   * @memberof BlobStore
    * @returns {String}
+   * @memberof BlobStore
    */
   get blobStoreRoot () {
     return this[_state].blobStoreRoot
@@ -46,8 +46,8 @@ class BlobStore {
    * This is a convenience method to allow the consumer to generate IDs.
    *
    * @readonly
-   * @memberof BlobStore
    * @returns {Function}
+   * @memberof BlobStore
    */
   get idFunction () {
     return this[_state].idFunction
@@ -58,8 +58,8 @@ class BlobStore {
    * number of files or directories allowed within a directory.
    *
    * @readonly
-   * @memberof BlobStore
    * @returns {Number}
+   * @memberof BlobStore
    */
   get dirWidth () {
     return this[_state].dirWidth
@@ -70,8 +70,8 @@ class BlobStore {
    * depth of directories to save blob files.
    *
    * @readonly
-   * @memberof BlobStore
    * @returns {Number}
+   * @memberof BlobStore
    */
   get dirDepth () {
     return this[_state].dirDepth
@@ -81,8 +81,8 @@ class BlobStore {
    * Returns the current directory being used for blob storage.
    * The full blob paths require the blobStoreRoot to be prefixed.
    *
-   * @memberof BlobStore
    * @returns {Promise<String>}
+   * @memberof BlobStore
    */
   async getCurrentBlobDir () {
     let blobDir = this[_currentBlobDir] || await blobDirBuild(this[_state])
@@ -203,7 +203,7 @@ class BlobStore {
    * Tests for the existance of a file located at the relative blobPath.
    *
    * @param {String} blobPath
-   * @returns {Boolean} - True if the file exists. False otherwise.
+   * @returns {Promise<Boolean>} - True if the file exists. False otherwise.
    * @memberof BlobStore
    */
   async exists (blobPath) {
@@ -211,9 +211,7 @@ class BlobStore {
       const stat = await this.stat(blobPath)
       return !!stat
     } catch (err) {
-      if (err.code !== 'ENOENT') {
-        throw err
-      }
+      if (err.code !== 'ENOENT') { throw err }
     }
     return false
   }
@@ -231,9 +229,7 @@ class BlobStore {
     try {
       await fsp.unlink(fullFilePath)
     } catch (err) {
-      if (err.code !== 'ENOENT') {
-        throw err
-      }
+      if (err.code !== 'ENOENT') { throw err }
     }
   }
 
