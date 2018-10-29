@@ -4,16 +4,16 @@ const fsBlobFileList = require('./fs-blob-file-list')
 const fsBlobDirList = require('./fs-blob-dir-list')
 const fsBlobDirLatestFullDepth = require('./fs-blob-dir-latest-full-depth')
 
-module.exports = blobPathBuild
+module.exports = blobDirBuild
 
 /**
- * Returns a new blob path following the dirDepth and dirWidth restrictions.
+ * Returns a new blob directory following the dirDepth and dirWidth restrictions.
  * Creates the directory if it doesn't exist.
  *
  * @param {Object} state
  * @returns {Promise<String>}
  */
-async function blobPathBuild (state) {
+async function blobDirBuild (state) {
   const fullBlobDirPath = await fsBlobDirLatestFullDepth(state)
   const blobFiles = await fsBlobFileList(state.blobStoreRoot, fullBlobDirPath)
   let newBlobPath = fullBlobDirPath

@@ -1,5 +1,3 @@
-const os = require('os')
-const ulid = require('ulid').ulid
 const cuid = require('cuid')
 const utils = require('./test-utils')
 const bulkCreate = require('./bulk-create')

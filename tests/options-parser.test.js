@@ -1,5 +1,4 @@
 const fs = require('fs')
-const del = require('del')
 const ulid = require('ulid').ulid
 const utils = require('./test-utils')
 const parser = require('../src/options-parser')

@@ -2,10 +2,9 @@ const fsBlobDirList = require('../src/fs-blob-dir-list')
 const fsBlobFileList = require('../src/fs-blob-file-list')
 const utils = require('./test-utils')
 const blobRoot = utils.genBlobStoreRoot('fs-modules')
-let buildFs = {}
 
 beforeAll(async () => {
-  buildFs = await utils.buildTestFs(blobRoot)
+  await utils.buildTestFs(blobRoot)
 })
 
 describe('fs-modules tests', () => {

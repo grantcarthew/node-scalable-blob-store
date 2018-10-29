@@ -3,6 +3,7 @@ const fs = require('fs')
 const del = require('del')
 const ulid = require('ulid').ulid
 const utils = require('./test-utils')
+const streamToString = require('./test-streamtostring')
 const blobStoreRoot = utils.genBlobStoreRoot('blob-store')
 const tmpBlobFile = '/data'
 const testOptions = {
@@ -74,22 +75,12 @@ describe('scalable-blob-store tests', () => {
     expect(data).toBe(utils.data)
   })
 
-  test('createReadStream test', async (done) => {
+  test('createReadStream test', async () => {
     expect.assertions(1)
     const bs = new BlobStore(testOptions)
     const rs = await bs.createReadStream(tmpBlobFile)
-    let data = ''
-    rs.on('error', err => {
-      console.error(err)
-      expect(err).toBeUndefined()
-    })
-    rs.on('data', (chunk) => {
-      data += chunk
-    })
-    rs.on('end', () => {
-      expect(data).toBe(utils.data)
-      done()
-    })
+    const data = await streamToString(rs)
+    expect(data).toBe(utils.data)
   })
 
   test('readFile test', async () => {
