@@ -40,9 +40,7 @@
     "upgrade:finish": "npm run test"
   },
   "jest": {
-    "verbose": true,
-    "globalSetup": "./tests/jest-setup.js",
-    "globalTeardown": ""
+    "verbose": true
   },
   "standard": {
     "globals": [

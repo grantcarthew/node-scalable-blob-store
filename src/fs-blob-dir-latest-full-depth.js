@@ -5,11 +5,11 @@ const fsBlobDirLatest = require('./fs-blob-dir-latest')
 module.exports = fsBlobDirLatestFullDepth
 
 /**
- *  Returns the most recent directory within the blobStoreRoot path.
- *  Creates the directories down to the dirDepth if they don't exist.
+ * Returns the most recent directory within the blobStoreRoot path.
+ * Creates the directories down to the dirDepth if they don't exist.
  *
- * @param {object} state
- * @returns {Promise<string>}
+ * @param {Object} state
+ * @returns {Promise<String>}
  */
 async function fsBlobDirLatestFullDepth (state) {
   let loopIndex = state.dirDepth
@@ -22,8 +22,8 @@ async function fsBlobDirLatestFullDepth (state) {
    * directory or create one. Loops down to the dirDepth
    * based on the loopIndex closure variable.
    *
-   * @param {string} nextPath
-   * @returns {Promise<undefined>}
+   * @param {String} nextPath
+   * @returns {Promise<void>}
    */
   async function dirFindOrCreate (nextPath) {
     const fullNextPath = path.join(state.blobStoreRoot, nextPath)

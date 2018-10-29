@@ -7,8 +7,8 @@ module.exports = fsBlobDirLatest
  *  Returns the most recently created directory from within the fsPath.
  *  Returns false if the fsPath does not exist or has no directories within it.
  *
- *  @param {string} fsPath
- *  @returns {Promise<string|boolean>}
+ *  @param {String} fsPath
+ *  @returns {Promise<String|Boolean>}
  */
 async function fsBlobDirLatest (fsPath) {
   const listOfDir = []

@@ -7,11 +7,11 @@ const fsBlobDirLatestFullDepth = require('./fs-blob-dir-latest-full-depth')
 module.exports = blobPathBuild
 
 /**
- *  Returns a new blob path following the dirDepth and dirWidth restrictions.
- *  Creates the directory if it doesn't exist.
+ * Returns a new blob path following the dirDepth and dirWidth restrictions.
+ * Creates the directory if it doesn't exist.
  *
- * @param {object} state
- * @returns {Promise<string>}
+ * @param {Object} state
+ * @returns {Promise<String>}
  */
 async function blobPathBuild (state) {
   const fullBlobDirPath = await fsBlobDirLatestFullDepth(state)
@@ -38,12 +38,12 @@ async function blobPathBuild (state) {
 }
 
 /**
- *  Climbs up the blobPath looking for directories less than the dirWidth value.
- *  Returns first directory that is less than the dirWidth value.
+ * Climbs up the blobPath looking for directories less than the dirWidth value.
+ * Returns first directory that is less than the dirWidth value.
  *
- * @param {object} state
- * @param {string} blobPath
- * @returns {Promise<string>}
+ * @param {Object} state
+ * @param {String} blobPath
+ * @returns {Promise<String>}
  */
 async function trimFullBlobPath (state, blobPath) {
   return trimFullBlobPathRecursive(blobPath)
