@@ -45,10 +45,20 @@ With the release of `scalable-blob-store` v4 there has been some major changes.
 Version 4 Features:
 
 * Written using modern JavaScript language features.
-* Now has no dependencies.
+* No dependencies.
+* The unique ID used for the file and directory names is now a user supplied function.
 * The API has been extended:
-  * New blob methods including write, read, append, and copy.
-  
+  * New blob methods including write, read, append, copy, and realPath.
+  * All methods return a Promise.
+  * BlobStore state values are now exposed as read only properties.
+  * New get and set methods for the current blob directory.
+* No longer filters file and directory names to match IDs:
+  * This feature means you can change your ID function on an existing blob root directory.
+  * Any file or directory name can be used to retrieve blob data.
+
+Version 4 Limitations:
+
+* Requires Node.js v10.12.0 or later due to the fs.promises API use.
 
 
 ### Installation

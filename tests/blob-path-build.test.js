@@ -18,7 +18,7 @@ describe('blob-path-build tests', () => {
     expect(dir).toBe('/1/2/3')
     const blobFs = await utils.buildTestFs(blobRoot)
     dir = await blobDirBuild(state)
-    expect(dir).toBe(blobFs.latestBlobPath)
+    expect(dir).toBe(blobFs.latestBlobDir)
     await utils.rmBlobDir(blobRoot)
   })
 })

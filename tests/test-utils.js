@@ -100,5 +100,10 @@ async function buildTestFs (blobStoreRoot) {
     console.log('Error in buildTestFs ')
     console.error(err)
   }
-  return { latestBlobPath: '/09a/09b/09c', latestFilePath: '/09a/09b/09c/09d' }
+  return {
+    firstBlobDir: '/01a/01b/01c',
+    firstBlobPath: '/01a/01b/01c/01d',
+    latestBlobDir: '/09a/09b/09c',
+    latestBlobPath: '/09a/09b/09c/09d'
+  }
 }

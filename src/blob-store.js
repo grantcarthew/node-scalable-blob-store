@@ -105,8 +105,8 @@ class BlobStore {
    * @memberof BlobStore
    */
   async setCurrentBlobDir (blobDir) {
-    if (path.isAbsolute(blobDir)) {
-      throw new Error('setCurrentBlobDire requires a relative blob path. You supplied an absolute file system path.')
+    if (typeof blobDir !== 'string') {
+      throw new Error('setCurrentBlobDir requires a string path')
     }
     const fullDirPath = path.join(this[_state].blobStoreRoot, blobDir)
     await fsp.mkdir(fullDirPath, { recursive: true })
