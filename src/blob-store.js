@@ -95,6 +95,26 @@ class BlobStore {
   }
 
   /**
+   * Sets the Blob Stores current blob directory.
+   * If the new blob directory is not deep enough it will be extended to the dirDepth value.
+   * If the new blob directory contains more than the dirWidth number of files or directories
+   * a new blob directory will be generated.
+   *
+   * @param {String} blobDir
+   * @returns {Promise<void>}
+   * @memberof BlobStore
+   */
+  async setCurrentBlobDir (blobDir) {
+    if (path.isAbsolute(blobDir)) {
+      throw new Error('setCurrentBlobDire requires a relative blob path. You supplied an absolute file system path.')
+    }
+    const fullDirPath = path.join(this[_state].blobStoreRoot, blobDir)
+    await fsp.mkdir(fullDirPath, { recursive: true })
+    this[_currentBlobDir] = blobDir
+    await this.getCurrentBlobDir()
+  }
+
+  /**
    * Creates a new file system stream to a blob file.
    * Includes the writable stream and the relative blob path
    * in the returned object.
@@ -121,7 +141,7 @@ class BlobStore {
    * @returns {Promise<String>}
    * @memberof BlobStore
    */
-  async writeFile (data, writeOptions) {
+  async write (data, writeOptions) {
     const currentBlobDir = await this.getCurrentBlobDir()
     const blobPath = path.join(currentBlobDir, this[_state].idFunction())
     const filePath = path.join(this[_state].blobStoreRoot, blobPath)
@@ -138,7 +158,7 @@ class BlobStore {
    * @returns {Promise<void>}
    * @memberof BlobStore
    */
-  async appendFile (blobPath, data, appendOptions) {
+  async append (blobPath, data, appendOptions) {
     const fullFilePath = path.join(this[_state].blobStoreRoot, blobPath)
     return fsp.appendFile(fullFilePath, data, appendOptions)
   }
@@ -147,11 +167,11 @@ class BlobStore {
    * Copies the file located at the blobPath to a new blobPath.
    *
    * @param {String} blobPath
-   * @param {Object} flags - Standard fs.copy flags object which modifies the copy operation.
+   * @param {Object} flags - Standard fs.copyFile flags object which modifies the copy operation.
    * @returns {Promise<String>}
    * @memberof BlobStore
    */
-  async copyFile (blobPath, flags) {
+  async copy (blobPath, flags) {
     const currentBlobDir = await this.getCurrentBlobDir()
     const fullSrcPath = path.join(this[_state].blobStoreRoot, blobPath)
     const dstBlobPath = path.join(currentBlobDir, this[_state].idFunction())
@@ -180,7 +200,7 @@ class BlobStore {
    * @returns
    * @memberof BlobStore
    */
-  readFile (blobPath, readOptions = {}) {
+  read (blobPath, readOptions = {}) {
     readOptions.encoding = readOptions.encoding || 'utf8'
     const fullFilePath = path.join(this[_state].blobStoreRoot, blobPath)
     return fsp.readFile(fullFilePath, readOptions)

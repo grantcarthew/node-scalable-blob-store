@@ -1,5 +1,3 @@
 # scalable-blob-store Work Log
 
-## Src
-
-## Tests
+* Need to test setCurrentBlobDir()

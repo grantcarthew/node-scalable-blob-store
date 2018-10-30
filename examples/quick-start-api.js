@@ -23,7 +23,7 @@ async function quickStartApi (writeData) {
   console.log(line)
 
   // We need a blob file to read
-  const blobPath = await blobStore.writeFile(writeData)
+  const blobPath = await blobStore.write(writeData)
   console.log('Following is the blobPath for the file we will read:')
   console.log(blobPath)
 

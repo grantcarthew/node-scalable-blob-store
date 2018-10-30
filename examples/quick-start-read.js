@@ -25,7 +25,7 @@ async function quickStartRead (writeData) {
   console.log(line)
 
   console.log('We need a blob file to read.')
-  const blobPath = await blobStore.writeFile(writeData)
+  const blobPath = await blobStore.write(writeData)
   console.log('Following is the blobPath for the file we will read:')
   console.log(blobPath)
 
@@ -51,9 +51,9 @@ async function quickStartRead (writeData) {
   await new Promise(resolve => { setTimeout(resolve, 400) })
   console.log() // Adding a new line to the console
 
-  // We can also use the readFile method
-  const content = await blobStore.readFile(blobPath)
-  console.log('Following is the data from the readFile method:')
+  // We can also use the blobStore.read method
+  const content = await blobStore.read(blobPath)
+  console.log('Following is the data from the blobStore.read method:')
   console.log(content)
   console.log(line)
 }

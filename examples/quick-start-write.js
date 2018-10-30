@@ -24,9 +24,8 @@ async function quickStartWrite (writeData) {
   console.log('Quick Start Write Example')
   console.log(line)
 
-  // Saving data using writeFile
-  console.log('Saving data using writeFile:')
-  const firstBlobPath = await blobStore.writeFile(writeData)
+  console.log('Saving data using blobStore.write:')
+  const firstBlobPath = await blobStore.write(writeData)
   console.log('First file is located in the following blobPath:')
   console.log(firstBlobPath)
   console.log('First file full path is:')
@@ -66,17 +65,17 @@ async function quickStartWrite (writeData) {
   console.log('Save the blobPath for the file into your database:')
   console.log(result.blobPath)
 
-  console.log('We can append data to an existing blob using blobStore.appendFile:')
-  await blobStore.appendFile(result.blobPath, ' - New content...')
-  const content = await blobStore.readFile(result.blobPath)
+  console.log('We can append data to an existing blob using blobStore.append:')
+  await blobStore.append(result.blobPath, ' - New content...')
+  const content = await blobStore.read(result.blobPath)
   console.log(content)
 
   console.log('We can copy a blob to a new blobPath:')
-  const newCopyBlobPath = await blobStore.copyFile(result.blobPath)
+  const newCopyBlobPath = await blobStore.copy(result.blobPath)
   console.log('Here is the blobPath for the new copy:')
   console.log(newCopyBlobPath)
   console.log('And here is the content of the new file:')
-  const newCopyContent = await blobStore.readFile(newCopyBlobPath)
+  const newCopyContent = await blobStore.read(newCopyBlobPath)
   console.log(newCopyContent)
 
   console.log(line)

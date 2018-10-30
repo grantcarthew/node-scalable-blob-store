@@ -48,30 +48,30 @@ describe('scalable-blob-store tests', () => {
     expect(bs.createWriteStream()).toBeDefined()
   })
 
-  test('writeFile test', async () => {
+  test('write test', async () => {
     expect.assertions(2)
     const bs = new BlobStore(testOptions)
-    const blobPath = await bs.writeFile(utils.data)
+    const blobPath = await bs.write(utils.data)
     expect(typeof blobPath).toBe('string')
-    const data = await bs.readFile(blobPath)
+    const data = await bs.read(blobPath)
     expect(data).toBe(utils.data)
   })
 
-  test('appendFile test', async () => {
+  test('append test', async () => {
     expect.assertions(1)
     const bs = new BlobStore(testOptions)
-    const blobPath = await bs.writeFile(utils.data)
-    await bs.appendFile(blobPath, utils.data)
-    const data = await bs.readFile(blobPath)
+    const blobPath = await bs.write(utils.data)
+    await bs.append(blobPath, utils.data)
+    const data = await bs.read(blobPath)
     expect(data).toBe(utils.data + utils.data)
   })
 
-  test('copyFile test', async () => {
+  test('copy test', async () => {
     expect.assertions(1)
     const bs = new BlobStore(testOptions)
-    const blobPath = await bs.writeFile(utils.data)
-    const dstBlobPath = await bs.copyFile(blobPath)
-    const data = await bs.readFile(dstBlobPath)
+    const blobPath = await bs.write(utils.data)
+    const dstBlobPath = await bs.copy(blobPath)
+    const data = await bs.read(dstBlobPath)
     expect(data).toBe(utils.data)
   })
 
@@ -83,10 +83,10 @@ describe('scalable-blob-store tests', () => {
     expect(data).toBe(utils.data)
   })
 
-  test('readFile test', async () => {
+  test('read test', async () => {
     expect.assertions(1)
     const bs = new BlobStore(testOptions)
-    const data = await bs.readFile(tmpBlobFile)
+    const data = await bs.read(tmpBlobFile)
     expect(data).toBe(utils.data)
   })
 
@@ -109,7 +109,7 @@ describe('scalable-blob-store tests', () => {
   test('remove test', async () => {
     expect.assertions(2)
     const bs = new BlobStore(testOptions)
-    const blobPath = await bs.writeFile(utils.data)
+    const blobPath = await bs.write(utils.data)
     let result = await bs.exists(blobPath)
     expect(result).toBe(true)
     await bs.remove(blobPath)

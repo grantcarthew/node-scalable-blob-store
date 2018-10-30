@@ -38,6 +38,19 @@ Please __Star__ on GitHub / NPM and __Watch__ for updates.
 
 ## Quick Start
 
+### Version 4 Release Warning
+
+With the release of `scalable-blob-store` v4 there has been some major changes.
+
+Version 4 Features:
+
+* Written using modern JavaScript language features.
+* Now has no dependencies.
+* The API has been extended:
+  * New blob methods including write, read, append, and copy.
+  
+
+
 ### Installation
 
 ```sh
