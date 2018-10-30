@@ -141,7 +141,7 @@ class BlobStore {
    * @returns {Promise<String>}
    * @memberof BlobStore
    */
-  async write (data, writeOptions) {
+  async write (data, writeOptions = {}) {
     const currentBlobDir = await this.getCurrentBlobDir()
     const blobPath = path.join(currentBlobDir, this[_state].idFunction())
     const filePath = path.join(this[_state].blobStoreRoot, blobPath)
@@ -158,7 +158,7 @@ class BlobStore {
    * @returns {Promise<void>}
    * @memberof BlobStore
    */
-  async append (blobPath, data, appendOptions) {
+  async append (blobPath, data, appendOptions = {}) {
     const fullFilePath = path.join(this[_state].blobStoreRoot, blobPath)
     return fsp.appendFile(fullFilePath, data, appendOptions)
   }
@@ -171,7 +171,7 @@ class BlobStore {
    * @returns {Promise<String>}
    * @memberof BlobStore
    */
-  async copy (blobPath, flags) {
+  async copy (blobPath, flags = 0) {
     const currentBlobDir = await this.getCurrentBlobDir()
     const fullSrcPath = path.join(this[_state].blobStoreRoot, blobPath)
     const dstBlobPath = path.join(currentBlobDir, this[_state].idFunction())
@@ -214,7 +214,7 @@ class BlobStore {
    * @returns {Promise<String>} - Full path to the blobPath file.
    * @memberof BlobStore
    */
-  realPath (blobPath, realPathOptions) {
+  realPath (blobPath, realPathOptions = {}) {
     const fullFilePath = path.join(this[_state].blobStoreRoot, blobPath)
     return fsp.realpath(fullFilePath, realPathOptions)
   }

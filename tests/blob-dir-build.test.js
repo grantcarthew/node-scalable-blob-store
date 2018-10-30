@@ -9,8 +9,8 @@ const state = {
   dirWidth: 1000
 }
 
-describe('blob-path-build tests', () => {
-  test('blob-path-build tests', async () => {
+describe('blob-dir-build tests', () => {
+  test('blob-dir-build tests', async () => {
     expect.assertions(2)
     await utils.rmBlobDir(blobRoot)
     await utils.mkBlobDir(blobRoot)

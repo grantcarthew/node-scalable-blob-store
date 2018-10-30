@@ -8,19 +8,19 @@ module.exports = fsBlobDirList
  * Returns an empty array if the directory does not exist.
  *
  * @param {String} blobStoreRoot
- * @param {String} blobPath
+ * @param {String} blobDir
  * @returns {Promise<Array>} - The array contains string directory names.
  */
-async function fsBlobDirList (blobStoreRoot, blobPath) {
+async function fsBlobDirList (blobStoreRoot, blobDir) {
   try {
-    const fullBlobPath = path.join(blobStoreRoot, blobPath)
-    const blobPathItems = await fsp.readdir(fullBlobPath)
-    const blobPathDirs = []
-    for (const fsItem of blobPathItems) {
+    const fullBlobPath = path.join(blobStoreRoot, blobDir)
+    const blobDirItems = await fsp.readdir(fullBlobPath)
+    const dirList = []
+    for (const fsItem of blobDirItems) {
       const stat = await fsp.stat(path.join(fullBlobPath, fsItem))
-      stat.isDirectory() && blobPathDirs.push(fsItem)
+      stat.isDirectory() && dirList.push(fsItem)
     }
-    return blobPathDirs
+    return dirList
   } catch (err) {
     if (err.code === 'ENOENT') { return [] }
     throw err

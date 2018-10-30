@@ -13,34 +13,34 @@ module.exports = fsBlobDirLatestFullDepth
  */
 async function fsBlobDirLatestFullDepth (state) {
   let loopIndex = state.dirDepth
-  let blobPath = '/'
-  await dirFindOrCreate(blobPath)
-  return blobPath
+  let blobDir = '/'
+  await dirFindOrCreate(blobDir)
+  return blobDir
 
   /**
    * Starting at the blobStoreRoot it will find the latest
    * directory or create one. Loops down to the dirDepth
    * based on the loopIndex closure variable.
    *
-   * @param {String} nextPath
+   * @param {String} nextDir
    * @returns {Promise<void>}
    */
-  async function dirFindOrCreate (nextPath) {
-    const fullNextPath = path.join(state.blobStoreRoot, nextPath)
+  async function dirFindOrCreate (nextDir) {
+    const fullNextPath = path.join(state.blobStoreRoot, nextDir)
     let dirLatest = await fsBlobDirLatest(fullNextPath)
     if (!dirLatest) {
       dirLatest = state.idFunction()
     }
     // @ts-ignore
-    blobPath = path.join(blobPath, dirLatest)
+    blobDir = path.join(blobDir, dirLatest)
 
     if (loopIndex < 2) {
       // @ts-ignore
-      fs.mkdirSync(path.join(state.blobStoreRoot, blobPath), { recursive: true })
+      fs.mkdirSync(path.join(state.blobStoreRoot, blobDir), { recursive: true })
       return
     }
 
     loopIndex--
-    await dirFindOrCreate(blobPath)
+    await dirFindOrCreate(blobDir)
   }
 }

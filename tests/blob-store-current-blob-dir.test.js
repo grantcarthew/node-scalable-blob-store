@@ -1,11 +1,8 @@
 const BlobStore = require('../src/blob-store')
-const fs = require('fs')
 const del = require('del')
 const ulid = require('ulid').ulid
 const utils = require('./test-utils')
-const streamToString = require('./test-streamtostring')
 const blobStoreRoot = utils.genBlobStoreRoot('blob-store-current-blob-dir')
-const tmpBlobFile = '/data'
 const testOptions = {
   blobStoreRoot,
   idFunction: ulid,
