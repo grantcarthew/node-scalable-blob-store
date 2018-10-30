@@ -250,7 +250,7 @@ const options = {
   dirWidth: 2000
 }
 
-// Create a blob store using an options `object`:
+// Create a blob store using the options `object`:
 const blobStore = new BlobStore(options)
 
 ```
@@ -288,7 +288,7 @@ __Returns:__ A `String` that matches your `options.blobStoreRoot` value.
 
 __Description:__
 
-This is a convenience method to allow you to pass the blobStore object to a sub module and still have access to the configured properties.
+This is a convenience property to allow you to pass the blobStore object to a sub module and still have access to the configured properties.
 
 __Example:__
 
@@ -319,7 +319,7 @@ __Returns:__ The unique ID function you configured in the `options.idFunction` v
 
 __Description:__
 
-This is a convenience method to allow you to pass the blobStore object to a sub module and still have access to the configured properties.
+This is a convenience property to allow you to pass the blobStore object to a sub module and still have access to the configured properties.
 
 __Example:__
 
@@ -350,7 +350,7 @@ __Returns:__ A `Number` that matches your `options.dirDepth` value.
 
 __Description:__
 
-This is a convenience method to allow you to pass the blobStore object to a sub module and still have access to the configured properties.
+This is a convenience property to allow you to pass the blobStore object to a sub module and still have access to the configured properties.
 
 __Example:__
 
@@ -381,7 +381,7 @@ __Returns:__ A `Number` that matches your `options.dirWidth` value.
 
 __Description:__
 
-This is a convenience method to allow you to pass the blobStore object to a sub module and still have access to the configured properties.
+This is a convenience property to allow you to pass the blobStore object to a sub module and still have access to the configured properties.
 
 __Example:__
 
