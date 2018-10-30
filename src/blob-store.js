@@ -1,7 +1,6 @@
 const fs = require('fs')
 const fsp = fs.promises
 const path = require('path')
-global.Promise = require('bluebird')
 
 // Internal Modules
 const optionsParser = require('./options-parser')
@@ -189,7 +188,8 @@ class BlobStore {
    */
   createReadStream (blobPath) {
     const fullFilePath = path.join(this[_state].blobStoreRoot, blobPath)
-    return fs.createReadStream(fullFilePath)
+    // For API consistency the ReadStream is wrapped in a Promise
+    return Promise.resolve(fs.createReadStream(fullFilePath))
   }
 
   /**

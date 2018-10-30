@@ -38,7 +38,7 @@ async function quickStartWrite (writeData) {
   // Opening a readStream from the file system for an example to write with
   const fs = require('fs')
   const fullFilePath = path.join(options.blobStoreRoot, firstBlobPath)
-  const fsReadStream = fs.createReadStream(fullFilePath)
+  const fsReadStream = await fs.createReadStream(fullFilePath)
 
   // Writing data using writeStream
   const result = await blobStore.createWriteStream()

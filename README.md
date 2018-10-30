@@ -2,9 +2,9 @@
 
 `scalable-blob-store` is a file system blob store that is designed to prevent conflicts when used with a distributed file system or storage area network..
 
+<!-- [![Build Status][travisci-image]][travisci-url] -->
 [![Maintainability][cc-maintain-badge]][cc-maintain-url]
 [![Test Coverage][cc-coverage-badge]][cc-coverage-url]
-[![Build Status][travisci-image]][travisci-url]
 [![js-standard-style][js-standard-image]][js-standard-url]
 [![Patreon Donation][patreon-image]][patreon-url]
 
@@ -16,50 +16,65 @@ Please __Star__ on GitHub / NPM and __Watch__ for updates.
 
 ## Topics
 
-- [Quick Start](#quick-start)
-- [Rationale](#rationale)
-- [Function](#function)
-- [Performance](#performance)
-- [Installation](#installation)
-- [API](#api)
-    - [create](#create)
-    - [createWriteStream](#createWriteStream)
-    - [createReadStream](#createReadStream)
-    - [remove](#remove)
-    - [stat](#stat)
-    - [exists](#exists)
-- [Known Issues](#known-issues)
-- [Testing](#testing)
-- [About the Owner](#about-the-owner)
-- [Contributing](#contributing)
-- [History](#history)
-- [Credits](#credits)
-- [License](#license)
+* [Warning](#warning)
+* [Features](#features)
+* [Quick Start](#quick-start)
+* [Rationale](#rationale)
+* [Function](#function)
+* [Performance](#performance)
+* [Installation](#installation)
+* [API](#api)
+  * [create](#create)
+  * [createWriteStream](#createWriteStream)
+  * [createReadStream](#createReadStream)
+  * [remove](#remove)
+  * [stat](#stat)
+  * [exists](#exists)
+* [Known Issues](#known-issues)
+* [Testing](#testing)
+* [About the Owner](#about-the-owner)
+* [Contributing](#contributing)
+* [History](#history)
+* [Credits](#credits)
+* [License](#license)
 
-## Quick Start
+## Warning
 
-### Version 4 Release Warning
+With the release of `scalable-blob-store` v4 there has seen some major changes.
 
-With the release of `scalable-blob-store` v4 there has been some major changes.
+These changes have introduced some restrictions on the use of the module:
 
-Version 4 Features:
+* Requires Node.js v10.12.0 or later.
+* Uses Node.js [Stability: 1 - Experimental](https://nodejs.org/api/documentation.html) features. Specifically the [fs.promises](https://nodejs.org/api/fs.html#fs_fs_promises_api) API and the [mkdir recursive](https://nodejs.org/api/fs.html#fs_fspromises_mkdir_path_options) options.
+* The module performance is approximately four times slower than v3.0.9. Most likely this is due to the experimental APIs.
+* All callback APIs have been removed.
 
+In time these restrictions will become less of an issue, however for now if you want to use `scalable-blob-store` in production, I suggest you use the old [version 3.0.9 release](https://github.com/grantcarthew/node-scalable-blob-store/releases/tag/v3.0.9).
+
+Please read the [v3.0.9 README](https://github.com/grantcarthew/node-scalable-blob-store/blob/v3.0.9/README.md) document to help you use the older release.
+
+## Features
+
+Version 4 has added a heap of new features.
+
+* Save binary large objects (blobs) locally in a scalable format.
+* Only save a relative `blobPath` value to your database.
 * Written using modern JavaScript language features.
 * No dependencies.
-* The unique ID used for the file and directory names is now a user supplied function.
+* The unique ID used for the file and directory names is a user supplied function. You can use UUIDs or ULIDs or any other unique ID function.
 * The API has been extended:
-  * New blob methods including write, read, append, copy, and realPath.
+  * New blob methods including read, write, append, copy, and realPath.
   * All methods return a Promise.
   * BlobStore state values are now exposed as read only properties.
   * New get and set methods for the current blob directory.
+  * Still includes the createWriteStream and createReadStream methods among others.
 * No longer filters file and directory names to match IDs:
   * This feature means you can change your ID function on an existing blob root directory.
   * Any file or directory name can be used to retrieve blob data.
 
-Version 4 Limitations:
+_Note: see the [restrictions](#warning) above prior to using in production._
 
-* Requires Node.js v10.12.0 or later due to the fs.promises API use.
-
+## Quick Start
 
 ### Installation
 
@@ -106,9 +121,9 @@ console.dir(result)
 
 See the Quick Start example files for more detail:
 
-- [quick-start-write.js](/examples/quick-start-write.js)
-- [quick-start-read.js](/examples/quick-start-read.js)
-- [quick-start-api.js](/examples/quick-start-api.js)
+* [quick-start-write.js](/examples/quick-start-write.js)
+* [quick-start-read.js](/examples/quick-start-read.js)
+* [quick-start-api.js](/examples/quick-start-api.js)
 
 ## Rationale
 
@@ -126,7 +141,7 @@ To achieve scalability on a distributed or replicated file system, `scalable-blo
 
 Once the latest path has been determined, the number of files within the directory are counted to ensure it remains under the configured value. This is to prevent disk performance issues when very large numbers of files are stored within a single directory. If the number of items within a directory becomes too large, a new storage path is determined.
 
-Because there are no databases used to manage the files in the root path, it is up to you to maintain the returned `blobStore` path and metadata about the stored files in your own database.
+Because there are no databases used to manage the files in the root path, it is up to you to maintain the returned `blobPath` value and metadata about the stored files in your own database.
 
 The reason `scalable-blob-store` is scalable is due to the naming of the directories and files within your file system. Every directory and file saved to disk is named by a generated unique id based on a user defined funciton. You could use any unique id generator such as [ULID][ulid-url], [CUID][cuid-url], [UUID v4][uuid-url], or MongoDBs [ObjectIds][objectid-url] just to name a few. Check out my [Awesome Unique ID][awesome-url] repository for more examples. Merging directories between servers or disks should never cause file name collisions.
 
@@ -162,9 +177,7 @@ Other operational points of interest:
 
 ### Write
 
-With the release of v4 of `scalable-blob-store`, the performance has dropped significantly. This is due to the use of the new experimental [fs promises](https://nodejs.org/en/blog/release/v10.0.0/) API released in v10.0.0 of Node.js.
-
-I would suggest [v3.0.9](https://github.com/grantcarthew/node-scalable-blob-store/releases/tag/v3.0.9) of `scalable-blob-store` could be a better option for a production system at this time.
+With the release of v4 of `scalable-blob-store`, the write performance has dropped significantly. See the [Warning](#warning) topic above for more detial.
 
 ### Read
 
@@ -172,7 +185,27 @@ Read performance will be close to, if not the same, as disk speed.
 
 ## API
 
-Scalable Blob Store supports both Promise or Callback APIs for asynchronous calls.
+With the update to v4 of `scalable-blob-store` all the BlobStore methods return a Promise. This is perfect for using with the async/await language features.
+
+|API|Parameters|Returns|Type|
+|---|----------|-------|----|
+|[new BlobStore(options)](#instantiation)|[Options Object](#options)|blobStore Instance|Constructor|
+|[blobStore.blobStoreRoot](#blobstoreroot)||`String`|Read Only Property|
+|[blobStore.idFunction](#idfunction)||`Function`|Read Only Property|
+|[blobStore.dirWidth](#dirwidth)||`Number`|Read Only Property|
+|[blobStore.dirDepth](#dirdepth)||`Number`|Read Only Property|
+|[blobStore.getCurrentBlobDir()](#getcurrentblobdir)||`Promise<String>`|Method|
+|[blobStore.setCurrentBlobDir(blobDir)](#setcurrentblobdir)|`String`|`Promise<undefined>`|Method|
+|[blobStore.createWriteStream()](#createwritestream)||`Promise<Object>`|Method|
+|[blobStore.write(data, writeOptions)](#write)|`String|Buffer`,`Object`|`Promise<String>`|Method|
+|[blobStore.append(blobPath, data, appendOptions)](#append)|`String`,`String|Buffer`,`Object`|`Promise<undefined>`|Method|
+|[blobStore.copy(blobPath, flags)](#copy)|`String`,`Number`|`Promise<String>`|Method|
+|[blobStore.createReadStream(blobPath)](#createreadstream)|`String`|`Promise<ReadStream>`|Method|
+|[blobStore.read(blobPath, readOptions)](#read)|`String`,`Object`|`Promise<data>`|Method|
+|[blobStore.realPath(blobPath, realPathOptions)](#realpath)|`String`,`Object`|`Promise<String>`|Method|
+|[blobStore.exists(blobPath)](#exists)|`String`|`Promise<Boolean>`|Method|
+|[blobStore.remove(blobPath)](#remove)|`String`|`Promise<undefined>`|Method|
+|[blobStore.stat(blobPath)](#stat)|`String`|`Promise<Stats>`|Method|
 
 <a name="create" />
 

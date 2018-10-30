@@ -35,7 +35,7 @@ async function bulkCreate (options, numberOfFiles) {
     }).catch((err) => {
       console.error(err)
     })
-    const rs = bs.createReadStream(blobPath)
+    const rs = await bs.createReadStream(blobPath)
     const fileData = await streamToString(rs)
     readTotal += fileData.length
     lastBlobPath = blobPath

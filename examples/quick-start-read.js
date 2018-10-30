@@ -39,7 +39,7 @@ async function quickStartRead (writeData) {
   // Reading Example
   console.log('Lets read the file using blobStore.createReadStream.')
   console.log('Following this log line we should see the data:')
-  const readStream = blobStore.createReadStream(blobPath)
+  const readStream = await blobStore.createReadStream(blobPath)
   readStream.on('error', err => {
     console.error(err)
   })

@@ -1,3 +1,3 @@
 # scalable-blob-store Work Log
 
-* Need to test setCurrentBlobDir()
+* Should we change createReadStream to be a Promise return?

@@ -28,7 +28,7 @@ describe('scalable-blob-store read/write tests', () => {
       ws1.writeStream.on('error', reject)
       crispyReadStream.pipe(ws1.writeStream)
     })
-    const rs1 = bs.createReadStream(blobPath)
+    const rs1 = await bs.createReadStream(blobPath)
     const read = await streamToString(rs1)
     expect(read).toBe(data)
     const exists = await bs.exists(testBlobPath)
