@@ -187,80 +187,307 @@ Read performance will be close to, if not the same, as disk speed.
 
 With the update to v4 of `scalable-blob-store` all the BlobStore methods return a Promise. This is perfect for using with the async/await language features.
 
-|API|Parameters|Returns|Type|
-|---|----------|-------|----|
-|[new BlobStore(options)](#instantiation)|[Options Object](#options)|blobStore Instance|Constructor|
-|[blobStore.blobStoreRoot](#blobstoreroot)||`String`|Read Only Property|
-|[blobStore.idFunction](#idfunction)||`Function`|Read Only Property|
-|[blobStore.dirWidth](#dirwidth)||`Number`|Read Only Property|
-|[blobStore.dirDepth](#dirdepth)||`Number`|Read Only Property|
-|[blobStore.getCurrentBlobDir()](#getcurrentblobdir)||`Promise<String>`|Method|
-|[blobStore.setCurrentBlobDir(blobDir)](#setcurrentblobdir)|`String`|`Promise<undefined>`|Method|
-|[blobStore.createWriteStream()](#createwritestream)||`Promise<Object>`|Method|
-|[blobStore.write(data, writeOptions)](#write)|`String/Buffer`,`Object`|`Promise<String>`|Method|
-|[blobStore.append(blobPath, data, appendOptions)](#append)|`String`,`String/Buffer`,`Object`|`Promise<undefined>`|Method|
-|[blobStore.copy(blobPath, flags)](#copy)|`String`,`Number`|`Promise<String>`|Method|
-|[blobStore.createReadStream(blobPath)](#createreadstream)|`String`|`Promise<ReadStream>`|Method|
-|[blobStore.read(blobPath, readOptions)](#read)|`String`,`Object`|`Promise<data>`|Method|
-|[blobStore.realPath(blobPath, realPathOptions)](#realpath)|`String`,`Object`|`Promise<String>`|Method|
-|[blobStore.exists(blobPath)](#exists)|`String`|`Promise<Boolean>`|Method|
-|[blobStore.remove(blobPath)](#remove)|`String`|`Promise<undefined>`|Method|
-|[blobStore.stat(blobPath)](#stat)|`String`|`Promise<Stats>`|Method|
+|API|Type|Returns|
+|---|----|-------|
+|[new BlobStore(options)](#instantiation)|Constructor|blobStore Instance|
+|[blobStore.blobStoreRoot](#blobstoreroot)|Read Only Property|`String`|
+|[blobStore.idFunction](#idfunction)|Read Only Property|`Function`|
+|[blobStore.dirDepth](#dirdepth)|Read Only Property|`Number`|
+|[blobStore.dirWidth](#dirwidth)|Read Only Property|`Number`|
+|[blobStore.getCurrentBlobDir()](#getcurrentblobdir)|Method|`Promise<String>`|
+|[blobStore.setCurrentBlobDir(blobDir)](#setcurrentblobdir)|Method|`Promise<undefined>`|
+|[blobStore.createWriteStream()](#createwritestream)|Method|`Promise<Object>`|
+|[blobStore.write(data, writeOptions)](#write)|Method|`Promise<String>`|
+|[blobStore.append(blobPath, data, appendOptions)](#append)|Method|`Promise<undefined>`|
+|[blobStore.copy(blobPath, flags)](#copy)|Method|`Promise<String>`|
+|[blobStore.createReadStream(blobPath)](#createreadstream)|Method|`Promise<ReadStream>`|
+|[blobStore.read(blobPath, readOptions)](#read)|Method|`Promise<data>`|
+|[blobStore.realPath(blobPath, realPathOptions)](#realpath)|Method|`Promise<String>`|
+|[blobStore.exists(blobPath)](#exists)|Method|`Promise<Boolean>`|
+|[blobStore.remove(blobPath)](#remove)|Method|`Promise<undefined>`|
+|[blobStore.stat(blobPath)](#stat)|Method|`Promise<Stats>`|
 
-<a name="create" />
+<a name="instantiation"></a>
 
-### `create(options)`
+### `new BlobStore(options)`
+
+__Type:__ Constructor function.
+
+__Parameter:__ `options` `Object`
+
+* A JavaScript object with desired options set. See below.
 
 __Returns__: A new `BlobStore` object to be used to store data.
-The `create(options)` function can be called multiple times to create more than one blob store.
+
+__Description:__
+
+You can call `new BlobStore(options)` multiple times to create more than one blob store.
 
 Options are passed to the constructor function as a JavaScript `object`.
 
 |Key            |Description                                              |Defaults|
 |---------------|---------------------------------------------------------|--------|
 |`blobStoreRoot`|Root directory to store blobs                            |Required|
-|`idFunction`       |Either 'cuid' or 'uuid' as directory and file names      |Required|
+|`idFunction`   |Any ID function that returns a unique ID string          |Required|
 |`dirDepth`     |How deep you want the directories under the root         |3       |
 |`dirWidth`     |The maximum number of files or directories in a directory|1000    |
 
-Start by creating the `scalable-blob-store` factory object:
+__Example:__
 
 ```js
-const sbsFactory = require('scalable-blob-store')
-```
 
-Create a blob store using an options `object`:
+// Start by requiring the `scalable-blob-store` constructor function:
+const BlobStore = require('scalable-blob-store')
 
-```js
+// You will need a unique ID function
+const uuid = require('uuid')
+
+// Create the options object
 const options = {
   blobStoreRoot: '/app/blobs',
-  idFunction: 'cuid',
+  idFunction: uuid.v4,
   dirDepth: 4,
   dirWidth: 2000
 }
 
-const blobStore = sbsFactory.create(options)
+// Create a blob store using an options `object`:
+const blobStore = new BlobStore(options)
+
 ```
 
 Creating multiple blob stores:
 
 ```js
+
 const userOptions = {
   blobStoreRoot: '/app/blobs/user',
-  idFunction: 'cuid',
+  idFunction: uuid.v4,
   dirDepth: 4,
   dirWidth: 2000
 }
 
 const pdfOptions = {
   blobStoreRoot: '/app/blobs/pdf',
-  idFunction: 'uuid',
+  idFunction: uuid.v4,
   dirDepth: 2,
   dirWidth: 300
 }
 
-const userFileStore = sbsFacorty.create(userOptions)
-const pdfDocumentStore = sbsFactory.create(pdfOptions)
+const userFileStore = new BlobStore(userOptions)
+const pdfDocumentStore = new BlobStore(pdfOptions)
+
+```
+
+### `blobStoreRoot`
+
+__Type:__ Read only property.
+
+__Parameters:__ None
+
+__Returns:__ A `String` that matches your `options.blobStoreRoot` value.
+
+__Description:__
+
+This is a convenience method to allow you to pass the blobStore object to a sub module and still have access to the configured properties.
+
+__Example:__
+
+```js
+
+const BlobStore = require('scalable-blob-store')
+const uuid = require('uuid')
+const options = {
+  blobStoreRoot: '/app/blobs',
+  idFunction: uuid.v4,
+  dirDepth: 4,
+  dirWidth: 2000
+}
+
+const blobStore = new BlobStore(options)
+console.log(blobStore.blobStoreRoot)
+// Outputs '/app/blobs' which you configured in the options
+
+```
+
+### `idFunction`
+
+__Type:__ Read only property.
+
+__Parameters:__ None
+
+__Returns:__ The unique ID function you configured in the `options.idFunction` value.
+
+__Description:__
+
+This is a convenience method to allow you to pass the blobStore object to a sub module and still have access to the configured properties.
+
+__Example:__
+
+```js
+
+const BlobStore = require('scalable-blob-store')
+const uuid = require('uuid')
+const options = {
+  blobStoreRoot: '/app/blobs',
+  idFunction: uuid.v4,
+  dirDepth: 4,
+  dirWidth: 2000
+}
+
+const blobStore = new BlobStore(options)
+console.log(blobStore.idFunction())
+// Outputs 'bac00ab2-5e6d-4b77-bfa4-e9befc3e4279' which is a generated UUID from the idFunction.
+
+```
+
+### `dirDepth`
+
+__Type:__ Read only property.
+
+__Parameters:__ None
+
+__Returns:__ A `Number` that matches your `options.dirDepth` value.
+
+__Description:__
+
+This is a convenience method to allow you to pass the blobStore object to a sub module and still have access to the configured properties.
+
+__Example:__
+
+```js
+
+const BlobStore = require('scalable-blob-store')
+const uuid = require('uuid')
+const options = {
+  blobStoreRoot: '/app/blobs',
+  idFunction: uuid.v4,
+  dirDepth: 4,
+  dirWidth: 2000
+}
+
+const blobStore = new BlobStore(options)
+console.log(blobStore.dirDepth)
+// Outputs '4' which you configured in the options
+
+```
+
+### `dirWidth`
+
+__Type:__ Read only property.
+
+__Parameters:__ None
+
+__Returns:__ A `Number` that matches your `options.dirWidth` value.
+
+__Description:__
+
+This is a convenience method to allow you to pass the blobStore object to a sub module and still have access to the configured properties.
+
+__Example:__
+
+```js
+
+const BlobStore = require('scalable-blob-store')
+const uuid = require('uuid')
+const options = {
+  blobStoreRoot: '/app/blobs',
+  idFunction: uuid.v4,
+  dirDepth: 4,
+  dirWidth: 2000
+}
+
+const blobStore = new BlobStore(options)
+console.log(blobStore.dirWidth)
+// Outputs '2000' which you configured in the options
+
+```
+
+### `getCurrentBlobDir()`
+
+__Type:__ Method.
+
+__Parameters:__ None
+
+__Returns:__ A `Promise` that resolves to a `String` that is the current active blob creation directory.
+
+__Description:__
+
+This function is used internally by the `BlobStore` to determine the directory where the next blob file will be saved to disk.
+
+If you ever need to store a blob file outside of the `BlobStore` you could use this method to locate the right place to put your file.
+
+__Example:__
+
+```js
+
+const BlobStore = require('scalable-blob-store')
+const uuid = require('uuid')
+const options = {
+  blobStoreRoot: '/app/blobs',
+  idFunction: uuid.v4,
+  dirDepth: 3,
+  dirWidth: 2000
+}
+
+const blobStore = new BlobStore(options)
+
+async function main () {
+  console.log(await blobStore.getCurrentBlobDir())
+  // The 'dirDepth' option above is set to 3 so the output will be similar to the following:
+  // '/e44d3b0d-b552-4257-8b64-a53331184c38/443061b9-bfa7-40fc-a5a9-d848bc52155e/4d818f4c-88b3-45fd-a104-a2fc3700e9de'
+}
+main()
+
+```
+
+### `setCurrentBlobDir(blobDir)`
+
+__Type:__ Method.
+
+__Parameters:__ `blobDir` `String`
+
+* Represents a file system directory path you desire to store blob files in that will be located under the `blobStoreRoot` path.
+
+__Returns:__ A `Promise` that resolves to  `undefined`.
+
+__Description:__
+
+This function can be used to guide the `BlobStore` to save new blob files into a desired `blobPath`.
+
+One issue with `scalable-blob-store` is that if you remove many blob files the directories the files were located in will not be removed.
+You could either remove the directories yourself, or repopulate them with new blob files by setting the current active blob directory.
+
+This function was added to enable consumers of this module to work around empty blob directories.
+
+__Example:__
+
+```js
+
+const BlobStore = require('scalable-blob-store')
+const uuid = require('uuid')
+const options = {
+  blobStoreRoot: '/app/blobs',
+  idFunction: uuid.v4,
+  dirDepth: 3,
+  dirWidth: 2000
+}
+
+const blobStore = new BlobStore(options)
+
+async function main () {
+  console.log(await blobStore.getCurrentBlobDir())
+  // The 'dirDepth' option above is set to 3 so the output will be similar to the following:
+  // '/e44d3b0d-b552-4257-8b64-a53331184c38/443061b9-bfa7-40fc-a5a9-d848bc52155e/4d818f4c-88b3-45fd-a104-a2fc3700e9de'
+
+  await blobStore.setCurrentBlobDir('/some/blob/path')
+
+  console.log(await blobStore.getCurrentBlobDir())
+  // Outputs '/some/blob/path' to the console.
+  // Any new blob files added to the blob store will go into this path until there are `dirWidth` or 2000 files within it.
+
+}
+main()
+
 ```
 
 <a name="createWriteStream" />
