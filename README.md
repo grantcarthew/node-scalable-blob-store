@@ -1,6 +1,6 @@
 # Introduction
 
-`scalable-blob-store` is a file system blob store that is designed to prevent conflicts when used with a distributed file system or storage area network..
+A file system blob store that is designed to prevent conflicts when used with a distributed file system or storage area network..
 
 <!-- [![Build Status][travisci-image]][travisci-url] -->
 [![Maintainability][cc-maintain-badge]][cc-maintain-url]
@@ -40,7 +40,7 @@ Please __Star__ on GitHub / NPM and __Watch__ for updates.
 
 ## Warning
 
-With the release of `scalable-blob-store` v4 there has seen some major changes.
+With the release of `scalable-blob-store` v4 there has been some major changes.
 
 These changes have introduced some restrictions on the use of the module:
 
@@ -197,8 +197,8 @@ With the update to v4 of `scalable-blob-store` all the BlobStore methods return 
 |[blobStore.getCurrentBlobDir()](#getcurrentblobdir)||`Promise<String>`|Method|
 |[blobStore.setCurrentBlobDir(blobDir)](#setcurrentblobdir)|`String`|`Promise<undefined>`|Method|
 |[blobStore.createWriteStream()](#createwritestream)||`Promise<Object>`|Method|
-|[blobStore.write(data, writeOptions)](#write)|`String|Buffer`,`Object`|`Promise<String>`|Method|
-|[blobStore.append(blobPath, data, appendOptions)](#append)|`String`,`String|Buffer`,`Object`|`Promise<undefined>`|Method|
+|[blobStore.write(data, writeOptions)](#write)|`String/Buffer`,`Object`|`Promise<String>`|Method|
+|[blobStore.append(blobPath, data, appendOptions)](#append)|`String`,`String/Buffer`,`Object`|`Promise<undefined>`|Method|
 |[blobStore.copy(blobPath, flags)](#copy)|`String`,`Number`|`Promise<String>`|Method|
 |[blobStore.createReadStream(blobPath)](#createreadstream)|`String`|`Promise<ReadStream>`|Method|
 |[blobStore.read(blobPath, readOptions)](#read)|`String`,`Object`|`Promise<data>`|Method|
