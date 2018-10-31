@@ -207,6 +207,20 @@ class BlobStore {
   }
 
   /**
+   * Opens the blob file on the filesystem for further operation.
+   *
+   * @param {String} blobPath
+   * @param {String|Number} flags
+   * @param {Number} mode
+   * @returns {Promise<Object>}
+   * @memberof BlobStore
+   */
+  open (blobPath, flags = 'r', mode) {
+    const fullFilePath = path.join(this[_state].blobStoreRoot, blobPath)
+    return fsp.open(fullFilePath, flags, mode)
+  }
+
+  /**
    * Returns the full file system file path for the relative blobPath.
    *
    * @param {String} blobPath

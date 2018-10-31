@@ -186,6 +186,7 @@ With the update to v4 of `scalable-blob-store` all the BlobStore methods return 
 |[blobStore.copy(blobPath, flags)](#copy)|Method|`Promise<String>`|
 |[blobStore.createReadStream(blobPath)](#createreadstream)|Method|`Promise<ReadStream>`|
 |[blobStore.read(blobPath, readOptions)](#read)|Method|`Promise<data>`|
+|[blobStore.open(blobPath, flags, mode)](#open)|Method|`Promise<FileHandle>`|
 |[blobStore.realPath(blobPath, realPathOptions)](#realpath)|Method|`Promise<String>`|
 |[blobStore.stat(blobPath)](#stat)|Method|`Promise<Stats>`|
 |[blobStore.exists(blobPath)](#exists)|Method|`Promise<Boolean>`|
@@ -807,6 +808,58 @@ async function main () {
 
     const content = await blobStore.read(blobPath)
     // Do something with the content
+  } catch (err) {
+    console.error(err)
+  }
+}
+main()
+
+```
+
+<a name="open"><a/>
+
+### `open(blobPath, flags, mode)`
+
+__Type:__ Method.
+
+__Parameter:__ `blobPath` as a `String`.
+
+* Retrieve this from the application database.
+
+__Parameter:__ `flags` as an `String` or `Number`.
+
+* See the [open](https://nodejs.org/api/fs.html#fs_fspromises_open_path_flags_mode) documentation for more detail.
+
+__Returns:__ A `Promise` that resolves to a [FileHandle](https://nodejs.org/api/fs.html#fs_class_filehandle) object.
+
+__Description:__
+
+This is a more advanced method allowing you to carry out [many file operations](https://nodejs.org/api/fs.html#fs_class_filehandle) against the blob file.
+
+__Example:__
+
+```js
+
+const BlobStore = require('scalable-blob-store')
+const uuid = require('uuid')
+const options = {
+  blobStoreRoot: '/app/blobs',
+  idFunction: uuid.v4,
+  dirDepth: 3,
+  dirWidth: 2000
+}
+
+const blobStore = new BlobStore(options)
+
+async function main () {
+  try {
+    // Retrieve the blobPath value from your database
+    const blobPath = '/e6b7815a-c818-465d-8511-5a53c8276b86/aea4be6a-9e7f-4511-b394-049e68f59b02/fea722d1-001a-4765-8408-eb8e0fe7dbc6/183a6b7b-2fd6-4f80-8c6a-2647beb7bb19'
+
+    const fileHandle = await blobStore.open(blobPath)
+    // Do something with the file handle object
+    // See the documentation for more detail
+    // The documentation link is in the description above
   } catch (err) {
     console.error(err)
   }
