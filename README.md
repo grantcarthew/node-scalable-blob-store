@@ -22,20 +22,12 @@ Please __Star__ on GitHub / NPM and __Watch__ for updates.
 * [Rationale](#rationale)
 * [Function](#function)
 * [Performance](#performance)
-* [Installation](#installation)
 * [API](#api)
-  * [create](#create)
-  * [createWriteStream](#createWriteStream)
-  * [createReadStream](#createReadStream)
-  * [remove](#remove)
-  * [stat](#stat)
-  * [exists](#exists)
 * [Known Issues](#known-issues)
 * [Testing](#testing)
 * [About the Owner](#about-the-owner)
 * [Contributing](#contributing)
 * [History](#history)
-* [Credits](#credits)
 * [License](#license)
 
 ## Warning
@@ -175,11 +167,11 @@ Other operational points of interest:
 
 ## Performance
 
-### Write
+__Write__
 
 With the release of v4 of `scalable-blob-store`, the write performance has dropped significantly. See the [Warning](#warning) topic above for more detial.
 
-### Read
+__Read__
 
 Read performance will be close to, if not the same, as disk speed.
 
@@ -740,7 +732,7 @@ main()
 
 ```
 
-<a name="createReadStream"><a/>
+<a name="createreadstream"><a/>
 
 ### `createReadStream(blobPath)`
 
@@ -1049,20 +1041,17 @@ main()
 
 ## Known Issues
 
-There is an issue in `scalable-blob-store` that I have no work around for as of yet. If there are a large number of blobs added and then removed from the store, you may have directories with small numbers of files in them, or empty. These directories will never be removed and will not be populated.
+There is a minor issue in `scalable-blob-store`. If there are a large number of blob files added and then removed from the blob store, you may have empty directories or directories with a small number of files in them. These directories will never be removed and will not be populated.
 
-There are two possible solutions for this problem:
+If you wish to prevent empty or sparsely populated directories you will need to run a maintenance task against the `blobStoreRoot` directory. This maintenance task will need to look for empty or incomplete directories and call the [setCurrentBlobDir](#setcurrentblobdir) method passing in the empty `blobPath`.
 
-- A maintenance task to remove empty directories and migrate low numbered directories into other directories. This is not something that `scalable-blob-store` can do and the developer needs to build this.
-- A better solution would be to replace the cached blob path (`this.currentBlobPath`) on the 'blobStore' object with a valid path that is not full.
-
-For my use case, removal of large numbers of files is unlikely to occur, so my motivation to build a solution for this issue is quite low.
+For your application you may find you rarely remove large numbers of blob files. If this is the case then this issue can be ignored.
 
 ## Testing
 
 There are two methods for testing `scalable-blob-store`:
 
-1.  _Unit Testing_ which uses [tape][tape-url] and the local `os.tmpdir()` directory.
+1.  _Unit Testing_ which uses [jest][jest-url] and the local `os.tmpdir()` directory.
 2.  _Manual Testing_ which will create directories and files on your local disk.
 
 ### Unit Testing
@@ -1070,26 +1059,29 @@ There are two methods for testing `scalable-blob-store`:
 After cloning `scalable-blob-store`, type the following into your console:
 
 ```sh
+
 npm install
-npm run build
 npm test
+
 ```
 
 ### Manual Testing
 
-Running the `test-fs.js` file will create a `~/blobs` directory in your home directory and then recursively fill it with lots of blobs.
+Running the `test-fs.js` file will create a `~/blobs` directory in your temporary directory and then recursively fill it with lots of blobs.
 
 The default options configured in the `test-fs.js` file are:
 
 ```js
+
 const opts = {
-  blobStoreRoot: os.homedir() + '/blobs',
-  idFunction: 'cuid',
+  blobStoreRoot: os.tmpdir() + '/blobs',
+  idFunction: cuid,
   dirDepth: 3,
   dirWidth: 1000
 }
 
 const repeat = 10000
+
 ```
 
 Change the options if you wish to see different results.
@@ -1097,16 +1089,19 @@ Change the options if you wish to see different results.
 After cloning `scalable-blob-store`, type the following into your console:
 
 ```sh
+
 npm install
-npm run build
 node ./tests/test-fs.js
+
 ```
 
-Once complete, inspect the `~/blobs` directory. I suggest using the [tree][tree-url] command which gives you a summary of directories and files within the target directory.
+Once complete, inspect the `/tmp/blobs` directory. I suggest using the [tree][tree-url] command which gives you a summary of directories and files within the target directory.
 
 ```sh
+
 tree ~/blobs
 tree -d ~/blobs
+
 ```
 
 ## About the Owner
@@ -1125,59 +1120,47 @@ See my [other projects on NPM](https://www.npmjs.com/~grantcarthew).
 
 ## Contributing
 
-1.  Fork it!
-2.  Create your feature branch: `git checkout -b my-new-feature`
-3.  Commit your changes: `git commit -am 'Add some feature'`
-4.  Push to the branch: `git push origin my-new-feature`
-5.  Submit a pull request :D
+1. Fork it!
+1. Create your feature branch: `git checkout -b my-new-feature`
+1. Commit your changes: `git commit -am 'Add some feature'`
+1. Push to the branch: `git push origin my-new-feature`
+1. Submit a pull request :D
 
 ## History
 
-- v4.0.0  [2018-10-29]: Major upgrade to modern syntax. See readme above.
-- v3.0.9  [2018-02-26]: Dependency packages updated.
-- v3.0.8  [2017-12-22]: Dependency packages updated.
-- v3.0.7  [2017-07-28]: Fixed test. Removed mock-fs (now uses /tmp). Dependency packages updated.
-- v3.0.6  [2017-05-17]: Dependency packages updated.
-- v3.0.5  [2017-03-20]: Dependency packages updated to support Node.js v7.7.3 and mock-fs v4.2.0.
-- v3.0.4  [2016-12-05]: Dependency packages updated.
-- v3.0.3  [2016-10-10]: Replaced `node-uuid` with `uuid`.
-- v3.0.2  [2016-09-20]: Dependency packages updated.
-- v3.0.1  [2016-05-05]: Packages updated and minor refactor.
-- v3.0.0  [2016-03-07]: Callback support added. createReadStream API changed.
-- v2.1.2  [2016-03-05]: Missed duplicate function in tests, removed.
-- v2.1.1  [2016-03-05]: Refactored duplicate function in tests.
-- v2.1.0  [2016-03-05]: Switched to using the `ES5` build code. Removed Nodejs engine requirements.
-- v2.0.10 [2016-03-03]: Dependency packages updated.
-- v2.0.9  [2016-02-09]: Added promisifyAll to the fsBlobStore instance. More `return null` statements.
-- v2.0.8  [2016-02-09]: Added `return null` after resolve/reject calls to prevent Bluebird warnings.
-- v2.0.7  [2016-02-09]: Added `es5dist` for older versions of node. Packages updated.
-- v2.0.6  [2016-01-28]: Added failure unit tests.
-- v2.0.5  [2016-01-26]: Refactor blob-store.js for minor performance improvement.
-- v2.0.4  [2016-01-24]: Minor performance improvements and bug fixes.
-- v2.0.3  [2016-01-22]: Added unit tests and minor fix.
-- v2.0.2  [2016-01-19]: Added [standard][js-standard-url] to package.json.
-- v2.0.1  [2016-01-12]: Minor performance improvements and bug fixes.
-- v2.0.0  [2016-01-08]: Added support for [CUID][cuid-url] or [UUID][uuid-url] directory and file names.
-- v1.0.1  [2016-01-07]: Last release of v1. Work on v2.0.0 to support cuid.
-- v1.0.0  [2016-01-05]: Minor delint and README updates. Bump to v1.0 for future changes.
-- v0.4.1  [2015-08-20]: Fix reference error.
-- v0.4.0  [2015-08-16]: Changed read and write to createReadStream and createWriteStream.
-- v0.3.1  [2015-08-16]: Fix write stream event order.
-- v0.3.0  [2015-08-16]: Removed file path function, change of plans.
-- v0.2.0  [2015-08-16]: Added file path function.
-- v0.1.0  [2015-09-30]: Initial release.
-
-## Credits
-
-Thanks to the following marvelous people for their hard work:
-
-- [Petka Antonov][petka-url] for [bluebird][bluebird-url]
-- [Roman Shtylman][defunctzombie-url] for [uuid][uuid-url]
-- [Eric Elliot][ericelliott-url] for [cuid][cuid-url]
-- [James Halliday][substack-url] for [mkdirp][mkdirp-url]
-- [Mathias Buus][mathiasbuus-url] for [fs-blob-store][fsblobstore-url]
-
-This list could go on...
+* v4.0.0  [2018-10-29]: Major upgrade to modern syntax. See readme above.
+* v3.0.9  [2018-02-26]: Dependency packages updated.
+* v3.0.8  [2017-12-22]: Dependency packages updated.
+* v3.0.7  [2017-07-28]: Fixed test. Removed mock-fs (now uses /tmp). Dependency packages updated.
+* v3.0.6  [2017-05-17]: Dependency packages updated.
+* v3.0.5  [2017-03-20]: Dependency packages updated to support Node.js v7.7.3 and mock-fs v4.2.0.
+* v3.0.4  [2016-12-05]: Dependency packages updated.
+* v3.0.3  [2016-10-10]: Replaced `node-uuid` with `uuid`.
+* v3.0.2  [2016-09-20]: Dependency packages updated.
+* v3.0.1  [2016-05-05]: Packages updated and minor refactor.
+* v3.0.0  [2016-03-07]: Callback support added. createReadStream API changed.
+* v2.1.2  [2016-03-05]: Missed duplicate function in tests, removed.
+* v2.1.1  [2016-03-05]: Refactored duplicate function in tests.
+* v2.1.0  [2016-03-05]: Switched to using the `ES5` build code. Removed Nodejs engine requirements.
+* v2.0.10 [2016-03-03]: Dependency packages updated.
+* v2.0.9  [2016-02-09]: Added promisifyAll to the fsBlobStore instance. More `return null` statements.
+* v2.0.8  [2016-02-09]: Added `return null` after resolve/reject calls to prevent Bluebird warnings.
+* v2.0.7  [2016-02-09]: Added `es5dist` for older versions of node. Packages updated.
+* v2.0.6  [2016-01-28]: Added failure unit tests.
+* v2.0.5  [2016-01-26]: Refactor blob-store.js for minor performance improvement.
+* v2.0.4  [2016-01-24]: Minor performance improvements and bug fixes.
+* v2.0.3  [2016-01-22]: Added unit tests and minor fix.
+* v2.0.2  [2016-01-19]: Added [standard][js-standard-url] to package.json.
+* v2.0.1  [2016-01-12]: Minor performance improvements and bug fixes.
+* v2.0.0  [2016-01-08]: Added support for [CUID][cuid-url] or [UUID][uuid-url] directory and file names.
+* v1.0.1  [2016-01-07]: Last release of v1. Work on v2.0.0 to support cuid.
+* v1.0.0  [2016-01-05]: Minor delint and README updates. Bump to v1.0 for future changes.
+* v0.4.1  [2015-08-20]: Fix reference error.
+* v0.4.0  [2015-08-16]: Changed read and write to createReadStream and createWriteStream.
+* v0.3.1  [2015-08-16]: Fix write stream event order.
+* v0.3.0  [2015-08-16]: Removed file path function, change of plans.
+* v0.2.0  [2015-08-16]: Added file path function.
+* v0.1.0  [2015-09-30]: Initial release.
 
 ## License
 
@@ -1224,7 +1207,7 @@ MIT
 [travisci-image]: https://travis-ci.org/grantcarthew/node-scalable-blob-store.svg?branch=master
 [travisci-url]: https://travis-ci.org/grantcarthew/node-scalable-blob-store
 [cuid-discuss-url]: https://github.com/ericelliott/cuid/issues/22
-[tape-url]: https://www.npmjs.com/package/tape
+[jest-url]: https://jestjs.io/en/
 [tree-url]: https://www.debian-administration.org/article/606/Commands_you_might_have_missed_tree
 [risingstack-url]: https://risingstack.com/
 [risingstack-article-url]: https://blog.risingstack.com/how-to-become-a-better-node-js-developer-in-2016
