@@ -9,21 +9,17 @@ module.exports = fsBlobDirItemList
  *
  * @param {String} blobStoreRoot
  * @param {String} blobDir
- * @param {Boolean} filesOnly - true for file items, false for directory items.
+ * @param {String} filterFunctionName - The name of the stat function for filtering.
  * @returns {Promise<Array>} - The array contains string directory names.
  */
-async function fsBlobDirItemList (blobStoreRoot, blobDir, filesOnly = true) {
+async function fsBlobDirItemList (blobStoreRoot, blobDir, filterFunctionName = 'isFile') {
   try {
     const fullBlobDir = path.join(blobStoreRoot, blobDir)
     const blobDirItems = await fsp.readdir(fullBlobDir)
     const itemList = []
     for (const fsItem of blobDirItems) {
       const stat = await fsp.stat(path.join(fullBlobDir, fsItem))
-      if (filesOnly) {
-        stat.isFile() && itemList.push(fsItem)
-      } else {
-        stat.isDirectory() && itemList.push(fsItem)
-      }
+      stat[filterFunctionName]() && itemList.push(fsItem)
     }
     return itemList
   } catch (err) {
