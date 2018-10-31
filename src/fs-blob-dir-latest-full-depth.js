@@ -1,40 +1,46 @@
-const Promise = require('bluebird')
 const path = require('path')
-const mkdirp = require('mkdirp')
+const fs = require('fs')
 const fsBlobDirLatest = require('./fs-blob-dir-latest')
 
-module.exports = function (state) {
-  var loopIndex = state.dirDepth
-  var blobPath = '/'
+module.exports = fsBlobDirLatestFullDepth
 
-  return new Promise((resolve, reject) => {
-    function buildPath (nextPath) {
-      var fullNextPath = path.join(state.blobStoreRoot, nextPath)
-      return fsBlobDirLatest(fullNextPath, state.validateId).then((dir) => {
-        if (!dir) {
-          return state.newId()
-        }
-        return dir
-      }).then((dir) => {
-        blobPath = path.join(blobPath, dir)
+/**
+ * Returns the most recent directory within the blobStoreRoot path.
+ * Creates the directories down to the dirDepth if they don't exist.
+ *
+ * @param {Object} state
+ * @returns {Promise<String>}
+ */
+async function fsBlobDirLatestFullDepth (state) {
+  let loopIndex = state.dirDepth
+  let blobDir = '/'
+  await dirFindOrCreate(blobDir)
+  return blobDir
 
-        if (loopIndex === 1) {
-          mkdirp(path.join(state.blobStoreRoot, blobPath))
-          resolve(blobPath)
-          return null
-        } else {
-          loopIndex--
-          buildPath(blobPath)
-          return null
-        }
-      }).catch((err) => {
-        reject(err)
-        return null
-      })
+  /**
+   * Starting at the blobStoreRoot it will find the latest
+   * directory or create one. Loops down to the dirDepth
+   * based on the loopIndex closure variable.
+   *
+   * @param {String} nextDir
+   * @returns {Promise<void>}
+   */
+  async function dirFindOrCreate (nextDir) {
+    const fullNextPath = path.join(state.blobStoreRoot, nextDir)
+    let dirLatest = await fsBlobDirLatest(fullNextPath)
+    if (!dirLatest) {
+      dirLatest = state.idFunction()
+    }
+    // @ts-ignore
+    blobDir = path.join(blobDir, dirLatest)
+
+    if (loopIndex < 2) {
+      // @ts-ignore
+      fs.mkdirSync(path.join(state.blobStoreRoot, blobDir), { recursive: true })
+      return
     }
 
-    // Initiate Recursion
-    buildPath(blobPath)
-    return null
-  })
+    loopIndex--
+    await dirFindOrCreate(blobDir)
+  }
 }

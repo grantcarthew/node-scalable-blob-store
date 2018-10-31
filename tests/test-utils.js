@@ -1,35 +1,30 @@
 const os = require('os')
-const fs = require('fs')
-const Promise = require('bluebird')
-const mkdirp = require('mkdirp')
+const fsp = require('fs').promises
+const mkdir = fsp.mkdir
+const writeFile = fsp.writeFile
 const del = require('del')
-const writeFile = Promise.promisify(fs.writeFile)
 const path = require('path')
+const ulid = require('ulid').ulid
 const cuid = require('cuid')
 const uuid = require('uuid')
 
-const data = 'The quick brown fox jumped over the lazy dog'
+const data = 'The quick brown fox jumps over the lazy dog'
 module.exports.data = data
 
 module.exports.mkBlobDir = mkBlobDir
 async function mkBlobDir (blobRoot, ...dirs) {
   const fullPath = path.join(blobRoot, ...dirs)
-  return new Promise((resolve, reject) => {
-    mkdirp(fullPath, (err) => {
-      err && reject(err)
-      resolve()
-    })
-  })
+  return mkdir(fullPath, { recursive: true })
 }
 
 module.exports.rmBlobDir = rmBlobDir
 async function rmBlobDir (blobRoot, ...parts) {
   const fullPath = path.join(blobRoot, ...parts)
-  return fullPath.startsWith(os.tmpdir()) && del(fullPath, {force: true})
+  return fullPath.startsWith(os.tmpdir()) && del(fullPath, { force: true })
 }
 
-module.exports.blobRoot = blobRoot
-function blobRoot (name) {
+module.exports.genBlobStoreRoot = genBlobStoreRoot
+function genBlobStoreRoot (name) {
   let rootPath = path.join(os.tmpdir(), 'blobs', name)
   return rootPath
 }
@@ -43,9 +38,19 @@ async function mkBlobFile (blobRoot, ...pathPart) {
 
 module.exports.delay = delay
 function delay (ms) {
-  return Promise.delay(ms)
+  return new Promise((resolve, reject) => {
+    setTimeout(resolve, ms)
+  })
 }
 
+module.exports.generateUlids = generateUlids
+function generateUlids (total) {
+  const ulids = []
+  for (let i = 0; i < total; i++) {
+    ulids.push(ulid())
+  }
+  return ulids
+}
 module.exports.generateCuids = generateCuids
 function generateCuids (total) {
   const cuids = []
@@ -65,26 +70,40 @@ function generateUuids (total) {
 }
 
 module.exports.buildTestFs = buildTestFs
-async function buildTestFs (blobRoot) {
-  const cuids = generateCuids(10)
-  const uuids = generateUuids(10)
-  const newestCuid = `/${cuids[5]}/${cuids[6]}/${cuids[7]}`
-  const newestUuid = `/${uuids[5]}/${uuids[6]}/${uuids[7]}`
-
+async function buildTestFs (blobStoreRoot) {
   try {
-    await mkBlobFile(blobRoot, cuids[0], cuids[1], cuids[2], cuids[3])
-    await mkBlobFile(blobRoot, uuids[0], uuids[1], uuids[2], uuids[3])
-    await mkBlobFile(blobRoot, cuids[4])
-    await mkBlobFile(blobRoot, uuids[4])
-    await mkBlobFile(blobRoot, 'wrongnamefile')
-    await mkBlobDir(blobRoot, 'wrongnamedir')
+    await del(blobStoreRoot, { force: true })
+    await mkBlobFile(blobStoreRoot, '01a', '01b', '01c', '01d')
     await delay(200)
-    await mkBlobFile(blobRoot, cuids[5], cuids[6], cuids[7], cuids[8])
-    await mkBlobFile(blobRoot, uuids[5], uuids[6], uuids[7], uuids[8])
-    await mkBlobFile(blobRoot, cuids[9])
-    await mkBlobFile(blobRoot, uuids[9])
+    await mkBlobFile(blobStoreRoot, '02a', '02b', '02c', '02d')
+    await delay(200)
+    await mkBlobFile(blobStoreRoot, '03a', '03b', '03c', '03d')
+    await delay(200)
+    await mkBlobFile(blobStoreRoot, '04a')
+    await delay(200)
+    await mkBlobFile(blobStoreRoot, '05a')
+    await delay(200)
+    await mkBlobFile(blobStoreRoot, '06a')
+    await delay(200)
+    await mkBlobFile(blobStoreRoot, '07a', '07b', '07c', '07d')
+    await delay(200)
+    await mkBlobFile(blobStoreRoot, '08a', '08b', '08c', '08d')
+    await delay(200)
+    await mkBlobFile(blobStoreRoot, '09a', '09b', '09c', '09d')
+    await delay(200)
+    await mkBlobFile(blobStoreRoot, '10a')
+    await delay(200)
+    await mkBlobFile(blobStoreRoot, '11a')
+    await delay(200)
+    await mkBlobFile(blobStoreRoot, '12a')
   } catch (err) {
-    console.log(err)
+    console.log('Error in buildTestFs ')
+    console.error(err)
   }
-  return { newestCuid, newestUuid }
+  return {
+    firstBlobDir: '/01a/01b/01c',
+    firstBlobPath: '/01a/01b/01c/01d',
+    latestBlobDir: '/09a/09b/09c',
+    latestBlobPath: '/09a/09b/09c/09d'
+  }
 }

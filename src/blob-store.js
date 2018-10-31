@@ -1,139 +1,284 @@
 const fs = require('fs')
+const fsp = fs.promises
 const path = require('path')
-const Promise = require('bluebird')
-const fsBlobStoreFactory = require('fs-blob-store')
-Promise.promisify(fs.stat)
 
 // Internal Modules
 const optionsParser = require('./options-parser')
-const fsBlobItemList = require('./fs-blob-item-list')
-const blobPathBuild = require('./blob-path-build')
-const idGenerator = require('./id-generator')
-const idValidator = require('./id-validator')
+const blobDirBuild = require('./blob-dir-build')
+const fsBlobFileList = require('./fs-blob-file-list')
 
-exports.create = BlobStore
+// Internal State Symbols
+const _state = Symbol('BlobStoreState')
+const _currentBlobDir = Symbol('CurrentBlobDir')
 
-function BlobStore (opts) {
-  if (!(this instanceof BlobStore)) {
-    return new BlobStore(opts)
+/**
+ * The createWriteStream return type.
+ * @typedef BlobWriteStream
+ * @property {Object} writeStream - The Nodejs Writable Stream.
+ * @property {String} blobPath - The blobStoreRoot releative blob path.
+ */
+
+/**
+ * The main blob store class.
+ *
+ * @class BlobStore
+ */
+class BlobStore {
+  constructor (options) {
+    this[_state] = optionsParser(options)
+    this[_currentBlobDir] = false
   }
-  this.state = optionsParser(opts)
-  this.state.newId = idGenerator(this.state.idType)
-  this.state.validateId = idValidator(this.state.idType)
-  this.currentBlobPath = false
-  this.fsBlobStore = fsBlobStoreFactory(this.state.blobStoreRoot)
-  Promise.promisifyAll(Object.getPrototypeOf(this.fsBlobStore))
-}
 
-BlobStore.prototype.createWriteStream = function (callback) {
-  if (callback) {
-    CreateWriteStreamPromise.call(this).then(function (data) {
-      callback(null, data)
-    }, function (err) {
-      callback(err)
-    })
-  } else {
-    return CreateWriteStreamPromise.call(this)
+  /**
+   * Returns the root filesystem path used by the Blob Store.
+   *
+   * @readonly
+   * @returns {String}
+   * @memberof BlobStore
+   */
+  get blobStoreRoot () {
+    return this[_state].blobStoreRoot
   }
-}
 
-function CreateWriteStreamPromise () {
-  var self = this
-  return Promise.resolve(this.currentBlobPath).then((blobPath) => {
-    if (!blobPath) { return blobPathBuild(self.state) }
-    return blobPath
-  }).then((blobPath) => {
-    var fullBlobPath = path.join(self.state.blobStoreRoot, blobPath)
-    return fsBlobItemList(fullBlobPath, self.state.validateId, false)
-    .then((blobFileItems) => {
-      return blobFileItems.length
-    }).then((blobFileCount) => {
-      if (blobFileCount >= self.state.dirWidth) {
-        return blobPathBuild(self.state)
-      }
-      return blobPath
-    })
-  }).then((blobPath) => {
-    self.currentBlobPath = blobPath
-    var filePath = path.join(blobPath, self.state.newId())
-    var writeStream = self.fsBlobStore.createWriteStream({
-      key: filePath
-    })
-    let blobData = {
-      blobPath: filePath,
-      writeStream: writeStream
+  /**
+   * Returns the idFunction used to generate the Blob Store directory and file names.
+   * This is a convenience method to allow the consumer to generate IDs.
+   *
+   * @readonly
+   * @returns {Function}
+   * @memberof BlobStore
+   */
+  get idFunction () {
+    return this[_state].idFunction
+  }
+
+  /**
+   * Returns the configured dirWidth value which represents the maximum
+   * number of files or directories allowed within a directory.
+   *
+   * @readonly
+   * @returns {Number}
+   * @memberof BlobStore
+   */
+  get dirWidth () {
+    return this[_state].dirWidth
+  }
+
+  /**
+   * Returns the configured dirDepth value which represents the maximum
+   * depth of directories to save blob files.
+   *
+   * @readonly
+   * @returns {Number}
+   * @memberof BlobStore
+   */
+  get dirDepth () {
+    return this[_state].dirDepth
+  }
+
+  /**
+   * Returns the current directory being used for blob storage.
+   * The full blob paths require the blobStoreRoot to be prefixed.
+   *
+   * @returns {Promise<String>}
+   * @memberof BlobStore
+   */
+  async getCurrentBlobDir () {
+    let blobDir = this[_currentBlobDir] || await blobDirBuild(this[_state])
+    const blobDirFiles = await fsBlobFileList(this[_state].blobStoreRoot, blobDir)
+    if (blobDirFiles.length >= this[_state].dirWidth) {
+      blobDir = await blobDirBuild(this[_state])
     }
-    return blobData
-  })
-}
+    this[_currentBlobDir] = blobDir
+    return this[_currentBlobDir]
+  }
 
-BlobStore.prototype.createReadStream = function (blobPath) {
-  return this.fsBlobStore.createReadStream({
-    key: blobPath
-  })
-}
+  /**
+   * Sets the Blob Stores current blob directory.
+   * If the new blob directory is not deep enough it will be extended to the dirDepth value.
+   * If the new blob directory contains more than the dirWidth number of files or directories
+   * a new blob directory will be generated.
+   *
+   * @param {String} blobDir
+   * @returns {Promise<void>}
+   * @memberof BlobStore
+   */
+  async setCurrentBlobDir (blobDir) {
+    if (typeof blobDir !== 'string') {
+      throw new Error('setCurrentBlobDir requires a string path')
+    }
+    const fullDirPath = path.join(this[_state].blobStoreRoot, blobDir)
+    await fsp.mkdir(fullDirPath, { recursive: true })
+    this[_currentBlobDir] = blobDir
+    await this.getCurrentBlobDir()
+  }
 
-BlobStore.prototype.exists = function (blobPath, callback) {
-  if (callback) {
-    this.fsBlobStore.exists({ key: blobPath }, (err, exists) => {
-      if (err) {
-        return callback(err)
-      }
-      return callback(null, exists)
-    })
-  } else {
-    return new Promise((resolve, reject) => {
-      this.fsBlobStore.exists({ key: blobPath }, (err, exists) => {
-        if (err) {
-          reject(err)
-          return null
-        }
-        resolve(exists)
-        return null
-      })
-    })
+  /**
+   * Creates a new file system stream to a blob file.
+   * Includes the writable stream and the relative blob path
+   * in the returned object.
+   *
+   * @returns {Promise<BlobWriteStream>}
+   * @memberof BlobStore
+   */
+  async createWriteStream () {
+    const currentBlobDir = await this.getCurrentBlobDir()
+    const blobPath = path.join(currentBlobDir, this[_state].idFunction())
+    const filePath = path.join(this[_state].blobStoreRoot, blobPath)
+    const writeStream = fs.createWriteStream(filePath)
+    return {
+      blobPath,
+      writeStream
+    }
+  }
+
+  /**
+   * Writes the data to a new blob file returning the relative blob path.
+   *
+   * @param {String|Buffer} data
+   * @param {Object} writeOptions - Standard fs.writeFile options object.
+   * @returns {Promise<String>}
+   * @memberof BlobStore
+   */
+  async write (data, writeOptions = {}) {
+    const currentBlobDir = await this.getCurrentBlobDir()
+    const blobPath = path.join(currentBlobDir, this[_state].idFunction())
+    const filePath = path.join(this[_state].blobStoreRoot, blobPath)
+    await fsp.writeFile(filePath, data, writeOptions)
+    return blobPath
+  }
+
+  /**
+   * Appends data to the end of the file located at the blobPath.
+   *
+   * @param {String} blobPath
+   * @param {String|Buffer} data
+   * @param {Object} appendOptions - Standard fs.appendFile options object.
+   * @returns {Promise<void>}
+   * @memberof BlobStore
+   */
+  async append (blobPath, data, appendOptions = {}) {
+    const fullFilePath = path.join(this[_state].blobStoreRoot, blobPath)
+    return fsp.appendFile(fullFilePath, data, appendOptions)
+  }
+
+  /**
+   * Copies the file located at the blobPath to a new blobPath.
+   *
+   * @param {String} blobPath
+   * @param {Object} flags - Standard fs.copyFile flags object which modifies the copy operation.
+   * @returns {Promise<String>}
+   * @memberof BlobStore
+   */
+  async copy (blobPath, flags = 0) {
+    const currentBlobDir = await this.getCurrentBlobDir()
+    const fullSrcPath = path.join(this[_state].blobStoreRoot, blobPath)
+    const dstBlobPath = path.join(currentBlobDir, this[_state].idFunction())
+    const dstFilePath = path.join(this[_state].blobStoreRoot, dstBlobPath)
+    await fsp.copyFile(fullSrcPath, dstFilePath, flags)
+    return dstBlobPath
+  }
+
+  /**
+   * Returns a Readable Stream for the file located at the relative blobPath.
+   *
+   * @param {String} blobPath
+   * @returns {Object} - Standard Node.js readable stream.
+   * @memberof BlobStore
+   */
+  createReadStream (blobPath) {
+    const fullFilePath = path.join(this[_state].blobStoreRoot, blobPath)
+    // For API consistency the ReadStream is wrapped in a Promise
+    return Promise.resolve(fs.createReadStream(fullFilePath))
+  }
+
+  /**
+   * Reads the file located at the relative blobPath returning the contents.
+   *
+   * @param {String} blobPath
+   * @param {Object} [readOptions={}] - Defaults to encoding equal to 'utf8'.
+   * @returns
+   * @memberof BlobStore
+   */
+  read (blobPath, readOptions = {}) {
+    readOptions.encoding = readOptions.encoding || 'utf8'
+    const fullFilePath = path.join(this[_state].blobStoreRoot, blobPath)
+    return fsp.readFile(fullFilePath, readOptions)
+  }
+
+  /**
+   * Opens the blob file on the filesystem for further operation.
+   *
+   * @param {String} blobPath
+   * @param {String|Number} flags
+   * @param {Number} mode
+   * @returns {Promise<Object>}
+   * @memberof BlobStore
+   */
+  open (blobPath, flags = 'r', mode) {
+    const fullFilePath = path.join(this[_state].blobStoreRoot, blobPath)
+    return fsp.open(fullFilePath, flags, mode)
+  }
+
+  /**
+   * Returns the full file system file path for the relative blobPath.
+   *
+   * @param {String} blobPath
+   * @param {Object} realPathOptions - Standard fs.realpath options object.
+   * @returns {Promise<String>} - Full path to the blobPath file.
+   * @memberof BlobStore
+   */
+  realPath (blobPath, realPathOptions = {}) {
+    const fullFilePath = path.join(this[_state].blobStoreRoot, blobPath)
+    return fsp.realpath(fullFilePath, realPathOptions)
+  }
+
+  /**
+   * Tests for the existance of a file located at the relative blobPath.
+   *
+   * @param {String} blobPath
+   * @returns {Promise<Boolean>} - True if the file exists. False otherwise.
+   * @memberof BlobStore
+   */
+  async exists (blobPath) {
+    try {
+      const stat = await this.stat(blobPath)
+      return !!stat
+    } catch (err) {
+      if (err.code !== 'ENOENT') { throw err }
+    }
+    return false
+  }
+
+  /**
+   * Deletes the file located at the relative blobPath.
+   * Succeeds if the file exists or not.
+   *
+   * @param {String} blobPath
+   * @returns {Promise<void>}
+   * @memberof BlobStore
+   */
+  async remove (blobPath) {
+    const fullFilePath = path.join(this[_state].blobStoreRoot, blobPath)
+    try {
+      await fsp.unlink(fullFilePath)
+    } catch (err) {
+      if (err.code !== 'ENOENT') { throw err }
+    }
+  }
+
+  /**
+   * Returns the standard file system stat object for the file located
+   * at the relative blobPath.
+   *
+   * @param {String} blobPath
+   * @returns {Object}
+   * @memberof BlobStore
+   */
+  stat (blobPath) {
+    const fullFilePath = path.join(this[_state].blobStoreRoot, blobPath)
+    return fsp.stat(fullFilePath)
   }
 }
 
-BlobStore.prototype.remove = function (blobPath, callback) {
-  if (callback) {
-    this.fsBlobStore.remove({ key: blobPath }, (err) => {
-      if (err) {
-        return callback(err)
-      }
-      return callback()
-    })
-  } else {
-    return new Promise((resolve, reject) => {
-      this.fsBlobStore.remove({ key: blobPath }, (err) => {
-        if (err) {
-          reject(err)
-          return null
-        }
-        resolve()
-        return null
-      })
-    })
-  }
-}
-
-BlobStore.prototype.stat = function (blobPath, callback) {
-  var fullBlobPath = path.join(this.state.blobStoreRoot, blobPath)
-  if (callback) {
-    fs.stat(fullBlobPath, (err, result) => {
-      if (err) { return callback(err) }
-      return callback(null, result)
-    })
-  } else {
-    return new Promise((resolve, reject) => {
-      fs.stat(fullBlobPath, (err, result) => {
-        if (err) {
-          reject(err)
-          return null
-        }
-        resolve(result)
-        return null
-      })
-    })
-  }
-}
+module.exports = BlobStore

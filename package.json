@@ -1,7 +1,7 @@
 {
   "name": "scalable-blob-store",
-  "version": "3.0.9",
-  "description": "A simple local file system blob store that is designed to prevent conflicts when used with a distributed or replicated file system.",
+  "version": "4.0.0",
+  "description": "A file system blob store that is designed to prevent conflicts when used with a distributed file system or storage area network.",
   "homepage": "https://github.com/grantcarthew/node-scalable-blob-store",
   "author": "Grant Carthew <dev@carthew.net> (http://uglygizmo.blogspot.com.au/)",
   "license": "MIT",
@@ -20,49 +20,56 @@
     "store",
     "file",
     "scalable",
-    "uuid",
-    "guid",
-    "cuid",
     "distributed",
-    "local"
+    "san",
+    "local",
+    "stream",
+    "buffer"
   ],
   "engines": {
-    "node": "*"
+    "node": ">=10.12.0"
   },
   "scripts": {
-    "prepublish": "npm run build",
-    "clean": "rm -Rf dist",
-    "test": "node ./tests/test-runner.js | tap-spec",
-    "build": "npm run clean && babel src --presets babel-preset-es2015 --out-dir dist",
+    "test": "jest",
+    "test:watch": "jest --watch",
     "lint": "standard",
     "upgrade": "npm run upgrade:rm && npm run upgrade:ncu && npm run upgrade:install && npm run upgrade:finish",
     "upgrade:rm": "rm -Rf node_modules",
     "upgrade:ncu": "npm-check-updates --upgradeAll",
     "upgrade:install": "npm install",
-    "upgrade:finish": "npm run build && npm run test"
+    "upgrade:finish": "npm run test"
+  },
+  "jest": {
+    "verbose": true,
+    "collectCoverage": true,
+    "coveragePathIgnorePatterns": [
+      "<rootDir>/node_modules/",
+      "<rootDir>/tests/"
+    ],
+    "collectCoverageFrom": [
+      "**/src/**/*.js"
+    ],
+    "testURL": "http://localhost"
   },
   "standard": {
-    "parser": "babel-eslint",
-    "ignore": "dist"
+    "globals": [
+      "describe",
+      "test",
+      "expect",
+      "beforeAll",
+      "jest"
+    ]
   },
   "devDependencies": {
-    "babel-cli": "^6.26.0",
-    "babel-eslint": "^8.2.2",
-    "babel-preset-es2015": "^6.24.1",
     "crispy-stream": "^0.1.2",
     "del": "^3.0.0",
-    "moment": "^2.20.1",
+    "jest": "^23.6.0",
     "node-dir": "^0.1.17",
-    "npm-check-updates": "^2.14.0",
-    "standard": "^11.0.0",
-    "tap-spec": "^4.1.1",
-    "tape": "^4.9.0"
+    "npm-check-updates": "^2.14.2",
+    "standard": "^12.0.1",
+    "ulid": "^2.3.0",
+    "cuid": "^2.1.4",
+    "uuid": "^3.3.2"
   },
-  "dependencies": {
-    "bluebird": "^3.5.1",
-    "cuid": "^2.1.0",
-    "fs-blob-store": "^5.2.1",
-    "mkdirp": "^0.5.1",
-    "uuid": "^3.2.1"
-  }
+  "dependencies": {}
 }

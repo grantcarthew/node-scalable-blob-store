@@ -1,4 +1,4 @@
-const mkdirp = require('mkdirp')
+const fs = require('fs')
 
 module.exports = function (options) {
   if (!options || typeof options !== 'object') {
@@ -9,13 +9,17 @@ module.exports = function (options) {
     throw new Error('The blobStoreRoot directory option is required.')
   }
 
-  if (!options.idType) {
-    throw new Error('The idType option is required.')
+  if (!options.idFunction) {
+    throw new Error('The idFunction option is required.')
   }
 
-  if (options.idType.toUpperCase() !== 'uuid'.toUpperCase() &&
-      options.idType.toUpperCase() !== 'cuid'.toUpperCase()) {
-    throw new Error('The idType option is invalid.')
+  if (typeof options.idFunction !== 'function') {
+    throw new Error('The idFunction option is must be a function.')
+  }
+
+  const testId = options.idFunction()
+  if (typeof testId !== 'string') {
+    throw new Error('The idFunction option must generate a string.')
   }
 
   if (options.dirDepth < 1 || options.dirDepth > 10) {
@@ -25,7 +29,7 @@ module.exports = function (options) {
   options.dirDepth = options.dirDepth || 3
   options.dirWidth = options.dirWidth || 1000
 
-  mkdirp.sync(options.blobStoreRoot)
+  fs.mkdirSync(options.blobStoreRoot, { recursive: true })
 
   return options
 }

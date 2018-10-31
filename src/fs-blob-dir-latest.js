@@ -1,32 +1,42 @@
 const path = require('path')
-const Promise = require('bluebird')
-const fs = Promise.promisifyAll(require('fs'))
+const fsp = require('fs').promises
 
-module.exports = function (fsPath, validateId) {
-  return fs.readdirAsync(fsPath).map((fsItem) => {
-    var fsItemPath = path.join(fsPath, fsItem)
-    return fs.statAsync(fsItemPath).then((fsItemStat) => {
-      return {
-        name: fsItem,
-        stat: fsItemStat
-      }
-    })
-  }).filter((fsUnknownItem) => {
-    return fsUnknownItem.stat.isDirectory()
-  }).filter((fsUnvalidatedDirList) => {
-    return validateId(fsUnvalidatedDirList.name)
-  }).then((fsBlobDirList) => {
-    if (!fsBlobDirList || fsBlobDirList.length === 0) {
-      return false
+module.exports = fsBlobDirLatest
+
+/**
+ *  Returns the most recently created directory from within the fsPath.
+ *  Returns false if the fsPath does not exist or has no directories within it.
+ *
+ *  @param {String} fsPath
+ *  @returns {Promise<String|Boolean>}
+ */
+async function fsBlobDirLatest (fsPath) {
+  const listOfDir = []
+  try {
+    const fsItems = await fsp.readdir(fsPath)
+
+    for (const fsItem of fsItems) {
+      const fsItemPath = path.join(fsPath, fsItem)
+      const fsItemStat = await fsp.stat(fsItemPath)
+      fsItemStat.isDirectory() && listOfDir.push({
+        fsItem,
+        fsItemStat
+      })
     }
-    fsBlobDirList.sort((a, b) => {
-      return b.stat.birthtime.getTime() - a.stat.birthtime.getTime()
-    })
-    return fsBlobDirList[0].name
-  }).catch((err) => {
-    if (err.code === 'ENOENT') {
-      return false
-    }
+  } catch (err) {
+    if (err.code === 'ENOENT') { return false }
     throw err
-  })
+  }
+
+  if (listOfDir.length < 1) {
+    return false
+  }
+
+  if (listOfDir.length > 1) {
+    listOfDir.sort((a, b) => {
+      return b.fsItemStat.birthtime.getTime() - a.fsItemStat.birthtime.getTime()
+    })
+  }
+
+  return listOfDir[0].fsItem
 }

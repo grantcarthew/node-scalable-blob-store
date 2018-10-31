@@ -1,12 +1,11 @@
 # Introduction
 
-`scalable-blob-store` is a simple local file system blob store that is designed to prevent conflicts when used with a distributed or replicated file system.
+A file system blob store that is designed to prevent conflicts when used with a distributed file system or storage area network.
 
-[![bitHound Overall Score][bithound-overall-image]][bithound-overall-url]
-[![bitHound Dependencies][bithound-dep-image]][bithound-dep-url]
-[![Build Status][travisci-image]][travisci-url]
+<!-- [![Build Status][travisci-image]][travisci-url] -->
+[![Maintainability][cc-maintain-badge]][cc-maintain-url]
+[![Test Coverage][cc-coverage-badge]][cc-coverage-url]
 [![js-standard-style][js-standard-image]][js-standard-url]
-[![NSP Status][nsp-image]][nsp-url]
 [![Patreon Donation][patreon-image]][patreon-url]
 
 [![Mr Blobby][mrblobby-image]][sbs-url]
@@ -17,182 +16,98 @@ Please __Star__ on GitHub / NPM and __Watch__ for updates.
 
 ## Topics
 
-- [Quick Start](#quick-start)
-    - [Promise API Example](#promise-api-example)
-    - [Callback API Example](#callback-api-example)
-- [Rationale](#rationale)
-- [Function](#function)
-- [Performance](#performance)
-- [Installation](#installation)
-- [API](#api)
-    - [create](#create)
-    - [createWriteStream](#createWriteStream)
-    - [createReadStream](#createReadStream)
-    - [remove](#remove)
-    - [stat](#stat)
-    - [exists](#exists)
-- [Known Issues](#known-issues)
-- [Testing](#testing)
-- [About the Owner](#about-the-owner)
-- [Contributing](#contributing)
-- [History](#history)
-- [Credits](#credits)
-- [License](#license)
+* [Warning](#warning)
+* [Features](#features)
+* [Quick Start](#quick-start)
+* [Rationale](#rationale)
+* [Function](#function)
+* [Performance](#performance)
+* [API](#api)
+* [Known Issues](#known-issues)
+* [Testing](#testing)
+* [About the Owner](#about-the-owner)
+* [Contributing](#contributing)
+* [History](#history)
+* [License](#license)
+
+## Warning
+
+With the release of `scalable-blob-store` v4 there has been some major changes.
+
+These changes have introduced some restrictions on the use of the module:
+
+* Requires Node.js v10.12.0 or later.
+* Uses Node.js [Stability: 1 - Experimental](https://nodejs.org/api/documentation.html#documentation_stability_index) features. Specifically the [fs.promises](https://nodejs.org/api/fs.html#fs_fs_promises_api) API and the [mkdir recursive](https://nodejs.org/api/fs.html#fs_fspromises_mkdir_path_options) options.
+* The module performance is approximately four times slower than v3.0.9. Most likely this is due to the experimental APIs.
+* All callback APIs have been removed.
+
+In time these restrictions will become less of an issue, however for now if you want to use `scalable-blob-store` in production, I suggest you use the old [version 3.0.9 release](https://github.com/grantcarthew/node-scalable-blob-store/releases/tag/v3.0.9).
+
+Please read the [v3.0.9 README](https://github.com/grantcarthew/node-scalable-blob-store/blob/v3.0.9/README.md) document to help you use the older release.
+
+## Features
+
+* Save binary large objects (blobs) locally in a scalable format.
+* Written using modern JavaScript language features.
+* No dependencies.
+* Blob file and directory names based on unique IDs.
+* Extensive read / write APIs in both stream and file format.
+* Promise based with no callbacks.
+
+_Note: see the [restrictions](#warning) above prior to using in production._
 
 ## Quick Start
 
-You can use either Promise or callback APIs in `scalable-blob-store`. The returned Promises are using the [Bluebird][bluebird-url] library ([why Bluebird and not native Promises?][bluebird-speed-url]).
+### Installation
 
-### Promise API Example
+```sh
+
+npm install scalable-blob-store --save
+
+```
+
+### Create a writable stream
 
 ```js
-var os = require('os')
-var sbsFactory = require('scalable-blob-store')
 
-var options = {
-  blobStoreRoot: os.homedir() + '/blobs', // Change this!
-  idType: 'cuid',
+const os = require('os')
+const ulid = require('ulid').ulid // You need a unique ID generator function
+const BlobStore = require('scalable-blob-store')
+
+const options = {
+  blobStoreRoot: os.tmpdir() + '/blobs', // Change this!
+  idFunction: ulid,
   dirDepth: 4,
   dirWidth: 1000
 }
 
 // Creating the blobStore Object
-var blobStore = sbsFactory.create(options)
+const blobStore = new BlobStore(options)
+const result = await blobStore.createWriteStream()
 
-var fs = require('fs')
-var readStream = fs.createReadStream('/path/to/file')
+console.dir(result)
+// Logs the result object which contains the blobPath and writeStream.
+// Use the writeStream to save your blob.
+// Store the blobPath in your database.
+//
+// result object will be similar to this:
+// {
+//   blobPath: "/01CTZRTWMAD153V20K26S4Y0BW/01CTZRTWMBZW4SPR4E5QGGJYSH/01CTZRTWMB3QXZK04SYFY8ZJVR/01CTZS3KJYFPRQ34S3T15Y798S",
+//   writeStream: [WriteStream]
+// }
+//
+// In this example the full file path for the blob would be something like this:
+// /tmp/blobs/01CTZRTWMAD153V20K26S4Y0BW/01CTZRTWMBZW4SPR4E5QGGJYSH/01CTZRTWMB3QXZK04SYFY8ZJVR/01CTZS3KJYFPRQ34S3T15Y798S
+//
+// This is based on the blobStoreRoot + blobPath.
 
-// Writing Exapmle
-blobStore.createWriteStream().then(result => {
-  console.dir(result)
-  // Logs the result object which contains the blobPath and writeStream.
-  // Use the writeStream to save your blob.
-  // Store the blobPath in your database.
-  //
-  // result object will be similar to this:
-  // {
-  //   blobPath: "/cij50xids00ulzph3n49znlex/cij50xidu00upzph327c9zwwh/cij50xidx00utzph3ikjxzkt7/cij50xidq00ujzph3o3nsthq7",
-  //   writeStream: [object Object]
-  // }
-  return new Promise((resolve, reject) => {
-    result.writeStream.on('finish', () => {
-        resolve(result.blobPath)
-    })
-    result.writeStream.on('error', reject)
-    readStream.pipe(result.writeStream)
-  })
-}).then(blobPath => {
-  console.log(blobPath)
-  // Logs the blobPath. Save this in your database.
-}).catch(err => {
-  // Consider removing the empty blob from the file system. Code no included.
-  console.error(err)
-})
-
-// Reading Example
-var readStream = blobStore.createReadStream('/id/path/from/your/database')
-readStream.on('error', err => {
-  console.error(err)
-})
-// Pipe the file to the console.
-readStream.pipe(process.stdout)
-
-// Delete Example
-blobStore.remove('/id/path/from/your/database').then(() => {
-  console.log('Blob removed successfully.')
-}).catch(err => {
-  console.error(err)
-})
-
-// File Metadata Example
-blobStore.stat('/id/path/from/your/database').then(stats => {
-  // Returns a unix stats object
-  // https://en.wikipedia.org/wiki/Stat_(system_call)
-  console.dir(stats)
-}).catch(err => {
-  console.error(err)
-})
-
-// File Exists Example
-blobStore.exists('/id/path/from/your/database').then(result => {
-  console.log(result)
-  // Logs 'true' or 'false'
-}).catch(err => {
-  console.error(err)
-})
 ```
 
-### Callback API Example
+See the Quick Start example files for more detail:
 
-```js
-var os = require('os')
-var sbsFactory = require('scalable-blob-store')
-
-var options = {
-  blobStoreRoot: os.homedir() + '/blobs', // Change this!
-  idType: 'cuid',
-  dirDepth: 4,
-  dirWidth: 1000
-}
-
-// Creating the blobStore Object
-var blobStore = sbsFactory.create(options)
-
-var fs = require('fs')
-var readStream = fs.createReadStream('/path/to/file')
-
-// Writing Exapmle
-blobStore.createWriteStream((err, result) => {
-  console.dir(result)
-  // Logs the result object which contains the blobPath and writeStream.
-  // Use the writeStream to save your blob.
-  // Store the blobPath in your database.
-  //
-  // result object will be similar to this:
-  // {
-  //   blobPath: "/cij50xids00ulzph3n49znlex/cij50xidu00upzph327c9zwwh/cij50xidx00utzph3ikjxzkt7/cij50xidq00ujzph3o3nsthq7",
-  //   writeStream: [object Object]
-  // }
-  result.writeStream.on('finish', () => {
-    console.log(result.blobPath)
-    // Logs the blobPath. Save this in your database.
-  })
-  result.writeStream.on('error', (err) => {
-    // Consider removing the empty blob from the file system. Code no included.
-    console.error(err)
-  })
-  readStream.pipe(result.writeStream)
-})
-
-// Reading Example
-var readStream = blobStore.createReadStream('/id/path/from/your/database')
-readStream.on('error', err => {
-  console.error(err)
-})
-// Pipe the file to the console.
-readStream.pipe(process.stdout)
-
-// Delete Example
-blobStore.remove('/id/path/from/your/database', (err) => {
-  if (err) { console.error(err) }
-  console.log('Blob removed successfully.')
-})
-
-// File Metadata Example
-blobStore.stat('/id/path/from/your/database', (err, stats) => {
-  if (err) { console.error(err) }
-  // Returns a unix stats object
-  // https://en.wikipedia.org/wiki/Stat_(system_call)
-  console.dir(stats)
-})
-
-// File Exists Example
-blobStore.exists('/id/path/from/your/database', (err, exists) => {
-  if (err) { console.error(err) }
-  console.log(exists)
-  // Logs 'true' or 'false'
-})
-```
+* [quick-start-write.js](/examples/quick-start-write.js)
+* [quick-start-read.js](/examples/quick-start-read.js)
+* [quick-start-api.js](/examples/quick-start-api.js)
 
 ## Rationale
 
@@ -200,7 +115,7 @@ After researching user file storage, or blob storage, for a web application I wa
 
 I researched the price of cloud storage and decided I wanted a free local version that would scale if needed.
 
-I looked at a number of existing solutions such as [filestorage][filestorage-url] but was unhappy with the scalability of these solutions. Most are only designed for a single server and would cause write conflicts if a distributed file system or cluster file system like [GlusterFS][glusterfs-url] was used as the backend file system.
+I looked at a number of existing solutions such as [filestorage][filestorage-url] but was unhappy with the scalability of these solutions. Most are only designed for a single server and would cause write conflicts if a distributed file system, cluster file system like [GlusterFS][glusterfs-url], or a storage area network was used as the backend file system.
 
 On a long car trip I was thinking about a solution for my blob storage and came up with `scalable-blob-store`.
 
@@ -210,9 +125,9 @@ To achieve scalability on a distributed or replicated file system, `scalable-blo
 
 Once the latest path has been determined, the number of files within the directory are counted to ensure it remains under the configured value. This is to prevent disk performance issues when very large numbers of files are stored within a single directory. If the number of items within a directory becomes too large, a new storage path is determined.
 
-Because there are no databases used to manage the files in the root path, it is up to you to maintain the returned `blobStore` path and metadata about the stored files in your own database.
+Because there are no databases used to manage the files in the root path, it is up to you to maintain the returned `blobPath` value and metadata about the stored files in your own database.
 
-The reason `scalable-blob-store` is scalable is due to the naming of the directories and files within your file system. Every directory and file saved to disk is named by a generated id based on either [CUID][cuid-url] or [UUID v4][uuid-url] (here is a [discussion about CUIDs and UUIDs][cuid-discuss-url]). Merging directories between servers or disks should never cause file name collisions.
+The reason `scalable-blob-store` is scalable is due to the naming of the directories and files within your file system. Every directory and file saved to disk is named by a generated unique id based on a user defined funciton. You could use any unique id generator such as [ULID][ulid-url], [CUID][cuid-url], [UUID v4][uuid-url], or MongoDBs [ObjectIds][objectid-url] just to name a few. Check out my [Awesome Unique ID][awesome-url] repository for more examples. Merging directories between servers or disks should never cause file name collisions.
 
 If a replicated or cluster file system is in use the only conflict that can occur is when one server is reading a file while another is removing the same file. `scalable-blob-store` does not try to manage this conflict, however it will raise the exception.
 
@@ -232,7 +147,7 @@ Example with UUID directory and file names:
 \blobs\846a291f-9864-40bb-aefe-f29bdc73a761\..\8b86b6fe-6166-424c-aed9-8faf1e62689e
 ```
 
-`scalable-blob-store` supports configuration options to give you control over the type of ids used, depth of the directory structure, and the width of the directories. The default options give 3 directories deep containing 1000 items giving a total storage of one billion files within the directory structure.
+`scalable-blob-store` supports configuration options to give you control over the directory and file ids used, depth of the directory structure, and the width of the directories. The default options give 3 directories deep containing 1000 items giving a total storage of one billion files within the directory structure.
 
 Other operational points of interest:
 
@@ -244,351 +159,932 @@ Other operational points of interest:
 
 ## Performance
 
-### Write
+__Write__
 
-This is an unscientific measurement, however just to get some idea of the write performance I ran a test with the following configuration:
+With the release of v4 of `scalable-blob-store`, the write performance has dropped significantly. See the [Warning](#warning) topic above for more detial.
 
-- Virtual Machine with Debian GNU/Linux running on an SSD disk
-- File Content: "The quick brown fox jumped over the lazy dog"
-- dirDepth: 3
-- dirWidth: 1000
-- Repeat: 10,000
-
-With this configuration the following performance was observed:
-
-- Files Created: 10,000
-- Total File Size: 40MB
-- Total Size on Disk: 9.76GB (ext4 file system)
-- Total Time CUID: 115123 milliseconds (115 seconds)
-- Total Time UUID: 115743 milliseconds (116 seconds)
-
-Not surprisingly, this configuration created one top tier directory, one second tier directory, and ten third tier directories.
-
-It is also worth noting there's not a lot of content in each file however a large number of files. It is the creation of the files in the file system that is taking a majority of the time.
-
-### Read
+__Read__
 
 Read performance will be close to, if not the same, as disk speed.
 
-## Installation
-
-```sh
-npm install scalable-blob-store --save
-```
-
-If you clone from [GitHub](https://github.com) you will need to run the build script:
-```sh
-npm run build
-```
-
 ## API
 
-Scalable Blob Store supports both Promise or Callback APIs for asynchronous calls.
+With the update to v4 of `scalable-blob-store` all the BlobStore methods return a Promise. This is perfect for using with the async/await language features.
 
-<a name="create" />
+|API|Type|Returns|
+|---|----|-------|
+|[new BlobStore(options)](#instantiation)|Constructor|blobStore Instance|
+|[blobStore.blobStoreRoot](#blobstoreroot)|Read Only Property|`String`|
+|[blobStore.idFunction](#idfunction)|Read Only Property|`Function`|
+|[blobStore.dirDepth](#dirdepth)|Read Only Property|`Number`|
+|[blobStore.dirWidth](#dirwidth)|Read Only Property|`Number`|
+|[blobStore.getCurrentBlobDir()](#getcurrentblobdir)|Method|`Promise<String>`|
+|[blobStore.setCurrentBlobDir(blobDir)](#setcurrentblobdir)|Method|`Promise<undefined>`|
+|[blobStore.createWriteStream()](#createwritestream)|Method|`Promise<Object>`|
+|[blobStore.write(data, writeOptions)](#write)|Method|`Promise<String>`|
+|[blobStore.append(blobPath, data, appendOptions)](#append)|Method|`Promise<undefined>`|
+|[blobStore.copy(blobPath, flags)](#copy)|Method|`Promise<String>`|
+|[blobStore.createReadStream(blobPath)](#createreadstream)|Method|`Promise<ReadStream>`|
+|[blobStore.read(blobPath, readOptions)](#read)|Method|`Promise<data>`|
+|[blobStore.open(blobPath, flags, mode)](#open)|Method|`Promise<FileHandle>`|
+|[blobStore.realPath(blobPath, realPathOptions)](#realpath)|Method|`Promise<String>`|
+|[blobStore.stat(blobPath)](#stat)|Method|`Promise<Stats>`|
+|[blobStore.exists(blobPath)](#exists)|Method|`Promise<Boolean>`|
+|[blobStore.remove(blobPath)](#remove)|Method|`Promise<undefined>`|
 
-### `create(options)`
+<a name="instantiation"></a>
+
+### `new BlobStore(options)`
+
+__Type:__ Constructor function.
+
+__Parameter:__ `options` as an `Object`.
+
+* A JavaScript object with desired options set. See below.
 
 __Returns__: A new `BlobStore` object to be used to store data.
-The `create(options)` function can be called multiple times to create more than one blob store.
+
+__Description:__
+
+You can call `new BlobStore(options)` multiple times to create more than one blob store.
 
 Options are passed to the constructor function as a JavaScript `object`.
 
 |Key            |Description                                              |Defaults|
 |---------------|---------------------------------------------------------|--------|
 |`blobStoreRoot`|Root directory to store blobs                            |Required|
-|`idType`       |Either 'cuid' or 'uuid' as directory and file names      |Required|
+|`idFunction`   |Any ID function that returns a unique ID string          |Required|
 |`dirDepth`     |How deep you want the directories under the root         |3       |
 |`dirWidth`     |The maximum number of files or directories in a directory|1000    |
 
-Start by creating the `scalable-blob-store` factory object:
+__Example:__
 
 ```js
-var sbsFactory = require('scalable-blob-store')
-```
 
-Create a blob store using an options `object`:
+// Start by requiring the `scalable-blob-store` constructor function:
+const BlobStore = require('scalable-blob-store')
 
-```js
-var options = {
+// You will need a unique ID function
+const uuid = require('uuid')
+
+// Create the options object
+const options = {
   blobStoreRoot: '/app/blobs',
-  idType: 'cuid',
+  idFunction: uuid.v4,
   dirDepth: 4,
   dirWidth: 2000
 }
 
-var blobStore = sbsFactory.create(options)
+// Create a blob store using the options `object`:
+const blobStore = new BlobStore(options)
+
 ```
 
 Creating multiple blob stores:
 
 ```js
-var userOptions = {
+
+const userOptions = {
   blobStoreRoot: '/app/blobs/user',
-  idType: 'cuid',
+  idFunction: uuid.v4,
   dirDepth: 4,
   dirWidth: 2000
 }
 
-var pdfOptions = {
+const pdfOptions = {
   blobStoreRoot: '/app/blobs/pdf',
-  idType: 'uuid',
+  idFunction: uuid.v4,
   dirDepth: 2,
   dirWidth: 300
 }
 
-var userFileStore = sbsFacorty.create(userOptions)
-var pdfDocumentStore = sbsFactory.create(pdfOptions)
+const userFileStore = new BlobStore(userOptions)
+const pdfDocumentStore = new BlobStore(pdfOptions)
+
 ```
 
-<a name="createWriteStream" />
+<a name="blobstoreroot"><a/>
+
+### `blobStoreRoot`
+
+__Type:__ Read only property.
+
+__Returns:__ A `String` that matches your `options.blobStoreRoot` value.
+
+__Description:__
+
+This is a convenience property to allow you to pass the blobStore object to a sub module and still have access to the configured properties.
+
+__Example:__
+
+```js
+
+const BlobStore = require('scalable-blob-store')
+const uuid = require('uuid')
+const options = {
+  blobStoreRoot: '/app/blobs',
+  idFunction: uuid.v4,
+  dirDepth: 4,
+  dirWidth: 2000
+}
+
+const blobStore = new BlobStore(options)
+console.log(blobStore.blobStoreRoot)
+// Outputs '/app/blobs' which you configured in the options
+
+```
+
+<a name="idfunction"><a/>
+
+### `idFunction`
+
+__Type:__ Read only property.
+
+__Returns:__ The unique ID function you configured in the `options.idFunction` value.
+
+__Description:__
+
+This is a convenience property to allow you to pass the blobStore object to a sub module and still have access to the configured properties.
+
+__Example:__
+
+```js
+
+const BlobStore = require('scalable-blob-store')
+const uuid = require('uuid')
+const options = {
+  blobStoreRoot: '/app/blobs',
+  idFunction: uuid.v4,
+  dirDepth: 4,
+  dirWidth: 2000
+}
+
+const blobStore = new BlobStore(options)
+console.log(blobStore.idFunction())
+// Outputs 'bac00ab2-5e6d-4b77-bfa4-e9befc3e4279' which is a generated UUID from the idFunction.
+
+```
+
+<a name="dirdepth"><a/>
+
+### `dirDepth`
+
+__Type:__ Read only property.
+
+__Returns:__ A `Number` that matches your `options.dirDepth` value.
+
+__Description:__
+
+This is a convenience property to allow you to pass the blobStore object to a sub module and still have access to the configured properties.
+
+__Example:__
+
+```js
+
+const BlobStore = require('scalable-blob-store')
+const uuid = require('uuid')
+const options = {
+  blobStoreRoot: '/app/blobs',
+  idFunction: uuid.v4,
+  dirDepth: 4,
+  dirWidth: 2000
+}
+
+const blobStore = new BlobStore(options)
+console.log(blobStore.dirDepth)
+// Outputs '4' which you configured in the options
+
+```
+
+<a name="dirwidth"><a/>
+
+### `dirWidth`
+
+__Type:__ Read only property.
+
+__Returns:__ A `Number` that matches your `options.dirWidth` value.
+
+__Description:__
+
+This is a convenience property to allow you to pass the blobStore object to a sub module and still have access to the configured properties.
+
+__Example:__
+
+```js
+
+const BlobStore = require('scalable-blob-store')
+const uuid = require('uuid')
+const options = {
+  blobStoreRoot: '/app/blobs',
+  idFunction: uuid.v4,
+  dirDepth: 4,
+  dirWidth: 2000
+}
+
+const blobStore = new BlobStore(options)
+console.log(blobStore.dirWidth)
+// Outputs '2000' which you configured in the options
+
+```
+
+<a name="getcurrentblobdir"><a/>
+
+### `getCurrentBlobDir()`
+
+__Type:__ Method.
+
+__Returns:__ A `Promise` that resolves to a `String` that is the current active blob creation directory.
+
+__Description:__
+
+This function is used internally by the `BlobStore` to determine the directory where the next blob file will be saved to disk.
+
+If you ever need to store a blob file outside of the `BlobStore` you could use this method to locate the right place to put your file.
+
+__Example:__
+
+```js
+
+const BlobStore = require('scalable-blob-store')
+const uuid = require('uuid')
+const options = {
+  blobStoreRoot: '/app/blobs',
+  idFunction: uuid.v4,
+  dirDepth: 3,
+  dirWidth: 2000
+}
+
+const blobStore = new BlobStore(options)
+
+async function main () {
+  try {
+    console.log(await blobStore.getCurrentBlobDir())
+    // The 'dirDepth' option above is set to 3 so the output will be similar to the following:
+    // '/e44d3b0d-b552-4257-8b64-a53331184c38/443061b9-bfa7-40fc-a5a9-d848bc52155e/4d818f4c-88b3-45fd-a104-a2fc3700e9de'
+  } catch (err) {
+    console.error(err)
+  }
+}
+main()
+
+```
+
+<a name="setcurrentblobdir"><a/>
+
+### `setCurrentBlobDir(blobDir)`
+
+__Type:__ Method.
+
+__Parameters:__ `blobDir` as a `String`.
+
+* Represents a file system directory path you desire to store blob files in that will be located under the `blobStoreRoot` path.
+
+__Returns:__ A `Promise` that resolves to  `undefined`.
+
+__Description:__
+
+This function can be used to guide the `BlobStore` to save new blob files into a desired `blobPath`.
+
+One issue with `scalable-blob-store` is that if you remove many blob files the directories the files were located in will not be removed.
+You could either remove the directories yourself, or repopulate them with new blob files by setting the current active blob directory.
+
+This function was added to enable consumers of this module to work around empty blob directories.
+
+__Example:__
+
+```js
+
+const BlobStore = require('scalable-blob-store')
+const uuid = require('uuid')
+const options = {
+  blobStoreRoot: '/app/blobs',
+  idFunction: uuid.v4,
+  dirDepth: 3,
+  dirWidth: 2000
+}
+
+const blobStore = new BlobStore(options)
+
+async function main () {
+  try {
+    console.log(await blobStore.getCurrentBlobDir())
+    // The 'dirDepth' option above is set to 3 so the output will be similar to the following:
+    // '/e44d3b0d-b552-4257-8b64-a53331184c38/443061b9-bfa7-40fc-a5a9-d848bc52155e/4d818f4c-88b3-45fd-a104-a2fc3700e9de'
+
+    await blobStore.setCurrentBlobDir('/some/blob/path')
+
+    console.log(await blobStore.getCurrentBlobDir())
+    // Outputs '/some/blob/path' to the console.
+    // Any new blob files added to the blob store will go into this path until there are `dirWidth` or 2000 files within it.
+  } catch (err) {
+    console.error(err)
+  }
+}
+main()
+
+```
+
+<a name="createWriteStream"><a/>
 
 ### `createWriteStream()`
 
-__Returns__: `object` containing the child path to the file within the blob store root and a [stream.Writable][writestream-url].
+__Type:__ Method.
 
-Returned Object using CUID as the idType:
+__Returns__: A `Promise` that resolves to an `Object` containing the child path to the file within the blob store root and a [WriteStream][writestream-url].
 
-```js
-{
-  blobPath: "/cij50xi3y00iyzph3qs7oatcy/cij50xi3z00izzph3yo053mzs/cij50xi4000j0zph3mshil7p5/cij50xi4100j1zph3loy3hp6h",
-  writeStream: stream.Writable
-}
-```
+__Description:__
 
-Returned Object using UUID as the idType:
+Here is an exampe of the returned object using UUID as the idFunction:
 
 ```js
+
 {
   blobPath: "/e6b7815a-c818-465d-8511-5a53c8276b86/aea4be6a-9e7f-4511-b394-049e68f59b02/fea722d1-001a-4765-8408-eb8e0fe7dbc6/183a6b7b-2fd6-4f80-8c6a-2647beb7bb19",
   writeStream: stream.Writable
 }
+
 ```
 
 Use the `writeStream` to save your blob or file.
 The `blobPath` needs to be saved to your database for future access.
 
-Promise example:
+__Example:__
 
 ```js
-var fs = require('fs')
-var readStream = fs.createReadStream('/path/to/file')
 
-blobStore.createWriteStream().then(result => {
+const BlobStore = require('scalable-blob-store')
+const uuid = require('uuid')
+const options = {
+  blobStoreRoot: '/app/blobs',
+  idFunction: uuid.v4,
+  dirDepth: 3,
+  dirWidth: 2000
+}
+
+const blobStore = new BlobStore(options)
+
+// The below readStream is simply to make this a complete example
+const fs = require('fs')
+const readStream = fs.createReadStream('/path/to/file')
+
+async function main () {
+  let result
+  try {
+    result = await blobStore.createWriteStream()
+  } catch (err) {
+    console.error(err)
+  }
+
   console.dir(result)
   // result object will be similar to this:
   // {
-  //   blobPath: "/cij50xi3y00iyzph3qs7oatcy/cij50xi3z00izzph3yo053mzs/cij50xi4000j0zph3mshil7p5/cij50xi4100j1zph3loy3hp6h",
-  //   writeStream: [object Object]
+  //   blobPath: "/e6b7815a-c818-465d-8511-5a53c8276b86/aea4be6a-9e7f-4511-b394-049e68f59b02/fea722d1-001a-4765-8408-eb8e0fe7dbc6/183a6b7b-2fd6-4f80-8c6a-2647beb7bb19",
+  //   writeStream: [WriteStream]
   // }
+
   // Using a Promise to encapsulate the write asynchronous events.
-  return new Promise((resolve, reject) => {
+  await new Promise((resolve, reject) => {
     result.writeStream.on('finish', () => {
-        resolve(result.blobPath)
+        resolve()
     })
     result.writeStream.on('error', reject)
     readStream.pipe(result.writeStream)
   })
-}).then(blobPath => {
+
   console.log(blobPath)
   // Logs the blobPath. Save this in your database.
-}).catch(err => {
-  console.error(err)
-})
+}
+main()
+
 ```
 
-Callback example:
+<a name="write"><a/>
+
+### `write(data, writeOptions)`
+
+__Type:__ Method.
+
+__Parameter:__ `data` as either `String`, `Buffer`, `TypedArray`, or `DataView`.
+
+__Parameter:__ `writeOptions` as an `Object`.
+
+* The `writeOptions` object supports an encoding, mode, and flag property.
+* See the [writeFile](https://nodejs.org/api/fs.html#fs_fs_writefile_file_data_options_callback) documentation for more detail.
+
+__Returns:__ A `Promise` that resolves to a `String`.
+
+* The string contains the `blobPath` value which needs committing to your database.
+
+__Description:__
+
+If you have simple data in memory rather than a stream of data you can use this method to store the data into a blob file.
+
+__Example:__
 
 ```js
-var fs = require('fs')
-var readStream = fs.createReadStream('/path/to/file')
 
-blobStore.createWriteStream((err, result) => {
-  console.dir(result)
-  // result object will be similar to this:
-  // {
-  //   blobPath: "/cij50xi3y00iyzph3qs7oatcy/cij50xi3z00izzph3yo053mzs/cij50xi4000j0zph3mshil7p5/cij50xi4100j1zph3loy3hp6h",
-  //   writeStream: [object Object]
-  // }
+const BlobStore = require('scalable-blob-store')
+const uuid = require('uuid')
+const options = {
+  blobStoreRoot: '/app/blobs',
+  idFunction: uuid.v4,
+  dirDepth: 3,
+  dirWidth: 2000
+}
 
-  result.writeStream.on('finish', () => {
-    console.log(result.blobPath)
-    // Logs the blobPath. Save this in your database.
-  })
-  result.writeStream.on('error', (err) => {
-    // Consider removing the empty blob from the file system. Code no included.
+const blobStore = new BlobStore(options)
+
+async function main () {
+  const data = 'The quick brown fox jumps over the lazy dog.'
+
+  try {
+    const blobPath = await blobStore.write(data)
+    // The returned blobPath will look something like this:
+    // '/e44d3b0d-b552-4257-8b64-a53331184c38/443061b9-bfa7-40fc-a5a9-d848bc52155e/4d818f4c-88b3-45fd-a104-a2fc3700e9de'
+    // Save it to your database.
+  } catch (err) {
+    console.error(err)
+  }
+}
+main()
+
+```
+
+<a name="append"><a/>
+
+### `append(blobPath, data, appendOptions)`
+
+__Type:__ Method.
+
+__Parameter:__ `blobPath` as a `String`.
+
+* Retrieve the `blobPath` from your application database.
+
+__Parameter:__ `data` as either a `String` or `Buffer`.
+
+__Parameter:__ `appendOptions` as an `Object`.
+
+* The `appendOptions` object supports an encoding, mode, and flag property.
+* See the [appendFile](https://nodejs.org/api/fs.html#fs_fs_appendfile_path_data_options_callback) documentation for more detail.
+
+__Returns:__ A `Promise` that resolves to a `undefined`.
+
+__Description:__
+
+Use this method to add simple in memory data to the end of the blob file.
+
+__Example:__
+
+```js
+
+const BlobStore = require('scalable-blob-store')
+const uuid = require('uuid')
+const options = {
+  blobStoreRoot: '/app/blobs',
+  idFunction: uuid.v4,
+  dirDepth: 3,
+  dirWidth: 2000
+}
+
+const blobStore = new BlobStore(options)
+
+async function main () {
+  const data = 'The quick brown fox jumps over the lazy dog.'
+
+  try {
+    await blobStore.append(data)
+  } catch (err) {
+    console.error(err)
+  }
+}
+main()
+
+```
+
+<a name="copy"><a/>
+
+### `copy(blobPath, flags)`
+
+__Type:__ Method.
+
+__Parameter:__ `blobPath` as a `String`.
+
+* Retrieve the `blobPath` from your application database.
+
+__Parameter:__ `flags` as a `Number`.
+
+* See the [copyFile](https://nodejs.org/api/fs.html#fs_fspromises_copyfile_src_dest_flags) documentation for more detail.
+
+__Returns:__ A `Promise` that resolves to a `String`.
+
+* The returned string is a new `blobPath` value for the copied blob file.
+
+__Description:__
+
+Use this method to create a copy of an existing blob file.
+
+__Example:__
+
+```js
+
+const BlobStore = require('scalable-blob-store')
+const uuid = require('uuid')
+const options = {
+  blobStoreRoot: '/app/blobs',
+  idFunction: uuid.v4,
+  dirDepth: 3,
+  dirWidth: 2000
+}
+
+const blobStore = new BlobStore(options)
+
+async function main () {
+  try {
+  const blobPathSource = '/e6b7815a-c818-465d-8511-5a53c8276b86/aea4be6a-9e7f-4511-b394-049e68f59b02/fea722d1-001a-4765-8408-eb8e0fe7dbc6/183a6b7b-2fd6-4f80-8c6a-2647beb7bb19'
+
+  const blobPathDest = await blobStore.copy(blobPathSource)
+  // Store your new blobPath into your application database
+
+  } catch (err) {
+    console.error(err)
+  }
+}
+main()
+
+```
+
+<a name="createreadstream"><a/>
+
+### `createReadStream(blobPath)`
+
+__Type:__ Method.
+
+__Parameter:__ `blobPath` as a `String`.
+
+* Retrieve the `blobPath` from your application database.
+
+__Returns__: A `Promise` that resolves to a [`ReadStream`][readstream-url].
+
+__Description:__
+
+Creates a readable stream to the blob file located at the `blobPath`.
+
+__Example:__
+
+```js
+
+const BlobStore = require('scalable-blob-store')
+const uuid = require('uuid')
+const options = {
+  blobStoreRoot: '/app/blobs',
+  idFunction: uuid.v4,
+  dirDepth: 3,
+  dirWidth: 2000
+}
+async function main () {
+  // Get the blobPath value from your database.
+  const blobPath = '/e6b7815a-c818-465d-8511-5a53c8276b86/aea4be6a-9e7f-4511-b394-049e68f59b02/fea722d1-001a-4765-8408-eb8e0fe7dbc6/183a6b7b-2fd6-4f80-8c6a-2647beb7bb19h'
+
+  let readStream
+  try {
+    readStream = await blobStore.createReadStream(blobPath)
+  } catch (err) {
+    console.error(err)
+  }
+
+  readStream.on('error', err => {
     console.error(err)
   })
-  readStream.pipe(result.writeStream)
-})
+
+  // Blob contents is piped to the console.
+  readStream.pipe(process.stdout)
+}
+main()
+
 ```
 
-<a name="createReadStream" />
+<a name="read"><a/>
 
-### `createReadStream(string)`
+### `read(blobPath, readOptions)`
 
-__Returns__: [`stream.Readable`][readstream-url]
+__Type:__ Method.
 
-Example:
+__Parameter:__ `blobPath` as a `String`.
+
+* Retrieve the `blobPath` from your application database.
+
+__Parameter:__ `readOptions` as an `Object`.
+
+* See the [readFile](https://nodejs.org/api/fs.html#fs_fspromises_readfile_path_options) documentation for more detail.
+
+__Returns:__ A `Promise` that resolves to a the contents of the blob file.
+
+* The format of the file contents will depend on the readOptions passed.
+* `scalable-blob-store` sets the `readOptions.encoding` value to 'utf8' by default.
+
+__Description:__
+
+Use this method to read the content of a small blob file into memory.
+
+__Example:__
 
 ```js
-// Get the blobPath value from your database.
-var blobPath = '/cij50xi3y00iyzph3qs7oatcy/cij50xi3z00izzph3yo053mzs/cij50xi4000j0zph3mshil7p5/cij50xi4100j1zph3loy3hp6h'
 
-var readStream = blobStore.createReadStream(blobPath)
-readStream.on('error', err => {
-  console.error(err)
-})
-// Blob contents is piped to the console.
-readStream.pipe(process.stdout)
+const BlobStore = require('scalable-blob-store')
+const uuid = require('uuid')
+const options = {
+  blobStoreRoot: '/app/blobs',
+  idFunction: uuid.v4,
+  dirDepth: 3,
+  dirWidth: 2000
+}
+
+const blobStore = new BlobStore(options)
+
+async function main () {
+  try {
+    // Retrieve the blobPath value from your database
+    const blobPath = '/e6b7815a-c818-465d-8511-5a53c8276b86/aea4be6a-9e7f-4511-b394-049e68f59b02/fea722d1-001a-4765-8408-eb8e0fe7dbc6/183a6b7b-2fd6-4f80-8c6a-2647beb7bb19'
+
+    const content = await blobStore.read(blobPath)
+    // Do something with the content
+  } catch (err) {
+    console.error(err)
+  }
+}
+main()
+
 ```
 
-<a name="remove" />
+<a name="open"><a/>
 
-### `remove(string)`
+### `open(blobPath, flags, mode)`
+
+__Type:__ Method.
+
+__Parameter:__ `blobPath` as a `String`.
+
+* Retrieve the `blobPath` from your application database.
+
+__Parameter:__ `flags` as an `String` or `Number`.
+
+* See the [open](https://nodejs.org/api/fs.html#fs_fspromises_open_path_flags_mode) documentation for more detail.
+
+__Returns:__ A `Promise` that resolves to a [FileHandle](https://nodejs.org/api/fs.html#fs_class_filehandle) object.
+
+__Description:__
+
+This is a more advanced method allowing you to carry out [many file operations](https://nodejs.org/api/fs.html#fs_class_filehandle) against the blob file.
+
+__Example:__
+
+```js
+
+const BlobStore = require('scalable-blob-store')
+const uuid = require('uuid')
+const options = {
+  blobStoreRoot: '/app/blobs',
+  idFunction: uuid.v4,
+  dirDepth: 3,
+  dirWidth: 2000
+}
+
+const blobStore = new BlobStore(options)
+
+async function main () {
+  try {
+    // Retrieve the blobPath value from your database
+    const blobPath = '/e6b7815a-c818-465d-8511-5a53c8276b86/aea4be6a-9e7f-4511-b394-049e68f59b02/fea722d1-001a-4765-8408-eb8e0fe7dbc6/183a6b7b-2fd6-4f80-8c6a-2647beb7bb19'
+
+    const fileHandle = await blobStore.open(blobPath)
+    // Do something with the file handle object
+    // See the documentation for more detail
+    // The documentation link is in the description above
+  } catch (err) {
+    console.error(err)
+  }
+}
+main()
+
+```
+
+<a name="realpath"><a/>
+
+### `realPath(blobPath, realPathOptions)`
+
+__Type:__ Method.
+
+__Parameter:__ `blobPath` as a `String`.
+
+* Retrieve the `blobPath` from your application database.
+
+__Parameter:__ `realPathOptions` as a `String` or `Object`.
+
+* See the [realPath](https://nodejs.org/api/fs.html#fs_fspromises_realpath_path_options) documentation for more detail.
+
+__Returns:__ A `Promise` that resolves to a `String`.
+
+* The returned string will be the full file system path of the blob file.
+
+__Description:__
+
+Use this method to locate a blob file on the file system. This method should not really be needed because you can determine the full blob file path. Simply concatenate the blobStoreRoot and the blobPath values.
+
+__Example:__
+
+```js
+
+const BlobStore = require('scalable-blob-store')
+const uuid = require('uuid')
+const options = {
+  blobStoreRoot: '/app/blobs',
+  idFunction: uuid.v4,
+  dirDepth: 3,
+  dirWidth: 2000
+}
+
+const blobStore = new BlobStore(options)
+
+async function main () {
+  try {
+    // Retrieve the blobPath value from your database
+    const blobPath = '/e6b7815a-c818-465d-8511-5a53c8276b86/aea4be6a-9e7f-4511-b394-049e68f59b02/fea722d1-001a-4765-8408-eb8e0fe7dbc6/183a6b7b-2fd6-4f80-8c6a-2647beb7bb19'
+
+    const fsPath = await blobStore.realPath(blobPath)
+    // With the above options the result will be similar to this:
+    // '/app/blobs/e6b7815a-c818-465d-8511-5a53c8276b86/aea4be6a-9e7f-4511-b394-049e68f59b02/fea722d1-001a-4765-8408-eb8e0fe7dbc6/183a6b7b-2fd6-4f80-8c6a-2647beb7bb19
+  } catch (err) {
+    console.error(err)
+  }
+}
+main()
+
+```
+
+<a name="stat"><a/>
+
+### `stat(blobPath)`
+
+__Type:__ Method.
+
+__Parameter:__ `blobPath` as a `String`.
+
+__Returns:__ A stats `Object`.
+
+__Description:__
+
+Rather than parse the file system [`stats`][nodefs-url] object, `scalable-blob-store` returns the raw `stats` object.
+
+More stat class details can be found on [Wikipedia][wikistat-url].
+
+__Example:__
+
+```js
+
+const BlobStore = require('scalable-blob-store')
+const uuid = require('uuid')
+const options = {
+  blobStoreRoot: '/app/blobs',
+  idFunction: uuid.v4,
+  dirDepth: 3,
+  dirWidth: 2000
+}
+
+const blobStore = new BlobStore(options)
+
+async function main () {
+  try {
+    // Retrieve the blobPath value from your database
+    const blobPath = '/e6b7815a-c818-465d-8511-5a53c8276b86/aea4be6a-9e7f-4511-b394-049e68f59b02/fea722d1-001a-4765-8408-eb8e0fe7dbc6/183a6b7b-2fd6-4f80-8c6a-2647beb7bb19'
+
+    const stats = await blobStore.stat(blobPath)
+    console.dir(stats)
+    // Console output will be similar to the following.
+    // { dev: 2050,
+    //   mode: 33188,
+    //   nlink: 1,
+    //   uid: 1000,
+    //   gid: 1000,
+    //   rdev: 0,
+    //   blksize: 4096,
+    //   ino: 6707277,
+    //   size: 44,
+    //   blocks: 8,
+    //   atime: Mon Oct 12 2015 08:51:29 GMT+1000 (AEST),
+    //   mtime: Mon Oct 12 2015 08:51:29 GMT+1000 (AEST),
+    //   ctime: Mon Oct 12 2015 08:51:29 GMT+1000 (AEST),
+    //   birthtime: Mon Oct 12 2015 08:51:29 GMT+1000 (AEST) }
+  } catch (err) {
+    console.error(err)
+  }
+}
+main()
+
+```
+
+<a name="exists"><a/>
+
+### `exists(blobPath)`
+
+__Type:__ Method.
+
+__Parameter:__ `blobPath` as a `String`.
+
+__Returns:__ `Boolean`
+
+* `true` if the file exists, otherwise `false`.
+
+__Description:__
+
+Use this method for a simple blob file existence test.
+
+__Example:__
+
+```js
+
+const BlobStore = require('scalable-blob-store')
+const uuid = require('uuid')
+const options = {
+  blobStoreRoot: '/app/blobs',
+  idFunction: uuid.v4,
+  dirDepth: 3,
+  dirWidth: 2000
+}
+
+const blobStore = new BlobStore(options)
+
+async function main () {
+  try {
+    // Retrieve the blobPath value from your database
+    const blobPath = '/e6b7815a-c818-465d-8511-5a53c8276b86/aea4be6a-9e7f-4511-b394-049e68f59b02/fea722d1-001a-4765-8408-eb8e0fe7dbc6/183a6b7b-2fd6-4f80-8c6a-2647beb7bb19'
+
+    const exists = await blobStore.exists(blobPath)
+    // The result will be either true or false depending if the blob file exists.
+  } catch (err) {
+    console.error(err)
+  }
+}
+main()
+
+```
+
+<a name="remove"><a/>
+
+### `remove(blobPath)`
+
+__Type:__ Method.
+
+__Parameter:__ `blobPath` as a `String`.
 
 __Returns__: `undefined` if nothing went wrong or the file did not exist.
 
-Promise example:
+__Description:__
+
+Use this method to delete a blob file. This method can not be used to remove directories.
+
+__Example:__
 
 ```js
-// Get the blobPath value from your database.
-var blobPath = '/cij50xi3y00iyzph3qs7oatcy/cij50xi3z00izzph3yo053mzs/cij50xi4000j0zph3mshil7p5/cij50xi4100j1zph3loy3hp6h'
 
-blobStore.remove(blobPath).then(() => {
-  console.log('Blob removed successfully.')
-}).catch(err => {
-  console.error(err)
-})
-```
+const BlobStore = require('scalable-blob-store')
+const uuid = require('uuid')
+const options = {
+  blobStoreRoot: '/app/blobs',
+  idFunction: uuid.v4,
+  dirDepth: 3,
+  dirWidth: 2000
+}
 
-Callback example:
+const blobStore = new BlobStore(options)
 
-```js
-// Get the blobPath value from your database.
-var blobPath = '/cij50xi3y00iyzph3qs7oatcy/cij50xi3z00izzph3yo053mzs/cij50xi4000j0zph3mshil7p5/cij50xi4100j1zph3loy3hp6h'
+async function main () {
+  try {
+    // Retrieve the blobPath value from your database
+    const blobPath = '/e6b7815a-c818-465d-8511-5a53c8276b86/aea4be6a-9e7f-4511-b394-049e68f59b02/fea722d1-001a-4765-8408-eb8e0fe7dbc6/183a6b7b-2fd6-4f80-8c6a-2647beb7bb19'
 
-blobStore.remove(blobPath, (err) => {
-  if (err) { console.error(err) }
-  console.log('Blob removed successfully.')
-})
-```
+    await blobStore.remove(blobPath)
+    // The blob file will no longer exist
+  } catch (err) {
+    console.error(err)
+  }
+}
+main()
 
-<a name="stat" />
-
-### `stat(string)`
-
-__Returns__: `object`
-
-Rather than parse the file system [`stats`][nodefs-url] object, `scalable-blob-store` returns the raw `stats` object.
-More stat class details can be found on [Wikipedia][wikistat-url].
-
-Promise example:
-
-```js
-// Get the blobPath value from your database.
-var blobPath = '/cij50xi3y00iyzph3qs7oatcy/cij50xi3z00izzph3yo053mzs/cij50xi4000j0zph3mshil7p5/cij50xi4100j1zph3loy3hp6h'
-
-blobStore.stat(blobPath).then(stats => {
-  console.dir(stats)
-  // Console output will be similar to the following.
-  // { dev: 2050,
-  //   mode: 33188,
-  //   nlink: 1,
-  //   uid: 1000,
-  //   gid: 1000,
-  //   rdev: 0,
-  //   blksize: 4096,
-  //   ino: 6707277,
-  //   size: 44,
-  //   blocks: 8,
-  //   atime: Mon Oct 12 2015 08:51:29 GMT+1000 (AEST),
-  //   mtime: Mon Oct 12 2015 08:51:29 GMT+1000 (AEST),
-  //   ctime: Mon Oct 12 2015 08:51:29 GMT+1000 (AEST),
-  //   birthtime: Mon Oct 12 2015 08:51:29 GMT+1000 (AEST) }
-}).catch(err => {
-  console.error(err)
-})
-```
-
-Callback example:
-
-```js
-// Get the blobPath value from your database.
-var blobPath = '/cij50xi3y00iyzph3qs7oatcy/cij50xi3z00izzph3yo053mzs/cij50xi4000j0zph3mshil7p5/cij50xi4100j1zph3loy3hp6h'
-
-blobStore.stat(blobPath, (err, stats) => {
-  if (err) { console.error(err) }
-  console.dir(stats)
-  // Console output will be similar to the following.
-  // { dev: 2050,
-  //   mode: 33188,
-  //   nlink: 1,
-  //   uid: 1000,
-  //   gid: 1000,
-  //   rdev: 0,
-  //   blksize: 4096,
-  //   ino: 6707277,
-  //   size: 44,
-  //   blocks: 8,
-  //   atime: Mon Oct 12 2015 08:51:29 GMT+1000 (AEST),
-  //   mtime: Mon Oct 12 2015 08:51:29 GMT+1000 (AEST),
-  //   ctime: Mon Oct 12 2015 08:51:29 GMT+1000 (AEST),
-  //   birthtime: Mon Oct 12 2015 08:51:29 GMT+1000 (AEST) }
-})
-```
-
-<a name="exists" />
-
-### `exists(string)`
-
-__Returns__: `boolean`
-
-`true` if the file exists, otherwise `false`.
-
-Promise example:
-
-```js
-// Get the blobPath value from your database.
-var blobPath = '/cij50xi3y00iyzph3qs7oatcy/cij50xi3z00izzph3yo053mzs/cij50xi4000j0zph3mshil7p5/cij50xi4100j1zph3loy3hp6h'
-
-blobStore.exists(blobPath).then(result => {
-  console.log(result)
-  // Logs 'true' or 'false'.
-}).catch(err => {
-  console.error(err)
-})
-```
-
-Callback example:
-
-```js
-// Get the blobPath value from your database.
-var blobPath = '/cij50xi3y00iyzph3qs7oatcy/cij50xi3z00izzph3yo053mzs/cij50xi4000j0zph3mshil7p5/cij50xi4100j1zph3loy3hp6h'
-
-blobStore.exists(blobPath, (err, exists) => {
-  if (err) { console.error(err) }
-  console.log(exists)
-  // Logs 'true' or 'false'
-})
 ```
 
 ## Known Issues
 
-There is an issue in `scalable-blob-store` that I have no work around for as of yet. If there are a large number of blobs added and then removed from the store, you may have directories with small numbers of files in them, or empty. These directories will never be removed and will not be populated.
+There is a minor issue in `scalable-blob-store`. If there are a large number of blob files added and then removed from the blob store, you may have empty directories or directories with a small number of files in them. These directories will never be removed and will not be populated.
 
-There are two possible solutions for this problem:
+If you wish to prevent empty or sparsely populated directories you will need to run a maintenance task against the `blobStoreRoot` directory. This maintenance task will need to look for empty or incomplete directories and call the [setCurrentBlobDir](#setcurrentblobdir) method passing in the empty `blobPath`.
 
-- A maintenance task to remove empty directories and migrate low numbered directories into other directories. This is not something that `scalable-blob-store` can do and the developer needs to build this.
-- A better solution would be to replace the cached blob path (`this.currentBlobPath`) on the 'blobStore' object with a valid path that is not full.
-
-For my use case, removal of large numbers of files is unlikely to occur, so my motivation to build a solution for this issue is quite low.
+For your application you may find you rarely remove large numbers of blob files. If this is the case then this issue can be ignored.
 
 ## Testing
 
 There are two methods for testing `scalable-blob-store`:
 
-1.  _Unit Testing_ which uses [tape][tape-url] and the local `os.tmpdir()` directory.
+1.  _Unit Testing_ which uses [jest][jest-url] and the local `os.tmpdir()` directory.
 2.  _Manual Testing_ which will create directories and files on your local disk.
 
 ### Unit Testing
@@ -596,26 +1092,29 @@ There are two methods for testing `scalable-blob-store`:
 After cloning `scalable-blob-store`, type the following into your console:
 
 ```sh
+
 npm install
-npm run build
 npm test
+
 ```
 
 ### Manual Testing
 
-Running the `test-fs.js` file will create a `~/blobs` directory in your home directory and then recursively fill it with lots of blobs.
+Running the `test-fs.js` file will create a `~/blobs` directory in your temporary directory and then recursively fill it with lots of blobs.
 
 The default options configured in the `test-fs.js` file are:
 
 ```js
+
 const opts = {
-  blobStoreRoot: os.homedir() + '/blobs',
-  idType: 'cuid',
+  blobStoreRoot: os.tmpdir() + '/blobs',
+  idFunction: cuid,
   dirDepth: 3,
   dirWidth: 1000
 }
 
 const repeat = 10000
+
 ```
 
 Change the options if you wish to see different results.
@@ -623,16 +1122,19 @@ Change the options if you wish to see different results.
 After cloning `scalable-blob-store`, type the following into your console:
 
 ```sh
+
 npm install
-npm run build
 node ./tests/test-fs.js
+
 ```
 
-Once complete, inspect the `~/blobs` directory. I suggest using the [tree][tree-url] command which gives you a summary of directories and files within the target directory.
+Once complete, inspect the `/tmp/blobs` directory. I suggest using the [tree][tree-url] command which gives you a summary of directories and files within the target directory.
 
 ```sh
+
 tree ~/blobs
 tree -d ~/blobs
+
 ```
 
 ## About the Owner
@@ -651,58 +1153,47 @@ See my [other projects on NPM](https://www.npmjs.com/~grantcarthew).
 
 ## Contributing
 
-1.  Fork it!
-2.  Create your feature branch: `git checkout -b my-new-feature`
-3.  Commit your changes: `git commit -am 'Add some feature'`
-4.  Push to the branch: `git push origin my-new-feature`
-5.  Submit a pull request :D
+1. Fork it!
+1. Create your feature branch: `git checkout -b my-new-feature`
+1. Commit your changes: `git commit -am 'Add some feature'`
+1. Push to the branch: `git push origin my-new-feature`
+1. Submit a pull request :D
 
 ## History
 
-- v3.0.9  [2018-02-26]: Dependency packages updated.
-- v3.0.8  [2017-12-22]: Dependency packages updated.
-- v3.0.7  [2017-07-28]: Fixed test. Removed mock-fs (now uses /tmp). Dependency packages updated.
-- v3.0.6  [2017-05-17]: Dependency packages updated.
-- v3.0.5  [2017-03-20]: Dependency packages updated to support Node.js v7.7.3 and mock-fs v4.2.0.
-- v3.0.4  [2016-12-05]: Dependency packages updated.
-- v3.0.3  [2016-10-10]: Replaced `node-uuid` with `uuid`.
-- v3.0.2  [2016-09-20]: Dependency packages updated.
-- v3.0.1  [2016-05-05]: Packages updated and minor refactor.
-- v3.0.0  [2016-03-07]: Callback support added. createReadStream API changed.
-- v2.1.2  [2016-03-05]: Missed duplicate function in tests, removed.
-- v2.1.1  [2016-03-05]: Refactored duplicate function in tests.
-- v2.1.0  [2016-03-05]: Switched to using the `ES5` build code. Removed Nodejs engine requirements.
-- v2.0.10 [2016-03-03]: Dependency packages updated.
-- v2.0.9  [2016-02-09]: Added promisifyAll to the fsBlobStore instance. More `return null` statements.
-- v2.0.8  [2016-02-09]: Added `return null` after resolve/reject calls to prevent Bluebird warnings.
-- v2.0.7  [2016-02-09]: Added `es5dist` for older versions of node. Packages updated.
-- v2.0.6  [2016-01-28]: Added failure unit tests.
-- v2.0.5  [2016-01-26]: Refactor blob-store.js for minor performance improvement.
-- v2.0.4  [2016-01-24]: Minor performance improvements and bug fixes.
-- v2.0.3  [2016-01-22]: Added unit tests and minor fix.
-- v2.0.2  [2016-01-19]: Added [standard][js-standard-url] to package.json.
-- v2.0.1  [2016-01-12]: Minor performance improvements and bug fixes.
-- v2.0.0  [2016-01-08]: Added support for [CUID][cuid-url] or [UUID][uuid-url] directory and file names.
-- v1.0.1  [2016-01-07]: Last release of v1. Work on v2.0.0 to support cuid.
-- v1.0.0  [2016-01-05]: Minor delint and README updates. Bump to v1.0 for future changes.
-- v0.4.1  [2015-08-20]: Fix reference error.
-- v0.4.0  [2015-08-16]: Changed read and write to createReadStream and createWriteStream.
-- v0.3.1  [2015-08-16]: Fix write stream event order.
-- v0.3.0  [2015-08-16]: Removed file path function, change of plans.
-- v0.2.0  [2015-08-16]: Added file path function.
-- v0.1.0  [2015-09-30]: Initial release.
-
-## Credits
-
-Thanks to the following marvelous people for their hard work:
-
-- [Petka Antonov][petka-url] for [bluebird][bluebird-url]
-- [Roman Shtylman][defunctzombie-url] for [uuid][uuid-url]
-- [Eric Elliot][ericelliott-url] for [cuid][cuid-url]
-- [James Halliday][substack-url] for [mkdirp][mkdirp-url]
-- [Mathias Buus][mathiasbuus-url] for [fs-blob-store][fsblobstore-url]
-
-This list could go on...
+* v4.0.0  [2018-10-29]: Major upgrade to modern syntax. See readme above.
+* v3.0.9  [2018-02-26]: Dependency packages updated.
+* v3.0.8  [2017-12-22]: Dependency packages updated.
+* v3.0.7  [2017-07-28]: Fixed test. Removed mock-fs (now uses /tmp). Dependency packages updated.
+* v3.0.6  [2017-05-17]: Dependency packages updated.
+* v3.0.5  [2017-03-20]: Dependency packages updated to support Node.js v7.7.3 and mock-fs v4.2.0.
+* v3.0.4  [2016-12-05]: Dependency packages updated.
+* v3.0.3  [2016-10-10]: Replaced `node-uuid` with `uuid`.
+* v3.0.2  [2016-09-20]: Dependency packages updated.
+* v3.0.1  [2016-05-05]: Packages updated and minor refactor.
+* v3.0.0  [2016-03-07]: Callback support added. createReadStream API changed.
+* v2.1.2  [2016-03-05]: Missed duplicate function in tests, removed.
+* v2.1.1  [2016-03-05]: Refactored duplicate function in tests.
+* v2.1.0  [2016-03-05]: Switched to using the `ES5` build code. Removed Nodejs engine requirements.
+* v2.0.10 [2016-03-03]: Dependency packages updated.
+* v2.0.9  [2016-02-09]: Added promisifyAll to the fsBlobStore instance. More `return null` statements.
+* v2.0.8  [2016-02-09]: Added `return null` after resolve/reject calls to prevent Bluebird warnings.
+* v2.0.7  [2016-02-09]: Added `es5dist` for older versions of node. Packages updated.
+* v2.0.6  [2016-01-28]: Added failure unit tests.
+* v2.0.5  [2016-01-26]: Refactor blob-store.js for minor performance improvement.
+* v2.0.4  [2016-01-24]: Minor performance improvements and bug fixes.
+* v2.0.3  [2016-01-22]: Added unit tests and minor fix.
+* v2.0.2  [2016-01-19]: Added [standard][js-standard-url] to package.json.
+* v2.0.1  [2016-01-12]: Minor performance improvements and bug fixes.
+* v2.0.0  [2016-01-08]: Added support for [CUID][cuid-url] or [UUID][uuid-url] directory and file names.
+* v1.0.1  [2016-01-07]: Last release of v1. Work on v2.0.0 to support cuid.
+* v1.0.0  [2016-01-05]: Minor delint and README updates. Bump to v1.0 for future changes.
+* v0.4.1  [2015-08-20]: Fix reference error.
+* v0.4.0  [2015-08-16]: Changed read and write to createReadStream and createWriteStream.
+* v0.3.1  [2015-08-16]: Fix write stream event order.
+* v0.3.0  [2015-08-16]: Removed file path function, change of plans.
+* v0.2.0  [2015-08-16]: Added file path function.
+* v0.1.0  [2015-09-30]: Initial release.
 
 ## License
 
@@ -722,6 +1213,9 @@ MIT
 [defunctzombie-url]: https://github.com/defunctzombie
 [wikiuuid-url]: https://en.wikipedia.org/wiki/Universally_unique_identifier
 [cuid-url]: https://github.com/ericelliott/cuid
+[objectid-url]: https://docs.mongodb.com/manual/reference/method/ObjectId/
+[ulid-url]: https://github.com/ulid/javascript
+[awesome-url]: https://github.com/grantcarthew/awesome-unique-id
 [mkdirp-url]: https://www.npmjs.com/package/mkdirp
 [substack-url]: https://github.com/substack
 [ericelliott-url]: https://github.com/ericelliott
@@ -731,12 +1225,10 @@ MIT
 [writestream-url]: https://nodejs.org/api/stream.html#stream_class_stream_writable
 [mathiasbuus-url]: https://github.com/mafintosh
 [fsblobstore-url]: https://github.com/mafintosh/fs-blob-store
-[bithound-overall-image]: https://www.bithound.io/github/grantcarthew/node-scalable-blob-store/badges/score.svg
-[bithound-overall-url]: https://www.bithound.io/github/grantcarthew/node-scalable-blob-store
-[bithound-dep-image]: https://www.bithound.io/github/grantcarthew/node-scalable-blob-store/badges/dependencies.svg
-[bithound-dep-url]: https://www.bithound.io/github/grantcarthew/node-scalable-blob-store/master/dependencies/npm
-[bithound-code-image]: https://www.bithound.io/github/grantcarthew/node-scalable-blob-store/badges/code.svg
-[bithound-code-url]: https://www.bithound.io/github/grantcarthew/node-scalable-blob-store
+[cc-maintain-badge]: https://api.codeclimate.com/v1/badges/829bd04f05552f59b398/maintainability
+[cc-maintain-url]: https://codeclimate.com/github/grantcarthew/node-scalable-blob-store/maintainability
+[cc-coverage-badge]: https://api.codeclimate.com/v1/badges/829bd04f05552f59b398/test_coverage
+[cc-coverage-url]: https://codeclimate.com/github/grantcarthew/node-scalable-blob-store/test_coverage
 [js-standard-image]: https://img.shields.io/badge/code%20style-standard-brightgreen.svg
 [js-standard-url]: http://standardjs.com/
 [nsp-image]: https://nodesecurity.io/orgs/openjs/projects/3871d340-0ca9-471c-be9a-39df3871262d/badge
@@ -748,7 +1240,7 @@ MIT
 [travisci-image]: https://travis-ci.org/grantcarthew/node-scalable-blob-store.svg?branch=master
 [travisci-url]: https://travis-ci.org/grantcarthew/node-scalable-blob-store
 [cuid-discuss-url]: https://github.com/ericelliott/cuid/issues/22
-[tape-url]: https://www.npmjs.com/package/tape
+[jest-url]: https://jestjs.io/en/
 [tree-url]: https://www.debian-administration.org/article/606/Commands_you_might_have_missed_tree
 [risingstack-url]: https://risingstack.com/
 [risingstack-article-url]: https://blog.risingstack.com/how-to-become-a-better-node-js-developer-in-2016
