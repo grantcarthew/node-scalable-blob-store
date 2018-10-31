@@ -1,13 +1,12 @@
 const os = require('os')
 const path = require('path')
 const ulid = require('ulid').ulid
-// const BlobStore = require('scalable-blob-store')
-const BlobStore = require('../')
+const BlobStore = require('scalable-blob-store')
 const data = 'The quick brown fox jumps over the lazy dog.'
 const line = '='.repeat(80)
 
 const options = {
-  blobStoreRoot: os.tmpdir() + '/blobs', // Change this!
+  blobStoreRoot: os.tmpdir() + '/blobs', // TODO: Change this!
   idFunction: ulid,
   dirDepth: 3,
   dirWidth: 1000

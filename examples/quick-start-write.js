@@ -1,8 +1,7 @@
 const os = require('os')
 const path = require('path')
 const ulid = require('ulid').ulid
-// const BlobStore = require('scalable-blob-store')
-const BlobStore = require('../')
+const BlobStore = require('scalable-blob-store')
 const data = 'The quick brown fox jumps over the lazy dog.'
 const line = '='.repeat(80)
 
