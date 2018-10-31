@@ -5,7 +5,7 @@ const path = require('path')
 // Internal Modules
 const optionsParser = require('./options-parser')
 const blobDirBuild = require('./blob-dir-build')
-const fsBlobFileList = require('./fs-blob-file-list')
+const fsBlobDirItemList = require('./fs-blob-dir-item-list')
 
 // Internal State Symbols
 const _state = Symbol('BlobStoreState')
@@ -85,7 +85,7 @@ class BlobStore {
    */
   async getCurrentBlobDir () {
     let blobDir = this[_currentBlobDir] || await blobDirBuild(this[_state])
-    const blobDirFiles = await fsBlobFileList(this[_state].blobStoreRoot, blobDir)
+    const blobDirFiles = await fsBlobDirItemList(this[_state].blobStoreRoot, blobDir)
     if (blobDirFiles.length >= this[_state].dirWidth) {
       blobDir = await blobDirBuild(this[_state])
     }

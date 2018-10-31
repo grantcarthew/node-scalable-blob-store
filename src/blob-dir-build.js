@@ -1,7 +1,6 @@
 const mkdir = require('fs').promises.mkdir
 const path = require('path')
-const fsBlobFileList = require('./fs-blob-file-list')
-const fsBlobDirList = require('./fs-blob-dir-list')
+const fsBlobDirItemList = require('./fs-blob-dir-item-list')
 const fsBlobDirLatestFullDepth = require('./fs-blob-dir-latest-full-depth')
 
 module.exports = blobDirBuild
@@ -15,7 +14,7 @@ module.exports = blobDirBuild
  */
 async function blobDirBuild (state) {
   const fullBlobDirPath = await fsBlobDirLatestFullDepth(state)
-  const blobFiles = await fsBlobFileList(state.blobStoreRoot, fullBlobDirPath)
+  const blobFiles = await fsBlobDirItemList(state.blobStoreRoot, fullBlobDirPath)
   let newBlobPath = fullBlobDirPath
 
   if (blobFiles.length >= state.dirWidth) {
@@ -49,7 +48,7 @@ async function trimFullBlobPath (state, blobPath) {
   return trimFullBlobPathRecursive(blobPath)
 
   async function trimFullBlobPathRecursive (nextPath) {
-    const blobDirItems = await fsBlobDirList(state.blobStoreRoot, nextPath)
+    const blobDirItems = await fsBlobDirItemList(state.blobStoreRoot, nextPath, false)
     if (blobDirItems.length >= state.dirWidth && nextPath.length > 1) {
       const parentPath = path.dirname(nextPath)
       return trimFullBlobPathRecursive(parentPath)
