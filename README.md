@@ -1,6 +1,6 @@
 # Introduction
 
-A file system blob store that is designed to prevent conflicts when used with a distributed file system or storage area network..
+A file system blob store that is designed to prevent conflicts when used with a distributed file system or storage area network.
 
 <!-- [![Build Status][travisci-image]][travisci-url] -->
 [![Maintainability][cc-maintain-badge]][cc-maintain-url]
