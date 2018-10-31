@@ -203,9 +203,9 @@ With the update to v4 of `scalable-blob-store` all the BlobStore methods return 
 |[blobStore.createReadStream(blobPath)](#createreadstream)|Method|`Promise<ReadStream>`|
 |[blobStore.read(blobPath, readOptions)](#read)|Method|`Promise<data>`|
 |[blobStore.realPath(blobPath, realPathOptions)](#realpath)|Method|`Promise<String>`|
+|[blobStore.stat(blobPath)](#stat)|Method|`Promise<Stats>`|
 |[blobStore.exists(blobPath)](#exists)|Method|`Promise<Boolean>`|
 |[blobStore.remove(blobPath)](#remove)|Method|`Promise<undefined>`|
-|[blobStore.stat(blobPath)](#stat)|Method|`Promise<Stats>`|
 
 <a name="instantiation"></a>
 
@@ -278,6 +278,8 @@ const pdfDocumentStore = new BlobStore(pdfOptions)
 
 ```
 
+<a name="blobstoreroot"><a/>
+
 ### `blobStoreRoot`
 
 __Type:__ Read only property.
@@ -308,6 +310,8 @@ console.log(blobStore.blobStoreRoot)
 // Outputs '/app/blobs' which you configured in the options
 
 ```
+
+<a name="idfunction"><a/>
 
 ### `idFunction`
 
@@ -340,6 +344,8 @@ console.log(blobStore.idFunction())
 
 ```
 
+<a name="dirdepth"><a/>
+
 ### `dirDepth`
 
 __Type:__ Read only property.
@@ -370,6 +376,8 @@ console.log(blobStore.dirDepth)
 // Outputs '4' which you configured in the options
 
 ```
+
+<a name="dirwidth"><a/>
 
 ### `dirWidth`
 
@@ -402,6 +410,8 @@ console.log(blobStore.dirWidth)
 
 ```
 
+<a name="getcurrentblobdir"><a/>
+
 ### `getCurrentBlobDir()`
 
 __Type:__ Method.
@@ -432,13 +442,19 @@ const options = {
 const blobStore = new BlobStore(options)
 
 async function main () {
-  console.log(await blobStore.getCurrentBlobDir())
-  // The 'dirDepth' option above is set to 3 so the output will be similar to the following:
-  // '/e44d3b0d-b552-4257-8b64-a53331184c38/443061b9-bfa7-40fc-a5a9-d848bc52155e/4d818f4c-88b3-45fd-a104-a2fc3700e9de'
+  try {
+    console.log(await blobStore.getCurrentBlobDir())
+    // The 'dirDepth' option above is set to 3 so the output will be similar to the following:
+    // '/e44d3b0d-b552-4257-8b64-a53331184c38/443061b9-bfa7-40fc-a5a9-d848bc52155e/4d818f4c-88b3-45fd-a104-a2fc3700e9de'
+  } catch (err) {
+    console.error(err)
+  }
 }
 main()
 
 ```
+
+<a name="setcurrentblobdir"><a/>
 
 ### `setCurrentBlobDir(blobDir)`
 
@@ -475,251 +491,560 @@ const options = {
 const blobStore = new BlobStore(options)
 
 async function main () {
-  console.log(await blobStore.getCurrentBlobDir())
-  // The 'dirDepth' option above is set to 3 so the output will be similar to the following:
-  // '/e44d3b0d-b552-4257-8b64-a53331184c38/443061b9-bfa7-40fc-a5a9-d848bc52155e/4d818f4c-88b3-45fd-a104-a2fc3700e9de'
+  try {
+    console.log(await blobStore.getCurrentBlobDir())
+    // The 'dirDepth' option above is set to 3 so the output will be similar to the following:
+    // '/e44d3b0d-b552-4257-8b64-a53331184c38/443061b9-bfa7-40fc-a5a9-d848bc52155e/4d818f4c-88b3-45fd-a104-a2fc3700e9de'
 
-  await blobStore.setCurrentBlobDir('/some/blob/path')
+    await blobStore.setCurrentBlobDir('/some/blob/path')
 
-  console.log(await blobStore.getCurrentBlobDir())
-  // Outputs '/some/blob/path' to the console.
-  // Any new blob files added to the blob store will go into this path until there are `dirWidth` or 2000 files within it.
-
+    console.log(await blobStore.getCurrentBlobDir())
+    // Outputs '/some/blob/path' to the console.
+    // Any new blob files added to the blob store will go into this path until there are `dirWidth` or 2000 files within it.
+  } catch (err) {
+    console.error(err)
+  }
 }
 main()
 
 ```
 
-<a name="createWriteStream" />
+<a name="createWriteStream"><a/>
 
 ### `createWriteStream()`
 
-__Returns__: `object` containing the child path to the file within the blob store root and a [stream.Writable][writestream-url].
+__Type:__ Method.
 
-Returned Object using CUID as the idFunction:
+__Parameters:__ None.
 
-```js
-{
-  blobPath: "/cij50xi3y00iyzph3qs7oatcy/cij50xi3z00izzph3yo053mzs/cij50xi4000j0zph3mshil7p5/cij50xi4100j1zph3loy3hp6h",
-  writeStream: stream.Writable
-}
-```
+__Returns__: A `Promise` that resolves to an `Object` containing the child path to the file within the blob store root and a [WriteStream][writestream-url].
 
-Returned Object using UUID as the idFunction:
+__Description:__
+
+Here is an exampe of the returned object using UUID as the idFunction:
 
 ```js
+
 {
   blobPath: "/e6b7815a-c818-465d-8511-5a53c8276b86/aea4be6a-9e7f-4511-b394-049e68f59b02/fea722d1-001a-4765-8408-eb8e0fe7dbc6/183a6b7b-2fd6-4f80-8c6a-2647beb7bb19",
   writeStream: stream.Writable
 }
+
 ```
 
 Use the `writeStream` to save your blob or file.
 The `blobPath` needs to be saved to your database for future access.
 
-Promise example:
+__Example:__
 
 ```js
+
+const BlobStore = require('scalable-blob-store')
+const uuid = require('uuid')
+const options = {
+  blobStoreRoot: '/app/blobs',
+  idFunction: uuid.v4,
+  dirDepth: 3,
+  dirWidth: 2000
+}
+
+const blobStore = new BlobStore(options)
+
+// The below readStream is simply to make this a complete example
 const fs = require('fs')
 const readStream = fs.createReadStream('/path/to/file')
 
-blobStore.createWriteStream().then(result => {
+async function main () {
+  let result
+  try {
+    result = await blobStore.createWriteStream()
+  } catch (err) {
+    console.error(err)
+  }
+
   console.dir(result)
   // result object will be similar to this:
   // {
-  //   blobPath: "/cij50xi3y00iyzph3qs7oatcy/cij50xi3z00izzph3yo053mzs/cij50xi4000j0zph3mshil7p5/cij50xi4100j1zph3loy3hp6h",
-  //   writeStream: [object Object]
+  //   blobPath: "/e6b7815a-c818-465d-8511-5a53c8276b86/aea4be6a-9e7f-4511-b394-049e68f59b02/fea722d1-001a-4765-8408-eb8e0fe7dbc6/183a6b7b-2fd6-4f80-8c6a-2647beb7bb19",
+  //   writeStream: [WriteStream]
   // }
+
   // Using a Promise to encapsulate the write asynchronous events.
-  return new Promise((resolve, reject) => {
+  await new Promise((resolve, reject) => {
     result.writeStream.on('finish', () => {
-        resolve(result.blobPath)
+        resolve()
     })
     result.writeStream.on('error', reject)
     readStream.pipe(result.writeStream)
   })
-}).then(blobPath => {
+
   console.log(blobPath)
   // Logs the blobPath. Save this in your database.
-}).catch(err => {
-  console.error(err)
-})
+}
+main()
+
 ```
 
-Callback example:
+<a name="write"><a/>
+
+### `write(data, writeOptions)`
+
+__Type:__ Method.
+
+__Parameter:__ `data` as either `String`, `Buffer`, `TypedArray`, or `DataView`
+
+__Parameter:__ `writeOptions` as an `Object`.
+
+* The `writeOptions` object supports an encoding, mode, and flag property.
+* See the [writeFile](https://nodejs.org/api/fs.html#fs_fs_writefile_file_data_options_callback) documentation for more detail.
+
+__Returns:__ A `Promise` that resolves to a `String`.
+
+* The string contains the `blobPath` value which needs committing to your database.
+
+__Description:__
+
+If you have simple data in memory rather than a stream of data you can use this method to store the data into a blob file.
+
+__Example:__
 
 ```js
-const fs = require('fs')
-const readStream = fs.createReadStream('/path/to/file')
 
-blobStore.createWriteStream((err, result) => {
-  console.dir(result)
-  // result object will be similar to this:
-  // {
-  //   blobPath: "/cij50xi3y00iyzph3qs7oatcy/cij50xi3z00izzph3yo053mzs/cij50xi4000j0zph3mshil7p5/cij50xi4100j1zph3loy3hp6h",
-  //   writeStream: [object Object]
-  // }
+const BlobStore = require('scalable-blob-store')
+const uuid = require('uuid')
+const options = {
+  blobStoreRoot: '/app/blobs',
+  idFunction: uuid.v4,
+  dirDepth: 3,
+  dirWidth: 2000
+}
 
-  result.writeStream.on('finish', () => {
-    console.log(result.blobPath)
-    // Logs the blobPath. Save this in your database.
-  })
-  result.writeStream.on('error', (err) => {
-    // Consider removing the empty blob from the file system. Code no included.
+const blobStore = new BlobStore(options)
+
+async function main () {
+  const data = 'The quick brown fox jumps over the lazy dog.'
+
+  try {
+    const blobPath = await blobStore.write(data)
+    // The returned blobPath will look something like this:
+    // '/e44d3b0d-b552-4257-8b64-a53331184c38/443061b9-bfa7-40fc-a5a9-d848bc52155e/4d818f4c-88b3-45fd-a104-a2fc3700e9de'
+    // Save it to your database.
+  } catch (err) {
+    console.error(err)
+  }
+}
+main()
+
+```
+
+<a name="append"><a/>
+
+### `append(blobPath, data, appendOptions)`
+
+__Type:__ Method.
+
+__Parameter:__ `blobPath` as a `String`
+
+* Retrieve this from the application database.
+
+__Parameter:__ `data` as either a `String` or `Buffer`.
+
+__Parameter:__ `appendOptions` as an `Object`.
+
+* The `appendOptions` object supports an encoding, mode, and flag property.
+* See the [appendFile](https://nodejs.org/api/fs.html#fs_fs_appendfile_path_data_options_callback) documentation for more detail.
+
+__Returns:__ A `Promise` that resolves to a `undefined`.
+
+__Description:__
+
+Use this method to add simple in memory data to the end of the blob file.
+
+__Example:__
+
+```js
+
+const BlobStore = require('scalable-blob-store')
+const uuid = require('uuid')
+const options = {
+  blobStoreRoot: '/app/blobs',
+  idFunction: uuid.v4,
+  dirDepth: 3,
+  dirWidth: 2000
+}
+
+const blobStore = new BlobStore(options)
+
+async function main () {
+  const data = 'The quick brown fox jumps over the lazy dog.'
+
+  try {
+    await blobStore.append(data)
+  } catch (err) {
+    console.error(err)
+  }
+}
+main()
+
+```
+
+<a name="copy"><a/>
+
+### `copy(blobPath, flags)`
+
+__Type:__ Method.
+
+__Parameter:__ `blobPath` as a `String`
+
+* Retrieve this from the application database.
+
+__Parameter:__ `flags` as a `Number`.
+
+* See the [copyFile](https://nodejs.org/api/fs.html#fs_fspromises_copyfile_src_dest_flags) documentation for more detail.
+
+__Returns:__ A `Promise` that resolves to a `String`.
+
+* The returned string is a new `blobPath` value for the copied blob file.
+
+__Description:__
+
+Use this method to create a copy of an existing blob file.
+
+__Example:__
+
+```js
+
+const BlobStore = require('scalable-blob-store')
+const uuid = require('uuid')
+const options = {
+  blobStoreRoot: '/app/blobs',
+  idFunction: uuid.v4,
+  dirDepth: 3,
+  dirWidth: 2000
+}
+
+const blobStore = new BlobStore(options)
+
+async function main () {
+  try {
+  const blobPathSource = '/e6b7815a-c818-465d-8511-5a53c8276b86/aea4be6a-9e7f-4511-b394-049e68f59b02/fea722d1-001a-4765-8408-eb8e0fe7dbc6/183a6b7b-2fd6-4f80-8c6a-2647beb7bb19'
+
+  const blobPathDest = await blobStore.copy(blobPathSource)
+  // Store your new blobPath into your application database
+
+  } catch (err) {
+    console.error(err)
+  }
+}
+main()
+
+```
+
+<a name="createReadStream"><a/>
+
+### `createReadStream(blobPath)`
+
+__Type:__ Method.
+
+__Parameter:__ `blobPath` as a `String`.
+
+* The `blobPath` retrieved from your database.
+
+__Returns__: A `Promise` that resolves to a [`ReadStream`][readstream-url].
+
+__Description:__
+
+Creates a readable stream to the blob file located at the `blobPath`.
+
+__Example:__
+
+```js
+
+const BlobStore = require('scalable-blob-store')
+const uuid = require('uuid')
+const options = {
+  blobStoreRoot: '/app/blobs',
+  idFunction: uuid.v4,
+  dirDepth: 3,
+  dirWidth: 2000
+}
+async function main () {
+  // Get the blobPath value from your database.
+  const blobPath = '/e6b7815a-c818-465d-8511-5a53c8276b86/aea4be6a-9e7f-4511-b394-049e68f59b02/fea722d1-001a-4765-8408-eb8e0fe7dbc6/183a6b7b-2fd6-4f80-8c6a-2647beb7bb19h'
+
+  let readStream
+  try {
+    readStream = await blobStore.createReadStream(blobPath)
+  } catch (err) {
+    console.error(err)
+  }
+
+  readStream.on('error', err => {
     console.error(err)
   })
-  readStream.pipe(result.writeStream)
-})
+
+  // Blob contents is piped to the console.
+  readStream.pipe(process.stdout)
+}
+main()
+
 ```
 
-<a name="createReadStream" />
+<a name="read"><a/>
 
-### `createReadStream(string)`
+### `read(blobPath, readOptions)`
 
-__Returns__: [`stream.Readable`][readstream-url]
+__Type:__ Method.
 
-Example:
+__Parameter:__ `blobPath` as a `String`
+
+* Retrieve this from the application database.
+
+__Parameter:__ `readOptions` as an `Object`.
+
+* See the [readFile](https://nodejs.org/api/fs.html#fs_fspromises_readfile_path_options) documentation for more detail.
+
+__Returns:__ A `Promise` that resolves to a the contents of the blob file.
+
+* The format of the file contents will depend on the readOptions passed.
+* `scalable-blob-store` sets the `readOptions.encoding` value to 'utf8' by default.
+
+__Description:__
+
+Use this method to read the content of a small blob file into memory.
+
+__Example:__
 
 ```js
-// Get the blobPath value from your database.
-const blobPath = '/cij50xi3y00iyzph3qs7oatcy/cij50xi3z00izzph3yo053mzs/cij50xi4000j0zph3mshil7p5/cij50xi4100j1zph3loy3hp6h'
 
-const readStream = blobStore.createReadStream(blobPath)
-readStream.on('error', err => {
-  console.error(err)
-})
-// Blob contents is piped to the console.
-readStream.pipe(process.stdout)
+const BlobStore = require('scalable-blob-store')
+const uuid = require('uuid')
+const options = {
+  blobStoreRoot: '/app/blobs',
+  idFunction: uuid.v4,
+  dirDepth: 3,
+  dirWidth: 2000
+}
+
+const blobStore = new BlobStore(options)
+
+async function main () {
+  try {
+    // Retrieve the blobPath value from your database
+    const blobPath = '/e6b7815a-c818-465d-8511-5a53c8276b86/aea4be6a-9e7f-4511-b394-049e68f59b02/fea722d1-001a-4765-8408-eb8e0fe7dbc6/183a6b7b-2fd6-4f80-8c6a-2647beb7bb19'
+
+    const content = await blobStore.read(blobPath)
+    // Do something with the content
+  } catch (err) {
+    console.error(err)
+  }
+}
+main()
+
 ```
 
-<a name="remove" />
+<a name="realpath"><a/>
 
-### `remove(string)`
+### `realPath(blobPath, realPathOptions)`
+
+__Type:__ Method.
+
+__Parameter:__ `blobPath` as a `String`
+
+* Retrieve this from the application database.
+
+__Parameter:__ `realPathOptions` as a `String` or `Object`.
+
+* See the [realPath](https://nodejs.org/api/fs.html#fs_fspromises_realpath_path_options) documentation for more detail.
+
+__Returns:__ A `Promise` that resolves to a `String`.
+
+* The returned string will be the full file system path of the blob file.
+
+__Description:__
+
+Use this method to locate a blob file on the file system. This method should not really be needed because you can determine the full blob file path. Simply concatenate the blobStoreRoot and the blobPath values.
+
+__Example:__
+
+```js
+
+const BlobStore = require('scalable-blob-store')
+const uuid = require('uuid')
+const options = {
+  blobStoreRoot: '/app/blobs',
+  idFunction: uuid.v4,
+  dirDepth: 3,
+  dirWidth: 2000
+}
+
+const blobStore = new BlobStore(options)
+
+async function main () {
+  try {
+    // Retrieve the blobPath value from your database
+    const blobPath = '/e6b7815a-c818-465d-8511-5a53c8276b86/aea4be6a-9e7f-4511-b394-049e68f59b02/fea722d1-001a-4765-8408-eb8e0fe7dbc6/183a6b7b-2fd6-4f80-8c6a-2647beb7bb19'
+
+    const fsPath = await blobStore.realPath(blobPath)
+    // With the above options the result will be similar to this:
+    // '/app/blobs/e6b7815a-c818-465d-8511-5a53c8276b86/aea4be6a-9e7f-4511-b394-049e68f59b02/fea722d1-001a-4765-8408-eb8e0fe7dbc6/183a6b7b-2fd6-4f80-8c6a-2647beb7bb19
+  } catch (err) {
+    console.error(err)
+  }
+}
+main()
+
+```
+
+<a name="stat"><a/>
+
+### `stat(blobPath)`
+
+__Type:__ Method.
+
+__Parameter:__ `blobPath` as a `String`.
+
+__Returns:__ A stats `Object`.
+
+__Description:__
+
+Rather than parse the file system [`stats`][nodefs-url] object, `scalable-blob-store` returns the raw `stats` object.
+
+More stat class details can be found on [Wikipedia][wikistat-url].
+
+__Example:__
+
+```js
+
+const BlobStore = require('scalable-blob-store')
+const uuid = require('uuid')
+const options = {
+  blobStoreRoot: '/app/blobs',
+  idFunction: uuid.v4,
+  dirDepth: 3,
+  dirWidth: 2000
+}
+
+const blobStore = new BlobStore(options)
+
+async function main () {
+  try {
+    // Retrieve the blobPath value from your database
+    const blobPath = '/e6b7815a-c818-465d-8511-5a53c8276b86/aea4be6a-9e7f-4511-b394-049e68f59b02/fea722d1-001a-4765-8408-eb8e0fe7dbc6/183a6b7b-2fd6-4f80-8c6a-2647beb7bb19'
+
+    const stats = await blobStore.stat(blobPath)
+    console.dir(stats)
+    // Console output will be similar to the following.
+    // { dev: 2050,
+    //   mode: 33188,
+    //   nlink: 1,
+    //   uid: 1000,
+    //   gid: 1000,
+    //   rdev: 0,
+    //   blksize: 4096,
+    //   ino: 6707277,
+    //   size: 44,
+    //   blocks: 8,
+    //   atime: Mon Oct 12 2015 08:51:29 GMT+1000 (AEST),
+    //   mtime: Mon Oct 12 2015 08:51:29 GMT+1000 (AEST),
+    //   ctime: Mon Oct 12 2015 08:51:29 GMT+1000 (AEST),
+    //   birthtime: Mon Oct 12 2015 08:51:29 GMT+1000 (AEST) }
+  } catch (err) {
+    console.error(err)
+  }
+}
+main()
+
+```
+
+<a name="exists"><a/>
+
+### `exists(blobPath)`
+
+__Type:__ Method.
+
+__Parameter:__ `blobPath` as a `String`.
+
+__Returns:__ `Boolean`
+
+* `true` if the file exists, otherwise `false`.
+
+__Description:__
+
+Use this method for a simple blob file existence test.
+
+__Example:__
+
+```js
+
+const BlobStore = require('scalable-blob-store')
+const uuid = require('uuid')
+const options = {
+  blobStoreRoot: '/app/blobs',
+  idFunction: uuid.v4,
+  dirDepth: 3,
+  dirWidth: 2000
+}
+
+const blobStore = new BlobStore(options)
+
+async function main () {
+  try {
+    // Retrieve the blobPath value from your database
+    const blobPath = '/e6b7815a-c818-465d-8511-5a53c8276b86/aea4be6a-9e7f-4511-b394-049e68f59b02/fea722d1-001a-4765-8408-eb8e0fe7dbc6/183a6b7b-2fd6-4f80-8c6a-2647beb7bb19'
+
+    const exists = await blobStore.exists(blobPath)
+    // The result will be either true or false depending if the blob file exists.
+  } catch (err) {
+    console.error(err)
+  }
+}
+main()
+
+```
+
+<a name="remove"><a/>
+
+### `remove(blobPath)`
+
+__Type:__ Method.
+
+__Parameter:__ `blobPath` as a `String`.
 
 __Returns__: `undefined` if nothing went wrong or the file did not exist.
 
-Promise example:
+__Description:__
+
+Use this method to delete a blob file. This method can not be used to remove directories.
+
+__Example:__
 
 ```js
-// Get the blobPath value from your database.
-const blobPath = '/cij50xi3y00iyzph3qs7oatcy/cij50xi3z00izzph3yo053mzs/cij50xi4000j0zph3mshil7p5/cij50xi4100j1zph3loy3hp6h'
 
-blobStore.remove(blobPath).then(() => {
-  console.log('Blob removed successfully.')
-}).catch(err => {
-  console.error(err)
-})
-```
+const BlobStore = require('scalable-blob-store')
+const uuid = require('uuid')
+const options = {
+  blobStoreRoot: '/app/blobs',
+  idFunction: uuid.v4,
+  dirDepth: 3,
+  dirWidth: 2000
+}
 
-Callback example:
+const blobStore = new BlobStore(options)
 
-```js
-// Get the blobPath value from your database.
-const blobPath = '/cij50xi3y00iyzph3qs7oatcy/cij50xi3z00izzph3yo053mzs/cij50xi4000j0zph3mshil7p5/cij50xi4100j1zph3loy3hp6h'
+async function main () {
+  try {
+    // Retrieve the blobPath value from your database
+    const blobPath = '/e6b7815a-c818-465d-8511-5a53c8276b86/aea4be6a-9e7f-4511-b394-049e68f59b02/fea722d1-001a-4765-8408-eb8e0fe7dbc6/183a6b7b-2fd6-4f80-8c6a-2647beb7bb19'
 
-blobStore.remove(blobPath, (err) => {
-  if (err) { console.error(err) }
-  console.log('Blob removed successfully.')
-})
-```
+    await blobStore.remove(blobPath)
+    // The blob file will no longer exist
+  } catch (err) {
+    console.error(err)
+  }
+}
+main()
 
-<a name="stat" />
-
-### `stat(string)`
-
-__Returns__: `object`
-
-Rather than parse the file system [`stats`][nodefs-url] object, `scalable-blob-store` returns the raw `stats` object.
-More stat class details can be found on [Wikipedia][wikistat-url].
-
-Promise example:
-
-```js
-// Get the blobPath value from your database.
-const blobPath = '/cij50xi3y00iyzph3qs7oatcy/cij50xi3z00izzph3yo053mzs/cij50xi4000j0zph3mshil7p5/cij50xi4100j1zph3loy3hp6h'
-
-blobStore.stat(blobPath).then(stats => {
-  console.dir(stats)
-  // Console output will be similar to the following.
-  // { dev: 2050,
-  //   mode: 33188,
-  //   nlink: 1,
-  //   uid: 1000,
-  //   gid: 1000,
-  //   rdev: 0,
-  //   blksize: 4096,
-  //   ino: 6707277,
-  //   size: 44,
-  //   blocks: 8,
-  //   atime: Mon Oct 12 2015 08:51:29 GMT+1000 (AEST),
-  //   mtime: Mon Oct 12 2015 08:51:29 GMT+1000 (AEST),
-  //   ctime: Mon Oct 12 2015 08:51:29 GMT+1000 (AEST),
-  //   birthtime: Mon Oct 12 2015 08:51:29 GMT+1000 (AEST) }
-}).catch(err => {
-  console.error(err)
-})
-```
-
-Callback example:
-
-```js
-// Get the blobPath value from your database.
-const blobPath = '/cij50xi3y00iyzph3qs7oatcy/cij50xi3z00izzph3yo053mzs/cij50xi4000j0zph3mshil7p5/cij50xi4100j1zph3loy3hp6h'
-
-blobStore.stat(blobPath, (err, stats) => {
-  if (err) { console.error(err) }
-  console.dir(stats)
-  // Console output will be similar to the following.
-  // { dev: 2050,
-  //   mode: 33188,
-  //   nlink: 1,
-  //   uid: 1000,
-  //   gid: 1000,
-  //   rdev: 0,
-  //   blksize: 4096,
-  //   ino: 6707277,
-  //   size: 44,
-  //   blocks: 8,
-  //   atime: Mon Oct 12 2015 08:51:29 GMT+1000 (AEST),
-  //   mtime: Mon Oct 12 2015 08:51:29 GMT+1000 (AEST),
-  //   ctime: Mon Oct 12 2015 08:51:29 GMT+1000 (AEST),
-  //   birthtime: Mon Oct 12 2015 08:51:29 GMT+1000 (AEST) }
-})
-```
-
-<a name="exists" />
-
-### `exists(string)`
-
-__Returns__: `boolean`
-
-`true` if the file exists, otherwise `false`.
-
-Promise example:
-
-```js
-// Get the blobPath value from your database.
-const blobPath = '/cij50xi3y00iyzph3qs7oatcy/cij50xi3z00izzph3yo053mzs/cij50xi4000j0zph3mshil7p5/cij50xi4100j1zph3loy3hp6h'
-
-blobStore.exists(blobPath).then(result => {
-  console.log(result)
-  // Logs 'true' or 'false'.
-}).catch(err => {
-  console.error(err)
-})
-```
-
-Callback example:
-
-```js
-// Get the blobPath value from your database.
-const blobPath = '/cij50xi3y00iyzph3qs7oatcy/cij50xi3z00izzph3yo053mzs/cij50xi4000j0zph3mshil7p5/cij50xi4100j1zph3loy3hp6h'
-
-blobStore.exists(blobPath, (err, exists) => {
-  if (err) { console.error(err) }
-  console.log(exists)
-  // Logs 'true' or 'false'
-})
 ```
 
 ## Known Issues
