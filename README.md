@@ -37,7 +37,7 @@ With the release of `scalable-blob-store` v4 there has been some major changes.
 These changes have introduced some restrictions on the use of the module:
 
 * Requires Node.js v10.12.0 or later.
-* Uses Node.js [Stability: 1 - Experimental](https://nodejs.org/api/documentation.html) features. Specifically the [fs.promises](https://nodejs.org/api/fs.html#fs_fs_promises_api) API and the [mkdir recursive](https://nodejs.org/api/fs.html#fs_fspromises_mkdir_path_options) options.
+* Uses Node.js [Stability: 1 - Experimental](https://nodejs.org/api/documentation.html#documentation_stability_index) features. Specifically the [fs.promises](https://nodejs.org/api/fs.html#fs_fs_promises_api) API and the [mkdir recursive](https://nodejs.org/api/fs.html#fs_fspromises_mkdir_path_options) options.
 * The module performance is approximately four times slower than v3.0.9. Most likely this is due to the experimental APIs.
 * All callback APIs have been removed.
 
@@ -47,22 +47,12 @@ Please read the [v3.0.9 README](https://github.com/grantcarthew/node-scalable-bl
 
 ## Features
 
-Version 4 has added a heap of new features.
-
 * Save binary large objects (blobs) locally in a scalable format.
-* Only save a relative `blobPath` value to your database.
 * Written using modern JavaScript language features.
 * No dependencies.
-* The unique ID used for the file and directory names is a user supplied function. You can use UUIDs or ULIDs or any other unique ID function.
-* The API has been extended:
-  * New blob methods including read, write, append, copy, and realPath.
-  * All methods return a Promise.
-  * BlobStore state values are now exposed as read only properties.
-  * New get and set methods for the current blob directory.
-  * Still includes the createWriteStream and createReadStream methods among others.
-* No longer filters file and directory names to match IDs:
-  * This feature means you can change your ID function on an existing blob root directory.
-  * Any file or directory name can be used to retrieve blob data.
+* Blob file and directory names based on unique IDs.
+* Extensive read / write APIs in both stream and file format.
+* Promise based with no callbacks.
 
 _Note: see the [restrictions](#warning) above prior to using in production._
 
@@ -71,7 +61,9 @@ _Note: see the [restrictions](#warning) above prior to using in production._
 ### Installation
 
 ```sh
+
 npm install scalable-blob-store --save
+
 ```
 
 ### Create a writable stream
@@ -205,7 +197,7 @@ With the update to v4 of `scalable-blob-store` all the BlobStore methods return 
 
 __Type:__ Constructor function.
 
-__Parameter:__ `options` `Object`
+__Parameter:__ `options` as an `Object`.
 
 * A JavaScript object with desired options set. See below.
 
@@ -276,8 +268,6 @@ const pdfDocumentStore = new BlobStore(pdfOptions)
 
 __Type:__ Read only property.
 
-__Parameters:__ None
-
 __Returns:__ A `String` that matches your `options.blobStoreRoot` value.
 
 __Description:__
@@ -308,8 +298,6 @@ console.log(blobStore.blobStoreRoot)
 ### `idFunction`
 
 __Type:__ Read only property.
-
-__Parameters:__ None
 
 __Returns:__ The unique ID function you configured in the `options.idFunction` value.
 
@@ -342,8 +330,6 @@ console.log(blobStore.idFunction())
 
 __Type:__ Read only property.
 
-__Parameters:__ None
-
 __Returns:__ A `Number` that matches your `options.dirDepth` value.
 
 __Description:__
@@ -375,8 +361,6 @@ console.log(blobStore.dirDepth)
 
 __Type:__ Read only property.
 
-__Parameters:__ None
-
 __Returns:__ A `Number` that matches your `options.dirWidth` value.
 
 __Description:__
@@ -407,8 +391,6 @@ console.log(blobStore.dirWidth)
 ### `getCurrentBlobDir()`
 
 __Type:__ Method.
-
-__Parameters:__ None
 
 __Returns:__ A `Promise` that resolves to a `String` that is the current active blob creation directory.
 
@@ -452,7 +434,7 @@ main()
 
 __Type:__ Method.
 
-__Parameters:__ `blobDir` `String`
+__Parameters:__ `blobDir` as a `String`.
 
 * Represents a file system directory path you desire to store blob files in that will be located under the `blobStoreRoot` path.
 
@@ -506,8 +488,6 @@ main()
 ### `createWriteStream()`
 
 __Type:__ Method.
-
-__Parameters:__ None.
 
 __Returns__: A `Promise` that resolves to an `Object` containing the child path to the file within the blob store root and a [WriteStream][writestream-url].
 
@@ -583,7 +563,7 @@ main()
 
 __Type:__ Method.
 
-__Parameter:__ `data` as either `String`, `Buffer`, `TypedArray`, or `DataView`
+__Parameter:__ `data` as either `String`, `Buffer`, `TypedArray`, or `DataView`.
 
 __Parameter:__ `writeOptions` as an `Object`.
 
@@ -635,7 +615,7 @@ main()
 
 __Type:__ Method.
 
-__Parameter:__ `blobPath` as a `String`
+__Parameter:__ `blobPath` as a `String`.
 
 * Retrieve this from the application database.
 
@@ -686,7 +666,7 @@ main()
 
 __Type:__ Method.
 
-__Parameter:__ `blobPath` as a `String`
+__Parameter:__ `blobPath` as a `String`.
 
 * Retrieve this from the application database.
 
@@ -788,7 +768,7 @@ main()
 
 __Type:__ Method.
 
-__Parameter:__ `blobPath` as a `String`
+__Parameter:__ `blobPath` as a `String`.
 
 * Retrieve this from the application database.
 
@@ -841,7 +821,7 @@ main()
 
 __Type:__ Method.
 
-__Parameter:__ `blobPath` as a `String`
+__Parameter:__ `blobPath` as a `String`.
 
 * Retrieve this from the application database.
 
