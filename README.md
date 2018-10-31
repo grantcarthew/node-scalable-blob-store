@@ -618,7 +618,7 @@ __Type:__ Method.
 
 __Parameter:__ `blobPath` as a `String`.
 
-* Retrieve this from the application database.
+* Retrieve the `blobPath` from your application database.
 
 __Parameter:__ `data` as either a `String` or `Buffer`.
 
@@ -669,7 +669,7 @@ __Type:__ Method.
 
 __Parameter:__ `blobPath` as a `String`.
 
-* Retrieve this from the application database.
+* Retrieve the `blobPath` from your application database.
 
 __Parameter:__ `flags` as a `Number`.
 
@@ -721,7 +721,7 @@ __Type:__ Method.
 
 __Parameter:__ `blobPath` as a `String`.
 
-* The `blobPath` retrieved from your database.
+* Retrieve the `blobPath` from your application database.
 
 __Returns__: A `Promise` that resolves to a [`ReadStream`][readstream-url].
 
@@ -771,7 +771,7 @@ __Type:__ Method.
 
 __Parameter:__ `blobPath` as a `String`.
 
-* Retrieve this from the application database.
+* Retrieve the `blobPath` from your application database.
 
 __Parameter:__ `readOptions` as an `Object`.
 
@@ -824,7 +824,7 @@ __Type:__ Method.
 
 __Parameter:__ `blobPath` as a `String`.
 
-* Retrieve this from the application database.
+* Retrieve the `blobPath` from your application database.
 
 __Parameter:__ `flags` as an `String` or `Number`.
 
@@ -876,7 +876,7 @@ __Type:__ Method.
 
 __Parameter:__ `blobPath` as a `String`.
 
-* Retrieve this from the application database.
+* Retrieve the `blobPath` from your application database.
 
 __Parameter:__ `realPathOptions` as a `String` or `Object`.
 
