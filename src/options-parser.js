@@ -1,6 +1,8 @@
 const fs = require('fs')
 
-module.exports = function (options) {
+module.exports = optionsParser
+
+function optionsParser (options) {
   if (!options || typeof options !== 'object') {
     throw new Error('scalable-blob-store options object required.')
   }
