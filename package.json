@@ -1,9 +1,9 @@
 {
   "name": "scalable-blob-store",
-  "version": "4.0.0",
+  "version": "4.0.1",
   "description": "A file system blob store that is designed to prevent conflicts when used with a distributed file system or storage area network.",
   "homepage": "https://github.com/grantcarthew/node-scalable-blob-store",
-  "author": "Grant Carthew <dev@carthew.net> (http://uglygizmo.blogspot.com.au/)",
+  "author": "Grant Carthew <dev@carthew.net>",
   "license": "MIT",
   "main": "index.js",
   "repository": {
@@ -27,49 +27,25 @@
     "buffer"
   ],
   "engines": {
-    "node": ">=10.12.0"
+    "node": ">=12"
   },
   "scripts": {
-    "test": "jest",
-    "test:watch": "jest --watch",
-    "lint": "standard",
-    "upgrade": "npm run upgrade:rm && npm run upgrade:ncu && npm run upgrade:install && npm run upgrade:finish",
+    "test": "tap index.test.js --reporter=specy --coverage-report=text",
+    "upgrade": "npm run upgrade:rm && npm run upgrade:ncu && npm run upgrade:install && npm run upgrade:auditfix && npm run upgrade:finish",
     "upgrade:rm": "rm -Rf node_modules",
-    "upgrade:ncu": "npm-check-updates --upgradeAll",
+    "upgrade:ncu": "npm-check-updates --upgrade",
     "upgrade:install": "npm install",
+    "upgrade:auditfix": "npm audit fix --force",
     "upgrade:finish": "npm run test"
-  },
-  "jest": {
-    "verbose": true,
-    "collectCoverage": true,
-    "coveragePathIgnorePatterns": [
-      "<rootDir>/node_modules/",
-      "<rootDir>/tests/"
-    ],
-    "collectCoverageFrom": [
-      "**/src/**/*.js"
-    ],
-    "testURL": "http://localhost"
-  },
-  "standard": {
-    "globals": [
-      "describe",
-      "test",
-      "expect",
-      "beforeAll",
-      "jest"
-    ]
   },
   "devDependencies": {
     "crispy-stream": "^0.1.2",
-    "del": "^3.0.0",
-    "jest": "^23.6.0",
+    "cuid": "^2.1.8",
+    "del": "^6.0.0",
     "node-dir": "^0.1.17",
-    "npm-check-updates": "^2.14.2",
-    "standard": "^12.0.1",
+    "tap": "^15.1.5",
     "ulid": "^2.3.0",
-    "cuid": "^2.1.4",
-    "uuid": "^3.3.2"
+    "uuid": "^8.3.2"
   },
   "dependencies": {}
 }

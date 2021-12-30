@@ -1,9 +1,7 @@
 # Ignore Folders
 node_modules
 coverage
+.nyc_output
 
 # Ignore Files
-.idea
-.DS_STORE
-.swp
 package-lock.json
