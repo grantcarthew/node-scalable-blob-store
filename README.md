@@ -4,9 +4,7 @@ A file system blob store that is designed to prevent conflicts when used with a 
 
 <!-- [![Build Status][travisci-image]][travisci-url] -->
 
-[![Maintainability][cc-maintain-badge]][cc-maintain-url]
-[![Test Coverage][cc-coverage-badge]][cc-coverage-url]
-[![js-standard-style][js-standard-image]][js-standard-url]
+[![unit-tests](https://github.com/grantcarthew/node-scalable-blob-store/actions/workflows/unit-tests.yaml/badge.svg)][actions-url]
 [![Patreon Donation][patreon-image]][patreon-url]
 
 [![Mr Blobby][mrblobby-image]][sbs-url]
@@ -31,21 +29,6 @@ Please **Star** on GitHub / NPM and **Watch** for updates.
 - [History](#history)
 - [License](#license)
 
-## Warning
-
-With the release of `scalable-blob-store` v4 there has been some major changes.
-
-These changes have introduced some restrictions on the use of the module:
-
-- Requires Node.js v10.12.0 or later.
-- Uses Node.js [Stability: 1 - Experimental](https://nodejs.org/api/documentation.html#documentation_stability_index) features. Specifically the [fs.promises](https://nodejs.org/api/fs.html#fs_fs_promises_api) API and the [mkdir recursive](https://nodejs.org/api/fs.html#fs_fspromises_mkdir_path_options) options.
-- The module performance is approximately four times slower than v3.0.9. Most likely this is due to the experimental APIs.
-- All callback APIs have been removed.
-
-In time these restrictions will become less of an issue, however for now if you want to use `scalable-blob-store` in production, I suggest you use the old [version 3.0.9 release](https://github.com/grantcarthew/node-scalable-blob-store/releases/tag/v3.0.9).
-
-Please read the [v3.0.9 README](https://github.com/grantcarthew/node-scalable-blob-store/blob/v3.0.9/README.md) document to help you use the older release.
-
 ## Features
 
 - Save binary large objects (blobs) locally in a scalable format.
@@ -55,11 +38,11 @@ Please read the [v3.0.9 README](https://github.com/grantcarthew/node-scalable-bl
 - Extensive read / write APIs in both stream and file format.
 - Promise based with no callbacks.
 
-_Note: see the [restrictions](#warning) above prior to using in production._
-
 ## Quick Start
 
 ### Installation
+
+Note: Requires Node.js v12 or later.
 
 ```sh
 
@@ -1131,6 +1114,7 @@ See my [other projects on NPM](https://www.npmjs.com/~grantcarthew).
   - Dependency packages updated.
   - Replaced Jest with Tap for unit testing.
   - Updated fs-blob-dir-latest sort function to include duplicate creation time handling.
+  - Converted all files from CRLF to LF line endings.
 - v4.0.0 [2018-10-29]: Major upgrade to modern syntax. See readme above.
 - v3.0.9 [2018-02-26]: Dependency packages updated.
 - v3.0.8 [2017-12-22]: Dependency packages updated.
@@ -1171,46 +1155,23 @@ MIT
 
 [sbs-url]: https://github.com/grantcarthew/node-scalable-blob-store
 [mrblobby-image]: https://cdn.rawgit.com/grantcarthew/node-scalable-blob-store/master/mrblobby.svg
-[bluebird-url]: https://github.com/petkaantonov/bluebird
-[bluebird-speed-url]: http://programmers.stackexchange.com/questions/278778/why-are-native-es6-promises-slower-and-more-memory-intensive-than-bluebird
-[petka-url]: https://github.com/petkaantonov
 [amazones3-url]: https://aws.amazon.com/s3/
 [googlecloud-url]: https://cloud.google.com/storage/
 [azurestorage-url]: https://azure.microsoft.com/en-us/services/storage/
 [filestorage-url]: https://github.com/petersirka/node-filestorage
 [glusterfs-url]: http://www.gluster.org/
 [uuid-url]: https://www.npmjs.com/package/uuid
-[defunctzombie-url]: https://github.com/defunctzombie
-[wikiuuid-url]: https://en.wikipedia.org/wiki/Universally_unique_identifier
 [cuid-url]: https://github.com/ericelliott/cuid
 [objectid-url]: https://docs.mongodb.com/manual/reference/method/ObjectId/
 [ulid-url]: https://github.com/ulid/javascript
 [awesome-url]: https://github.com/grantcarthew/awesome-unique-id
-[mkdirp-url]: https://www.npmjs.com/package/mkdirp
-[substack-url]: https://github.com/substack
-[ericelliott-url]: https://github.com/ericelliott
 [nodefs-url]: https://nodejs.org/api/fs.html#fs_class_fs_stats
 [wikistat-url]: https://en.wikipedia.org/wiki/Stat_(system_call)
 [readstream-url]: https://nodejs.org/api/stream.html#stream_class_stream_readable
 [writestream-url]: https://nodejs.org/api/stream.html#stream_class_stream_writable
-[mathiasbuus-url]: https://github.com/mafintosh
-[fsblobstore-url]: https://github.com/mafintosh/fs-blob-store
-[cc-maintain-badge]: https://api.codeclimate.com/v1/badges/829bd04f05552f59b398/maintainability
-[cc-maintain-url]: https://codeclimate.com/github/grantcarthew/node-scalable-blob-store/maintainability
-[cc-coverage-badge]: https://api.codeclimate.com/v1/badges/829bd04f05552f59b398/test_coverage
-[cc-coverage-url]: https://codeclimate.com/github/grantcarthew/node-scalable-blob-store/test_coverage
-[js-standard-image]: https://img.shields.io/badge/code%20style-standard-brightgreen.svg
-[js-standard-url]: http://standardjs.com/
-[nsp-image]: https://nodesecurity.io/orgs/openjs/projects/3871d340-0ca9-471c-be9a-39df3871262d/badge
-[nsp-url]: https://nodesecurity.io/orgs/openjs/projects/3871d340-0ca9-471c-be9a-39df3871262d
 [patreon-image]: https://img.shields.io/badge/patreon-donate-yellow.svg
 [patreon-url]: https://www.patreon.com/grantcarthew
 [nodei-npm-image]: https://nodei.co/npm/scalable-blob-store.png?downloads=true&downloadRank=true&stars=true
 [nodei-npm-url]: https://nodei.co/npm/scalable-blob-store/
-[travisci-image]: https://travis-ci.org/grantcarthew/node-scalable-blob-store.svg?branch=master
-[travisci-url]: https://travis-ci.org/grantcarthew/node-scalable-blob-store
 [cuid-discuss-url]: https://github.com/ericelliott/cuid/issues/22
-[jest-url]: https://jestjs.io/en/
-[tree-url]: https://www.debian-administration.org/article/606/Commands_you_might_have_missed_tree
-[risingstack-url]: https://risingstack.com/
-[risingstack-article-url]: https://blog.risingstack.com/how-to-become-a-better-node-js-developer-in-2016
+[actions-url]: https://github.com/grantcarthew/node-scalable-blob-store/actions
