@@ -30,7 +30,8 @@
     "node": ">=12"
   },
   "scripts": {
-    "test": "tap index.test.js --reporter=specy --coverage-report=text",
+    "test": "tap --reporter=specy ./tests/*.test.js",
+    "watch": "nodemon -x 'tap --reporter=specy ./tests/*.test.js'",
     "upgrade": "npm run upgrade:rm && npm run upgrade:ncu && npm run upgrade:install && npm run upgrade:auditfix && npm run upgrade:finish",
     "upgrade:rm": "rm -Rf node_modules",
     "upgrade:ncu": "npm-check-updates --upgrade",
