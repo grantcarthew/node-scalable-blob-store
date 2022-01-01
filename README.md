@@ -1110,7 +1110,8 @@ See my [other projects on NPM](https://www.npmjs.com/~grantcarthew).
 
 ## History
 
-- v4.0.1 [2022-01-02]: Upgrade and minor fixes:
+- v5.0.0 [2022-01-02]: Upgrade Node.js version and minor fixes:
+  - Node.js minimum version updated to v12 or later.
   - Dependency packages updated.
   - Replaced Jest with Tap for unit testing.
   - Updated fs-blob-dir-latest sort function to include duplicate creation time handling.
