@@ -1,127 +1,127 @@
-const BlobStore = require('../src/blob-store')
-const fs = require('fs')
-const del = require('del')
-const ulid = require('ulid').ulid
-const utils = require('./test-utils')
-const streamToString = require('./test-streamtostring')
-const blobStoreRoot = utils.genBlobStoreRoot('blob-store')
-const tmpBlobFile = '/data'
+const tap = require('tap');
+const BlobStore = require('../src/blob-store');
+const fs = require('fs');
+const del = require('del');
+const ulid = require('ulid').ulid;
+const utils = require('./test-utils');
+const streamToString = require('./test-streamtostring');
+const blobStoreRoot = utils.genBlobStoreRoot('blob-store');
+const tmpBlobFile = '/data';
 const testOptions = {
   blobStoreRoot,
-  idFunction: ulid
-}
+  idFunction: ulid,
+};
 
-beforeAll(async () => {
-  await del(blobStoreRoot, { force: true })
-  await fs.promises.mkdir(blobStoreRoot, { resursive: true })
-  await fs.writeFileSync(blobStoreRoot + tmpBlobFile, utils.data)
-})
+tap.beforeEach(async () => {
+  await del(blobStoreRoot, { force: true });
+  await fs.promises.mkdir(blobStoreRoot, { resursive: true });
+  await fs.writeFileSync(blobStoreRoot + tmpBlobFile, utils.data);
+});
 
-describe('scalable-blob-store tests', () => {
-  test('basic constructor test', async () => {
-    expect.assertions(5)
-    const options = {}
-    expect(() => new BlobStore()).toThrow()
-    expect(() => new BlobStore(options)).toThrow()
-    options.blobStoreRoot = blobStoreRoot
-    expect(() => new BlobStore(options)).toThrow()
-    options.idFunction = ulid
-    expect(new BlobStore(options)).toBeDefined()
-    expect(fs.existsSync(blobStoreRoot)).toBe(true)
-  })
+tap.test('basic constructor test', async (t) => {
+  t.plan(5);
+  const options = {};
+  t.throws(() => new BlobStore(), /options object required/, 'Null options should throw');
+  t.throws(() => new BlobStore(options), /directory option is required/, 'Invalid options should throw');
+  options.blobStoreRoot = blobStoreRoot;
+  t.throws(() => new BlobStore(options), /idFunction option is required/, 'Incomplete options should throw');
+  options.idFunction = ulid;
+  t.ok(new BlobStore(options) instanceof BlobStore, 'Valid options creates a BlobStore object');
+  t.ok(fs.existsSync(blobStoreRoot), 'blobStoreRoot directory should exist');
+});
 
-  test('blobStore properties test', () => {
-    expect.assertions(4)
-    const bs = new BlobStore(testOptions)
-    expect(bs.blobStoreRoot).toBe(testOptions.blobStoreRoot)
-    expect(bs.idFunction).toBe(testOptions.idFunction)
-    expect(bs.dirWidth).toBe(1000)
-    expect(bs.dirDepth).toBe(3)
-  })
+tap.test('blobStore properties test', (t) => {
+  t.plan(4);
+  const bs = new BlobStore(testOptions);
+  t.equal(bs.blobStoreRoot, testOptions.blobStoreRoot, 'blobStoreRoot and options root should be equal');
+  t.equal(bs.idFunction, testOptions.idFunction, 'idFunction and options idFunction should be equal');
+  t.equal(bs.dirWidth, 1000, 'Blob store dirWidth should be 1000');
+  t.equal(bs.dirDepth, 3, 'Blob store dirDepth should be 3');
+});
 
-  test('createWriteStream test', async () => {
-    expect.assertions(3)
-    const bs = new BlobStore(testOptions)
-    const ws = await bs.createWriteStream()
-    expect(typeof ws.blobPath).toBe('string')
-    expect(typeof ws.writeStream).toBe('object')
-    expect(bs.createWriteStream()).toBeDefined()
-  })
+tap.test('createWriteStream test', async (t) => {
+  t.plan(3);
+  const bs = new BlobStore(testOptions);
+  const ws = await bs.createWriteStream();
+  t.equal(typeof ws.blobPath, 'string', 'writeStream blobPath should be a string');
+  t.equal(typeof ws.writeStream, 'object', 'writeStream should be an object');
+  t.equal(typeof bs.createWriteStream(), 'object', 'createWriteStream should return an object');
+});
 
-  test('write test', async () => {
-    expect.assertions(2)
-    const bs = new BlobStore(testOptions)
-    const blobPath = await bs.write(utils.data)
-    expect(typeof blobPath).toBe('string')
-    const data = await bs.read(blobPath)
-    expect(data).toBe(utils.data)
-  })
+tap.test('write test', async (t) => {
+  t.plan(2);
+  const bs = new BlobStore(testOptions);
+  const blobPath = await bs.write(utils.data);
+  t.equal(typeof blobPath, 'string', 'Returned blobPath should be a string');
+  const data = await bs.read(blobPath);
+  t.equal(data, utils.data, 'Blob data should be correct');
+});
 
-  test('append test', async () => {
-    expect.assertions(1)
-    const bs = new BlobStore(testOptions)
-    const blobPath = await bs.write(utils.data)
-    await bs.append(blobPath, utils.data)
-    const data = await bs.read(blobPath)
-    expect(data).toBe(utils.data + utils.data)
-  })
+tap.test('append test', async (t) => {
+  t.plan(1);
+  const bs = new BlobStore(testOptions);
+  const blobPath = await bs.write(utils.data);
+  await bs.append(blobPath, utils.data);
+  const data = await bs.read(blobPath);
+  t.equal(data, utils.data + utils.data, 'Appended blob data should be correct');
+});
 
-  test('copy test', async () => {
-    expect.assertions(1)
-    const bs = new BlobStore(testOptions)
-    const blobPath = await bs.write(utils.data)
-    const dstBlobPath = await bs.copy(blobPath)
-    const data = await bs.read(dstBlobPath)
-    expect(data).toBe(utils.data)
-  })
+tap.test('copy test', async (t) => {
+  t.plan(1);
+  const bs = new BlobStore(testOptions);
+  const blobPath = await bs.write(utils.data);
+  const dstBlobPath = await bs.copy(blobPath);
+  const data = await bs.read(dstBlobPath);
+  t.equal(data, utils.data, 'Copied blob data should be correct');
+});
 
-  test('createReadStream test', async () => {
-    expect.assertions(1)
-    const bs = new BlobStore(testOptions)
-    const rs = await bs.createReadStream(tmpBlobFile)
-    const data = await streamToString(rs)
-    expect(data).toBe(utils.data)
-  })
+tap.test('createReadStream test', async (t) => {
+  t.plan(1);
+  const bs = new BlobStore(testOptions);
+  const rs = await bs.createReadStream(tmpBlobFile);
+  const data = await streamToString(rs);
+  t.equal(data, utils.data, 'readStream should read blob data');
+});
 
-  test('read test', async () => {
-    expect.assertions(1)
-    const bs = new BlobStore(testOptions)
-    const data = await bs.read(tmpBlobFile)
-    expect(data).toBe(utils.data)
-  })
+tap.test('read test', async (t) => {
+  t.plan(1);
+  const bs = new BlobStore(testOptions);
+  const data = await bs.read(tmpBlobFile);
+  t.equal(data, utils.data, 'read should read blob data');
+});
 
-  test('realPath test', async () => {
-    expect.assertions(1)
-    const bs = new BlobStore(testOptions)
-    const realPath = await bs.realPath(tmpBlobFile)
-    expect(realPath).toBe(blobStoreRoot + tmpBlobFile)
-  })
+tap.test('realPath test', async (t) => {
+  t.plan(1);
+  const bs = new BlobStore(testOptions);
+  const realPath = await bs.realPath(tmpBlobFile);
+  t.equal(realPath, blobStoreRoot + tmpBlobFile, 'realPath should return full blob path');
+});
 
-  test('exists test', async () => {
-    expect.assertions(2)
-    const bs = new BlobStore(testOptions)
-    let result = await bs.exists(tmpBlobFile)
-    expect(result).toBe(true)
-    result = await bs.exists('notavalidfilenameorpath')
-    expect(result).toBe(false)
-  })
+tap.test('exists test', async (t) => {
+  t.plan(2);
+  const bs = new BlobStore(testOptions);
+  let result = await bs.exists(tmpBlobFile);
+  t.ok(result, 'Valid blobPath exist should be true');
+  result = await bs.exists('notavalidfilenameorpath');
+  t.notOk(result, 'Invalid blobPath exist should be false');
+});
 
-  test('remove test', async () => {
-    expect.assertions(2)
-    const bs = new BlobStore(testOptions)
-    const blobPath = await bs.write(utils.data)
-    let result = await bs.exists(blobPath)
-    expect(result).toBe(true)
-    await bs.remove(blobPath)
-    result = await bs.exists(blobPath)
-    expect(result).toBe(false)
-  })
+tap.test('remove test', async (t) => {
+  t.plan(3);
+  const bs = new BlobStore(testOptions);
+  const blobPath = await bs.write(utils.data);
+  let result = await bs.exists(blobPath);
+  t.ok(result, 'Blob should exist before removal');
+  result = await bs.remove(blobPath);
+  t.ok(typeof result === 'undefined', 'Blob removal should return undefined');
+  result = await bs.exists(blobPath);
+  t.notOk(result, 'Blob should not exist after removal');
+});
 
-  test('stat test', async () => {
-    expect.assertions(2)
-    const bs = new BlobStore(testOptions)
-    let result = await bs.stat(tmpBlobFile)
-    expect(typeof result.birthtime).toBe('object')
-    expect(Reflect.ownKeys(result).length).toBe(18)
-  })
-})
+tap.test('stat test', async (t) => {
+  t.plan(2);
+  const bs = new BlobStore(testOptions);
+  let result = await bs.stat(tmpBlobFile);
+  t.equal(typeof result.birthtime, 'object', 'Blob stat birthtime should be an object');
+  t.equal(Reflect.ownKeys(result).length, 18, 'Stat object should have 18 keys');
+});

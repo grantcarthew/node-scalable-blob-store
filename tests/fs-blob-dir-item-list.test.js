@@ -1,25 +1,24 @@
-const fsBlobDirItemList = require('../src/fs-blob-dir-item-list')
-const utils = require('./test-utils')
-const blobRoot = utils.genBlobStoreRoot('fs-modules')
+const tap = require('tap');
+const fsBlobDirItemList = require('../src/fs-blob-dir-item-list');
+const utils = require('./test-utils');
+const blobRoot = utils.genBlobStoreRoot('fs-modules');
 
-beforeAll(async () => {
-  await utils.buildTestFs(blobRoot)
-})
+tap.beforeEach(async () => {
+  await utils.buildTestFs(blobRoot);
+});
 
-describe('fs-modules tests', () => {
-  test('fs-blob-dir-list tests', async () => {
-    expect.assertions(8)
-    let items = await fsBlobDirItemList(blobRoot, '/')
-    expect(Array.isArray(items)).toBe(true)
-    expect(items.length).toBe(6)
-    items = await fsBlobDirItemList(blobRoot, 'does-not-exist')
-    expect(Array.isArray(items)).toBe(true)
-    expect(items.length).toBe(0)
-    items = await fsBlobDirItemList(blobRoot, '/', 'isDirectory')
-    expect(Array.isArray(items)).toBe(true)
-    expect(items.length).toBe(6)
-    items = await fsBlobDirItemList(blobRoot, 'does-not-exist', 'isDirectory')
-    expect(Array.isArray(items)).toBe(true)
-    expect(items.length).toBe(0)
-  })
-})
+tap.test('fs-blob-dir-list tests', async (t) => {
+  t.plan(8);
+  let items = await fsBlobDirItemList(blobRoot, '/');
+  t.ok(Array.isArray(items), 'Item list should be an array');
+  t.equal(items.length, 6, 'Item list should contain 6 items');
+  items = await fsBlobDirItemList(blobRoot, 'does-not-exist');
+  t.ok(Array.isArray(items), 'Item list for invalid path should be an array');
+  t.equal(items.length, 0, 'Item list for invalid path should contain 0 items');
+  items = await fsBlobDirItemList(blobRoot, '/', 'isDirectory');
+  t.ok(Array.isArray(items), 'Item list for isDirectory should be an array');
+  t.equal(items.length, 6, 'Item list for isDirectory should contain 6 items');
+  items = await fsBlobDirItemList(blobRoot, 'does-not-exist', 'isDirectory');
+  t.ok(Array.isArray(items), 'Item list for isDirectory on invalid path should be an array');
+  t.equal(items.length, 0, 'Item list for isDirectory on invalid path should contain 0 items');
+});

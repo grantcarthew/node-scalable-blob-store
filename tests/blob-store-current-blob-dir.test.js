@@ -1,34 +1,33 @@
-const BlobStore = require('../src/blob-store')
-const del = require('del')
-const ulid = require('ulid').ulid
-const utils = require('./test-utils')
-const blobStoreRoot = utils.genBlobStoreRoot('blob-store-current-blob-dir')
+const tap = require('tap');
+const BlobStore = require('../src/blob-store');
+const del = require('del');
+const ulid = require('ulid').ulid;
+const utils = require('./test-utils');
+const blobStoreRoot = utils.genBlobStoreRoot('blob-store-current-blob-dir');
 const testOptions = {
   blobStoreRoot,
   idFunction: ulid,
-  dirWidth: 3
-}
-let dirs = {}
+  dirWidth: 3,
+};
+let dirs = {};
 
-beforeAll(async () => {
-  await del(blobStoreRoot, { force: true })
-  dirs = await utils.buildTestFs(blobStoreRoot)
-})
+tap.beforeEach(async () => {
+  await del(blobStoreRoot, { force: true });
+  dirs = await utils.buildTestFs(blobStoreRoot);
+});
 
-describe('scalable-blob-store currentBlobDir tests', () => {
-  test('blobStore currentBlobDir test', async () => {
-    expect.assertions(4)
-    const bs = new BlobStore(testOptions)
-    let dir = await bs.getCurrentBlobDir()
-    expect(dir).toBe(dirs.latestBlobDir)
-    await bs.setCurrentBlobDir(dirs.firstBlobDir)
-    dir = await bs.getCurrentBlobDir()
-    expect(dir).toBe(dirs.firstBlobDir)
-    await bs.write(utils.data)
-    dir = await bs.getCurrentBlobDir()
-    expect(dir).toBe(dirs.firstBlobDir)
-    await bs.write(utils.data)
-    dir = await bs.getCurrentBlobDir()
-    expect(dir).toBe(dirs.latestBlobDir)
-  })
-})
+tap.test('scalable-blob-store currentBlobDir tests', async (t) => {
+  t.plan(4);
+  const bs = new BlobStore(testOptions);
+  let dir = await bs.getCurrentBlobDir();
+  t.equal(dir, dirs.latestBlobDir, 'getCurrentBlobDir should return latest dir');
+  await bs.setCurrentBlobDir(dirs.firstBlobDir);
+  dir = await bs.getCurrentBlobDir();
+  t.equal(dir, dirs.firstBlobDir, 'After set should return first blob dir');
+  await bs.write(utils.data);
+  dir = await bs.getCurrentBlobDir();
+  t.equal(dir, dirs.firstBlobDir, 'After write should return first blob dir');
+  await bs.write(utils.data);
+  dir = await bs.getCurrentBlobDir();
+  t.equal(dir, dirs.latestBlobDir, 'After second write should return latest dir');
+});
