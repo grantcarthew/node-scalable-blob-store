@@ -34,7 +34,10 @@ async function fsBlobDirLatest (fsPath) {
 
   if (listOfDir.length > 1) {
     listOfDir.sort((a, b) => {
-      return b.fsItemStat.birthtime.getTime() - a.fsItemStat.birthtime.getTime()
+      if (a.fsItemStat.birthtimeMs === b.fsItemStat.birthtimeMs) {
+        return a.fsItem > b.fsItem ? 1 : -1
+      }
+      return b.fsItemStat.birthtimeMs - a.fsItemStat.birthtimeMs
     })
   }
 
