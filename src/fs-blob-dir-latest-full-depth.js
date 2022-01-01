@@ -1,8 +1,8 @@
-const path = require('path')
-const fs = require('fs')
-const fsBlobDirLatest = require('./fs-blob-dir-latest')
+const path = require('path');
+const fs = require('fs');
+const fsBlobDirLatest = require('./fs-blob-dir-latest');
 
-module.exports = fsBlobDirLatestFullDepth
+module.exports = fsBlobDirLatestFullDepth;
 
 /**
  * Returns the most recent directory within the blobStoreRoot path.
@@ -11,11 +11,11 @@ module.exports = fsBlobDirLatestFullDepth
  * @param {Object} state
  * @returns {Promise<String>}
  */
-async function fsBlobDirLatestFullDepth (state) {
-  let loopIndex = state.dirDepth
-  let blobDir = '/'
-  await dirFindOrCreate(blobDir)
-  return blobDir
+async function fsBlobDirLatestFullDepth(state) {
+  let loopIndex = state.dirDepth;
+  let blobDir = '/';
+  await dirFindOrCreate(blobDir);
+  return blobDir;
 
   /**
    * Starting at the blobStoreRoot it will find the latest
@@ -25,22 +25,22 @@ async function fsBlobDirLatestFullDepth (state) {
    * @param {String} nextDir
    * @returns {Promise<void>}
    */
-  async function dirFindOrCreate (nextDir) {
-    const fullNextPath = path.join(state.blobStoreRoot, nextDir)
-    let dirLatest = await fsBlobDirLatest(fullNextPath)
+  async function dirFindOrCreate(nextDir) {
+    const fullNextPath = path.join(state.blobStoreRoot, nextDir);
+    let dirLatest = await fsBlobDirLatest(fullNextPath);
     if (!dirLatest) {
-      dirLatest = state.idFunction()
+      dirLatest = state.idFunction();
     }
     // @ts-ignore
-    blobDir = path.join(blobDir, dirLatest)
+    blobDir = path.join(blobDir, dirLatest);
 
     if (loopIndex < 2) {
       // @ts-ignore
-      fs.mkdirSync(path.join(state.blobStoreRoot, blobDir), { recursive: true })
-      return
+      fs.mkdirSync(path.join(state.blobStoreRoot, blobDir), { recursive: true });
+      return;
     }
 
-    loopIndex--
-    await dirFindOrCreate(blobDir)
+    loopIndex--;
+    await dirFindOrCreate(blobDir);
   }
 }

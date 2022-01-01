@@ -1,15 +1,15 @@
-const fs = require('fs')
-const fsp = fs.promises
-const path = require('path')
+const fs = require('fs');
+const fsp = fs.promises;
+const path = require('path');
 
 // Internal Modules
-const optionsParser = require('./options-parser')
-const blobDirBuild = require('./blob-dir-build')
-const fsBlobDirItemList = require('./fs-blob-dir-item-list')
+const optionsParser = require('./options-parser');
+const blobDirBuild = require('./blob-dir-build');
+const fsBlobDirItemList = require('./fs-blob-dir-item-list');
 
 // Internal State Symbols
-const _state = Symbol('BlobStoreState')
-const _currentBlobDir = Symbol('CurrentBlobDir')
+const _state = Symbol('BlobStoreState');
+const _currentBlobDir = Symbol('CurrentBlobDir');
 
 /**
  * The createWriteStream return type.
@@ -24,9 +24,9 @@ const _currentBlobDir = Symbol('CurrentBlobDir')
  * @class BlobStore
  */
 class BlobStore {
-  constructor (options) {
-    this[_state] = optionsParser(options)
-    this[_currentBlobDir] = false
+  constructor(options) {
+    this[_state] = optionsParser(options);
+    this[_currentBlobDir] = false;
   }
 
   /**
@@ -36,8 +36,8 @@ class BlobStore {
    * @returns {String}
    * @memberof BlobStore
    */
-  get blobStoreRoot () {
-    return this[_state].blobStoreRoot
+  get blobStoreRoot() {
+    return this[_state].blobStoreRoot;
   }
 
   /**
@@ -48,8 +48,8 @@ class BlobStore {
    * @returns {Function}
    * @memberof BlobStore
    */
-  get idFunction () {
-    return this[_state].idFunction
+  get idFunction() {
+    return this[_state].idFunction;
   }
 
   /**
@@ -60,8 +60,8 @@ class BlobStore {
    * @returns {Number}
    * @memberof BlobStore
    */
-  get dirWidth () {
-    return this[_state].dirWidth
+  get dirWidth() {
+    return this[_state].dirWidth;
   }
 
   /**
@@ -72,8 +72,8 @@ class BlobStore {
    * @returns {Number}
    * @memberof BlobStore
    */
-  get dirDepth () {
-    return this[_state].dirDepth
+  get dirDepth() {
+    return this[_state].dirDepth;
   }
 
   /**
@@ -83,14 +83,14 @@ class BlobStore {
    * @returns {Promise<String>}
    * @memberof BlobStore
    */
-  async getCurrentBlobDir () {
-    let blobDir = this[_currentBlobDir] || await blobDirBuild(this[_state])
-    const blobDirFiles = await fsBlobDirItemList(this[_state].blobStoreRoot, blobDir)
+  async getCurrentBlobDir() {
+    let blobDir = this[_currentBlobDir] || (await blobDirBuild(this[_state]));
+    const blobDirFiles = await fsBlobDirItemList(this[_state].blobStoreRoot, blobDir);
     if (blobDirFiles.length >= this[_state].dirWidth) {
-      blobDir = await blobDirBuild(this[_state])
+      blobDir = await blobDirBuild(this[_state]);
     }
-    this[_currentBlobDir] = blobDir
-    return this[_currentBlobDir]
+    this[_currentBlobDir] = blobDir;
+    return this[_currentBlobDir];
   }
 
   /**
@@ -103,14 +103,14 @@ class BlobStore {
    * @returns {Promise<void>}
    * @memberof BlobStore
    */
-  async setCurrentBlobDir (blobDir) {
+  async setCurrentBlobDir(blobDir) {
     if (typeof blobDir !== 'string') {
-      throw new Error('setCurrentBlobDir requires a string path')
+      throw new Error('setCurrentBlobDir requires a string path');
     }
-    const fullDirPath = path.join(this[_state].blobStoreRoot, blobDir)
-    await fsp.mkdir(fullDirPath, { recursive: true })
-    this[_currentBlobDir] = blobDir
-    await this.getCurrentBlobDir()
+    const fullDirPath = path.join(this[_state].blobStoreRoot, blobDir);
+    await fsp.mkdir(fullDirPath, { recursive: true });
+    this[_currentBlobDir] = blobDir;
+    await this.getCurrentBlobDir();
   }
 
   /**
@@ -121,15 +121,15 @@ class BlobStore {
    * @returns {Promise<BlobWriteStream>}
    * @memberof BlobStore
    */
-  async createWriteStream () {
-    const currentBlobDir = await this.getCurrentBlobDir()
-    const blobPath = path.join(currentBlobDir, this[_state].idFunction())
-    const filePath = path.join(this[_state].blobStoreRoot, blobPath)
-    const writeStream = fs.createWriteStream(filePath)
+  async createWriteStream() {
+    const currentBlobDir = await this.getCurrentBlobDir();
+    const blobPath = path.join(currentBlobDir, this[_state].idFunction());
+    const filePath = path.join(this[_state].blobStoreRoot, blobPath);
+    const writeStream = fs.createWriteStream(filePath);
     return {
       blobPath,
-      writeStream
-    }
+      writeStream,
+    };
   }
 
   /**
@@ -140,12 +140,12 @@ class BlobStore {
    * @returns {Promise<String>}
    * @memberof BlobStore
    */
-  async write (data, writeOptions = {}) {
-    const currentBlobDir = await this.getCurrentBlobDir()
-    const blobPath = path.join(currentBlobDir, this[_state].idFunction())
-    const filePath = path.join(this[_state].blobStoreRoot, blobPath)
-    await fsp.writeFile(filePath, data, writeOptions)
-    return blobPath
+  async write(data, writeOptions = {}) {
+    const currentBlobDir = await this.getCurrentBlobDir();
+    const blobPath = path.join(currentBlobDir, this[_state].idFunction());
+    const filePath = path.join(this[_state].blobStoreRoot, blobPath);
+    await fsp.writeFile(filePath, data, writeOptions);
+    return blobPath;
   }
 
   /**
@@ -157,9 +157,9 @@ class BlobStore {
    * @returns {Promise<void>}
    * @memberof BlobStore
    */
-  async append (blobPath, data, appendOptions = {}) {
-    const fullFilePath = path.join(this[_state].blobStoreRoot, blobPath)
-    return fsp.appendFile(fullFilePath, data, appendOptions)
+  async append(blobPath, data, appendOptions = {}) {
+    const fullFilePath = path.join(this[_state].blobStoreRoot, blobPath);
+    return fsp.appendFile(fullFilePath, data, appendOptions);
   }
 
   /**
@@ -170,13 +170,13 @@ class BlobStore {
    * @returns {Promise<String>}
    * @memberof BlobStore
    */
-  async copy (blobPath, flags = 0) {
-    const currentBlobDir = await this.getCurrentBlobDir()
-    const fullSrcPath = path.join(this[_state].blobStoreRoot, blobPath)
-    const dstBlobPath = path.join(currentBlobDir, this[_state].idFunction())
-    const dstFilePath = path.join(this[_state].blobStoreRoot, dstBlobPath)
-    await fsp.copyFile(fullSrcPath, dstFilePath, flags)
-    return dstBlobPath
+  async copy(blobPath, flags = 0) {
+    const currentBlobDir = await this.getCurrentBlobDir();
+    const fullSrcPath = path.join(this[_state].blobStoreRoot, blobPath);
+    const dstBlobPath = path.join(currentBlobDir, this[_state].idFunction());
+    const dstFilePath = path.join(this[_state].blobStoreRoot, dstBlobPath);
+    await fsp.copyFile(fullSrcPath, dstFilePath, flags);
+    return dstBlobPath;
   }
 
   /**
@@ -186,10 +186,10 @@ class BlobStore {
    * @returns {Object} - Standard Node.js readable stream.
    * @memberof BlobStore
    */
-  createReadStream (blobPath) {
-    const fullFilePath = path.join(this[_state].blobStoreRoot, blobPath)
+  createReadStream(blobPath) {
+    const fullFilePath = path.join(this[_state].blobStoreRoot, blobPath);
     // For API consistency the ReadStream is wrapped in a Promise
-    return Promise.resolve(fs.createReadStream(fullFilePath))
+    return Promise.resolve(fs.createReadStream(fullFilePath));
   }
 
   /**
@@ -200,10 +200,10 @@ class BlobStore {
    * @returns
    * @memberof BlobStore
    */
-  read (blobPath, readOptions = {}) {
-    readOptions.encoding = readOptions.encoding || 'utf8'
-    const fullFilePath = path.join(this[_state].blobStoreRoot, blobPath)
-    return fsp.readFile(fullFilePath, readOptions)
+  read(blobPath, readOptions = {}) {
+    readOptions.encoding = readOptions.encoding || 'utf8';
+    const fullFilePath = path.join(this[_state].blobStoreRoot, blobPath);
+    return fsp.readFile(fullFilePath, readOptions);
   }
 
   /**
@@ -215,9 +215,9 @@ class BlobStore {
    * @returns {Promise<Object>}
    * @memberof BlobStore
    */
-  open (blobPath, flags = 'r', mode) {
-    const fullFilePath = path.join(this[_state].blobStoreRoot, blobPath)
-    return fsp.open(fullFilePath, flags, mode)
+  open(blobPath, flags = 'r', mode) {
+    const fullFilePath = path.join(this[_state].blobStoreRoot, blobPath);
+    return fsp.open(fullFilePath, flags, mode);
   }
 
   /**
@@ -228,9 +228,9 @@ class BlobStore {
    * @returns {Promise<String>} - Full path to the blobPath file.
    * @memberof BlobStore
    */
-  realPath (blobPath, realPathOptions = {}) {
-    const fullFilePath = path.join(this[_state].blobStoreRoot, blobPath)
-    return fsp.realpath(fullFilePath, realPathOptions)
+  realPath(blobPath, realPathOptions = {}) {
+    const fullFilePath = path.join(this[_state].blobStoreRoot, blobPath);
+    return fsp.realpath(fullFilePath, realPathOptions);
   }
 
   /**
@@ -240,14 +240,16 @@ class BlobStore {
    * @returns {Promise<Boolean>} - True if the file exists. False otherwise.
    * @memberof BlobStore
    */
-  async exists (blobPath) {
+  async exists(blobPath) {
     try {
-      const stat = await this.stat(blobPath)
-      return !!stat
+      const stat = await this.stat(blobPath);
+      return !!stat;
     } catch (err) {
-      if (err.code !== 'ENOENT') { throw err }
+      if (err.code !== 'ENOENT') {
+        throw err;
+      }
     }
-    return false
+    return false;
   }
 
   /**
@@ -258,12 +260,14 @@ class BlobStore {
    * @returns {Promise<void>}
    * @memberof BlobStore
    */
-  async remove (blobPath) {
-    const fullFilePath = path.join(this[_state].blobStoreRoot, blobPath)
+  async remove(blobPath) {
+    const fullFilePath = path.join(this[_state].blobStoreRoot, blobPath);
     try {
-      await fsp.unlink(fullFilePath)
+      await fsp.unlink(fullFilePath);
     } catch (err) {
-      if (err.code !== 'ENOENT') { throw err }
+      if (err.code !== 'ENOENT') {
+        throw err;
+      }
     }
   }
 
@@ -275,10 +279,10 @@ class BlobStore {
    * @returns {Object}
    * @memberof BlobStore
    */
-  stat (blobPath) {
-    const fullFilePath = path.join(this[_state].blobStoreRoot, blobPath)
-    return fsp.stat(fullFilePath)
+  stat(blobPath) {
+    const fullFilePath = path.join(this[_state].blobStoreRoot, blobPath);
+    return fsp.stat(fullFilePath);
   }
 }
 
-module.exports = BlobStore
+module.exports = BlobStore;

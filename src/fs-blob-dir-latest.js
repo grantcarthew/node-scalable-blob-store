@@ -1,7 +1,7 @@
-const path = require('path')
-const fsp = require('fs').promises
+const path = require('path');
+const fsp = require('fs').promises;
 
-module.exports = fsBlobDirLatest
+module.exports = fsBlobDirLatest;
 
 /**
  *  Returns the most recently created directory from within the fsPath.
@@ -10,36 +10,39 @@ module.exports = fsBlobDirLatest
  *  @param {String} fsPath
  *  @returns {Promise<String|Boolean>}
  */
-async function fsBlobDirLatest (fsPath) {
-  const listOfDir = []
+async function fsBlobDirLatest(fsPath) {
+  const listOfDir = [];
   try {
-    const fsItems = await fsp.readdir(fsPath)
+    const fsItems = await fsp.readdir(fsPath);
 
     for (const fsItem of fsItems) {
-      const fsItemPath = path.join(fsPath, fsItem)
-      const fsItemStat = await fsp.stat(fsItemPath)
-      fsItemStat.isDirectory() && listOfDir.push({
-        fsItem,
-        fsItemStat
-      })
+      const fsItemPath = path.join(fsPath, fsItem);
+      const fsItemStat = await fsp.stat(fsItemPath);
+      fsItemStat.isDirectory() &&
+        listOfDir.push({
+          fsItem,
+          fsItemStat,
+        });
     }
   } catch (err) {
-    if (err.code === 'ENOENT') { return false }
-    throw err
+    if (err.code === 'ENOENT') {
+      return false;
+    }
+    throw err;
   }
 
   if (listOfDir.length < 1) {
-    return false
+    return false;
   }
 
   if (listOfDir.length > 1) {
     listOfDir.sort((a, b) => {
       if (a.fsItemStat.birthtimeMs === b.fsItemStat.birthtimeMs) {
-        return a.fsItem > b.fsItem ? 1 : -1
+        return a.fsItem > b.fsItem ? 1 : -1;
       }
-      return b.fsItemStat.birthtimeMs - a.fsItemStat.birthtimeMs
-    })
+      return b.fsItemStat.birthtimeMs - a.fsItemStat.birthtimeMs;
+    });
   }
 
-  return listOfDir[0].fsItem
+  return listOfDir[0].fsItem;
 }
