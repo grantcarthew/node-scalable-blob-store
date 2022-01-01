@@ -17,10 +17,11 @@ tap.beforeEach(async () => {
 });
 
 tap.test('scalable-blob-store currentBlobDir tests', async (t) => {
-  t.plan(4);
+  t.plan(5);
   const bs = new BlobStore(testOptions);
   let dir = await bs.getCurrentBlobDir();
   t.equal(dir, dirs.latestBlobDir, 'getCurrentBlobDir should return latest dir');
+  t.rejects(async () => await bs.setCurrentBlobDir({}), 'setCurrentBlobDir invalid option should throw');
   await bs.setCurrentBlobDir(dirs.firstBlobDir);
   dir = await bs.getCurrentBlobDir();
   t.equal(dir, dirs.firstBlobDir, 'After set should return first blob dir');
