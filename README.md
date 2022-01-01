@@ -2,8 +2,6 @@
 
 A file system blob store that is designed to prevent conflicts when used with a distributed file system or storage area network.
 
-<!-- [![Build Status][travisci-image]][travisci-url] -->
-
 [![unit-tests](https://github.com/grantcarthew/node-scalable-blob-store/actions/workflows/unit-tests.yaml/badge.svg)][actions-url]
 [![Patreon Donation][patreon-image]][patreon-url]
 
@@ -15,7 +13,6 @@ Please **Star** on GitHub / NPM and **Watch** for updates.
 
 ## Topics
 
-- [Warning](#warning)
 - [Features](#features)
 - [Quick Start](#quick-start)
 - [Rationale](#rationale)
@@ -1063,7 +1060,7 @@ For your application you may find you rarely remove large numbers of blob files.
 
 There are two methods for testing `scalable-blob-store`:
 
-1.  _Unit Testing_ which uses [jest][jest-url] and the local `os.tmpdir()` directory.
+1.  _Unit Testing_ which uses [tap][tap-url] and the local `os.tmpdir()` directory.
 2.  _Manual Testing_ which will create directories and files on your local disk.
 
 ### Unit Testing
@@ -1079,7 +1076,7 @@ npm test
 
 ### Manual Testing
 
-Running the `test-fs.js` file will create a `~/blobs` directory in your temporary directory and then recursively fill it with lots of blobs.
+Running the [test-fs.js](tests/test-fs.js) file will create a `~/blobs` directory in your temporary directory and then recursively fill it with lots of blobs.
 
 The default options configured in the `test-fs.js` file are:
 
@@ -1105,7 +1102,7 @@ node ./tests/test-fs.js
 
 ```
 
-Once complete, inspect the `/tmp/blobs` directory. I suggest using the [tree][tree-url] command which gives you a summary of directories and files within the target directory.
+Once complete, inspect the `/tmp/blobs` directory. I suggest using the **tree** command which gives you a summary of directories and files within the target directory.
 
 ```sh
 
@@ -1116,7 +1113,7 @@ tree -d ~/blobs
 
 ## About the Owner
 
-I, Grant Carthew, am a technologist, trainer, and Dad from Queensland, Australia. I work on code in a number of personal projects and when the need arises I build my own packages.
+I, Grant Carthew, am a technologist from Queensland, Australia. I work on code in a number of personal projects and when the need arises I build my own packages.
 
 This project exists because I needed a local blob store that could scale.
 
@@ -1204,3 +1201,4 @@ MIT
 [nodei-npm-url]: https://nodei.co/npm/scalable-blob-store/
 [cuid-discuss-url]: https://github.com/ericelliott/cuid/issues/22
 [actions-url]: https://github.com/grantcarthew/node-scalable-blob-store/actions
+[tap-url]: https://node-tap.org/
