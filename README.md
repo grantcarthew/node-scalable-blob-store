@@ -143,7 +143,35 @@ Other operational points of interest:
 
 **Write**
 
-With the release of v4 of `scalable-blob-store`, the write performance has dropped significantly. See the [Warning](#warning) topic above for more detial.
+On my laptop with an M.2 SSD disk, running the [test-fs.js](tests/test-fs.js) script produces the following results:
+
+```
+====================================================================================================
+Testing scalable-blob-store with the following options:
+blobStoreRoot: /tmp/blobs/test-fs
+idFunction: ulid
+dirDepth: 3
+dirWidth: 1000
+repeat: 10000
+
+Beginning test...
+====================================================================================================
+Test complete.
+====================================================================================================
+{
+  blobStoreRoot: '/tmp/blobs/test-fs',
+  dirDepth: 3,
+  dirWidth: 1000,
+  runTimeMilliseconds: 83730,
+  totalDirectories: 12,
+  totalFiles: 10000,
+  totalBytes: 430000,
+  lastBlobPath: '/ckxwcwgwz0001lk9hgq8t9iup/ckxwcwgx00002lk9h6tbpdmq1/ckxwcy36m06yclk9hb0g92dwg/ckxwcy9ip07q4lk9h5uyl10k6'
+}
+====================================================================================================
+Please remove /tmp/blobs/test-fs manually.
+====================================================================================================
+```
 
 **Read**
 
