@@ -30,7 +30,7 @@
     "node": ">=12"
   },
   "scripts": {
-    "test": "tap --reporter=specy ./tests/*.test.js --coverage-report=text",
+    "test": "tap --reporter=specy ./tests/*.test.js --no-check-coverage",
     "watch": "nodemon -x 'tap --reporter=specy ./tests/*.test.js'",
     "coverage": "tap --reporter=specy ./tests/*.test.js --coverage-report=html",
     "format": "prettier --write .",
