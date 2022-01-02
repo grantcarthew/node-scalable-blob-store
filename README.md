@@ -1135,6 +1135,7 @@ See my [other projects on NPM](https://www.npmjs.com/~grantcarthew).
 
 ## History
 
+- v5.0.1 [2022-01-02]: Updated README. New version to publish to npmjs.
 - v5.0.0 [2022-01-02]: Upgrade Node.js version and minor fixes:
   - Node.js minimum version updated to v12 or later.
   - Dependency packages updated.

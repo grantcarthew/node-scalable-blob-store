@@ -1,6 +1,6 @@
 {
   "name": "scalable-blob-store",
-  "version": "5.0.0",
+  "version": "5.0.1",
   "description": "A file system blob store that is designed to prevent conflicts when used with a distributed file system or storage area network.",
   "homepage": "https://github.com/grantcarthew/node-scalable-blob-store",
   "author": "Grant Carthew <dev@carthew.net>",
