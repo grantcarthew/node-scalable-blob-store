@@ -176,7 +176,7 @@ Read performance will be close to, if not the same, as disk speed.
 
 ## API
 
-With the update to v4 of `scalable-blob-store` all the BlobStore methods return a Promise. This is perfect for using with the async/await language features.
+All the BlobStore methods within `scalable-blob-store` return a Promise. This is perfect for using with the async/await language features.
 
 | API                                                        | Type               | Returns               |
 | ---------------------------------------------------------- | ------------------ | --------------------- |
